@@ -2,7 +2,6 @@ const Discord = require('discord.js');
 const fetch = require('node-fetch');
 var CronJob = require('cron').CronJob;
 const util = require('util')
-const jsdom = require("jsdom");
 const fs = require('fs')
 const streamPipeline = util.promisify(require('stream').pipeline)
 const client = new Discord.Client();
