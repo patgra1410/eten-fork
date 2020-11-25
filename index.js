@@ -27,13 +27,14 @@ client.on('message', message => {
     let msg = message.content.toUpperCase();
     let sender = message.author;
 
-    if (msg === prefix + `AVATAR`) {
-        message.reply(message.author.avatarURL);
-    };
-
     if (msg === prefix + 'PING') {
         message.channel.send(`Pong!\n\`MSG: ${Date.now() - message.createdTimestamp}ms\`\n\`API: ${Math.round(client.ws.ping)}ms\``);
     };
+
+    if (msg === prefix + 'FORCECRONINSPIRE' && sender.id === '567054306688106496') {
+        console.log(`User ${sender.id} requested cronInspire()`);
+        cronInspire();
+    }
 
     if (msg === prefix + `INSPIRUJ` || msg === prefix + `INSPIRACJA`) {
         (async () => {
@@ -48,7 +49,7 @@ client.on('message', message => {
         (async () => {
             const response = await fetch('https://thiscatdoesnotexist.com/')
             if (!response.ok) throw new Error(`unexpected response ${response.statusText}`);
-            console.log(response.body);
+            //console.log(response.body);
             await streamPipeline(response.body, fs.createWriteStream('./placeholder.jpg'));
             const attachment = new Discord.MessageAttachment('./placeholder.jpg');
             message.channel.send(attachment);
@@ -71,7 +72,7 @@ client.on('message', message => {
 async function cronInspire() {
     const response = await fetch('https://inspirobot.me/api?generate=true')
             .then(res => res.text())
-            .then(text => client.channels.cache.get(cronInspireChannel).send(text));
+            .then(text => client.channels.cache.get(cronInspireChannel).send("**Inspiracja na dziś:**", {files: [text]}));
 }
 
 client.on('ready', () => {
