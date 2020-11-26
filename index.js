@@ -24,14 +24,13 @@ job.start();
 
 client.on('message', message => {
     let msg = message.content.toUpperCase();
-    let sender = message.author;
 
     if (msg === prefix + 'PING') {
         message.channel.send(`Pong!\n\`MSG: ${Date.now() - message.createdTimestamp}ms\`\n\`API: ${Math.round(client.ws.ping)}ms\``);
     };
 
-    if (msg === prefix + 'FORCECRONINSPIRE' && sender.id === '567054306688106496') {
-        console.log(`User ${sender.id} requested cronInspire()`);
+    if (msg === prefix + 'FORCECRONINSPIRE' && message.author.id === '567054306688106496') {
+        console.log(`User ${message.author.username}#${message.author.discriminator} requested cronInspire()`);
         cronInspire();
     }
 
@@ -66,6 +65,19 @@ client.on('message', message => {
             message.channel.send(attachment);
         })();
     };
+    /*
+    if (msg.startsWith(`SPIERDALAJ`) && message.member.roles.find(r => rname === "Natchuz")) {
+        console.log("INITIALIZING BTFO");
+        message.channel.messages.fetch({ limit: 2 }).then(messages => {
+            let lastMessage = messages.array()[1];
+            let lastMessageMember = lastMessage.guild.members.fetch(lastMessage.author.id).then(idiot => {
+                console.log(`BTFOing ${lastMessage.author.username}#${lastMessage.author.discriminator} for \"${lastMessage.content}\"`);
+                lastMessage.author.send(`**${message.author.username}:** ${message.content}`)
+                idiot.kick('spadaj');
+            })
+        });
+    }
+    */
 });
 
 async function cronInspire() {
