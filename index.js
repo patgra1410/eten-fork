@@ -22,6 +22,51 @@ var job = new CronJob(
 );
 job.start();
 
+function getRandomCat() {
+    var folderNumber = Math.floor((Math.random() * 6) + 1);
+    switch (folderNumber) {
+        case 1:
+            var catNumber = Math.floor((Math.random() * 5000) + 1);
+            if (Math.random() < 0.5){
+                return "01/cat" + catNumber + ".jpg";
+            } else {
+                return "04/cat" + catNumber + ".jpg";
+            }
+            break;
+        case 2:
+            var catNumber = Math.floor((Math.random() * 5000) + 1);
+            if (Math.random() < 0.5){
+                return "02/cat" + catNumber + ".jpg";
+            } else {
+                return "05/cat" + catNumber + ".jpg";
+            }
+            break;
+        case 3:
+            var catNumber = Math.floor((Math.random() * 5000) + 1);
+            if (Math.random() < 0.5){
+                return "03/cat" + catNumber + ".jpg";
+            } else {
+                return "06/cat" + catNumber + ".jpg";
+            }
+            break;
+        case 4:
+            var catNumber = Math.floor((Math.random() * 5000) + 1);
+            var path = "04/cat" + catNumber + ".jpg";
+            return path;
+            break;
+        case 5:
+            var catNumber = Math.floor((Math.random() * 5000) + 1);
+            var path = "05/cat" + catNumber + ".jpg";
+            return path;
+            break;
+        case 6:
+            var catNumber = Math.floor((Math.random() * 5000) + 1);
+            var path = "06/cat" + catNumber + ".jpg";
+            return path;
+            break;
+    }
+}
+
 client.on('message', message => {
     let msg = message.content.toUpperCase();
 
@@ -46,6 +91,18 @@ client.on('message', message => {
     if (msg === prefix + `KOTEŁ`) {
         (async () => {
             const response = await fetch('https://thiscatdoesnotexist.com/')
+            if (!response.ok) throw new Error(`unexpected response ${response.statusText}`);
+            //console.log(response.body);
+            await streamPipeline(response.body, fs.createWriteStream('./placeholder.jpg'));
+            const attachment = new Discord.MessageAttachment('./placeholder.jpg');
+            message.channel.send(attachment);
+            
+        })();
+    };
+
+    if (msg === prefix + `CURSEDKOTEŁ` || msg.startsWith(`ROZPIERDOL KOTA`) || msg === prefix + `KOTBINGO`) {
+        (async () => {
+            const response = await fetch("https://d2ph5fj80uercy.cloudfront.net/" + getRandomCat())
             if (!response.ok) throw new Error(`unexpected response ${response.statusText}`);
             //console.log(response.body);
             await streamPipeline(response.body, fs.createWriteStream('./placeholder.jpg'));
