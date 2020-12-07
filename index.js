@@ -81,9 +81,14 @@ client.on('message', message => {
 });
 
 async function cronInspire() {
-    const response = await fetch('https://inspirobot.me/api?generate=true')
-            .then(res => res.text())
-            .then(text => client.channels.cache.get(cronInspireChannel).send("**Inspiracja na dziś:**", {files: [text]}));
+    const res = await fetch('https://inspirobot.me/api?generate=true')
+    if (!res.ok) throw new Error(`unexpected response ${res.statusText}`);
+    const response = await fetch(await res.text())
+    if (!response.ok) throw new Error(`unexpected response ${response.statusText}`);
+    await streamPipeline(response.body, fs.createWriteStream('./placeholder.jpg'));
+    const attachment = new Discord.MessageAttachment('./placeholder.jpg');
+    client.channels.cache.get(cronInspireChannel).send("**Inspiracja na dziś:**", {files: [attachment]})
+    console.log("Croninspire Sent!")
 }
 
 client.on('ready', () => {
