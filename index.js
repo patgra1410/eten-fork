@@ -120,7 +120,7 @@ async function getSchoolNoticesJson () {
   const resText = await res.text()
   const noticeJson = JSON.parse(resText)
   // console.log(noticeJson)
-  const dzwonekChannel = client.channels.cache.get('780946974274093076')
+  const dzwonekChannel = client.channels.cache.get('884370476128944148')
   for (const notice in noticeJson.SchoolNotices) {
     // console.log(noticeJson.SchoolNotices[notice].Id)
     if (!ogloszenia.has(noticeJson.SchoolNotices[notice].Id)) {
@@ -141,7 +141,8 @@ async function getSchoolNoticesJson () {
     }
   }
   updateSchoolNoticeJson()
-  setTimeout(getSchoolNoticesJson, ((Math.round(Math.random() * (12 - 4) + 4)) * 60000))
+  // TODO: setInterval zamiast setTimeout
+  setTimeout(getSchoolNoticesJson, ((Math.round(Math.random() * (6 - 4) + 4)) * 60000))
 }
 
 async function updateSlashCommands () {
