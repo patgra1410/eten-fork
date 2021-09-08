@@ -96,6 +96,7 @@ async function updateSchoolNoticeJson () {
 }
 
 async function getSchoolNoticesJson () {
+  setTimeout(getSchoolNoticesJson, ((Math.round(Math.random() * (6 - 4) + 4)) * 60000))
   console.log('Checking for new announcements via api.librus.pl')
   const res = await fetch(
     'https://api.librus.pl/2.0/SchoolNotices',
@@ -141,8 +142,6 @@ async function getSchoolNoticesJson () {
     }
   }
   updateSchoolNoticeJson()
-  // TODO: setInterval zamiast setTimeout
-  setTimeout(getSchoolNoticesJson, ((Math.round(Math.random() * (6 - 4) + 4)) * 60000))
 }
 
 async function updateSlashCommands () {
