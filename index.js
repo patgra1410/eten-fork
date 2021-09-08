@@ -1,160 +1,213 @@
-const Discord = require('discord.js');
-const fetch = require('node-fetch');
-var CronJob = require('cron').CronJob;
-const util = require('util')
+const Discord = require('discord.js')
+const { SlashCommandBuilder } = require('@discordjs/builders')
+const config = require('./config.json')
 const fs = require('fs')
+const cron = require('cron')
+const util = require('util')
+const fetch = require('node-fetch')
+const NodeCache = require('node-cache')
 const streamPipeline = util.promisify(require('stream').pipeline)
-const client = new Discord.Client();
-const CONFIG = require('./config.json');
-const prefix = CONFIG.prefix;
-const cronInspireChannel = CONFIG.cronInspireChannel;
+const client = new Discord.Client({ intents: [Discord.Intents.FLAGS.GUILDS, Discord.Intents.FLAGS.GUILD_MESSAGES] })
+client.commands = new Discord.Collection()
+client.textTriggers = new Discord.Collection()
+const ogloszenia = new NodeCache()
 
-var results
+const commandFiles = fs.readdirSync('./commands').filter(file => file.endsWith('.js'))
+//const planFiles = fs.readdirSync('./plany_lekcji').filter(file => file.endsWith('.json'))
+//const planJobs = []
 
-var job = new CronJob(
-	'0 0 8 * * *',
-	function() {
-		cronInspire()
-	},
-	null,
-	true,
-	'Poland'
-);
-job.start();
+// TODO: Regex triggers for free text (steam:// links, "/ROZPIERDOL.+KOTA/gi")
+// TODO: Handling for editReply and stuff
 
-function getRandomCat() {
-    var folderNumber = Math.floor((Math.random() * 6) + 1);
-    switch (folderNumber) {
-        case 1:
-            var catNumber = Math.floor((Math.random() * 5000) + 1);
-            if (Math.random() < 0.5){
-                return "01/cat" + catNumber + ".jpg";
-            } else {
-                return "04/cat" + catNumber + ".jpg";
-            }
-            break;
-        case 2:
-            var catNumber = Math.floor((Math.random() * 5000) + 1);
-            if (Math.random() < 0.5){
-                return "02/cat" + catNumber + ".jpg";
-            } else {
-                return "05/cat" + catNumber + ".jpg";
-            }
-            break;
-        case 3:
-            var catNumber = Math.floor((Math.random() * 5000) + 1);
-            if (Math.random() < 0.5){
-                return "03/cat" + catNumber + ".jpg";
-            } else {
-                return "06/cat" + catNumber + ".jpg";
-            }
-            break;
-        case 4:
-            var catNumber = Math.floor((Math.random() * 5000) + 1);
-            var path = "04/cat" + catNumber + ".jpg";
-            return path;
-            break;
-        case 5:
-            var catNumber = Math.floor((Math.random() * 5000) + 1);
-            var path = "05/cat" + catNumber + ".jpg";
-            return path;
-            break;
-        case 6:
-            var catNumber = Math.floor((Math.random() * 5000) + 1);
-            var path = "06/cat" + catNumber + ".jpg";
-            return path;
-            break;
-    }
-}
-
-client.on('message', message => {
-    let msg = message.content.toUpperCase();
-
-    if (msg === prefix + 'PING') {
-        message.channel.send(`Pong!\n\`MSG: ${Date.now() - message.createdTimestamp}ms\`\n\`API: ${Math.round(client.ws.ping)}ms\``);
-    };
-
-    if (msg === prefix + 'FORCECRONINSPIRE' && message.author.id === '567054306688106496') {
-        console.log(`User ${message.author.username}#${message.author.discriminator} requested cronInspire()`);
-        cronInspire();
-    }
-
-    if (msg === prefix + `INSPIRUJ` || msg === prefix + `INSPIRACJA`) {
-        (async () => {
-            const response = await fetch('https://inspirobot.me/api?generate=true')
-            .then(res => res.text())
-            .then(text => message.channel.send(text));
-            
-        })();
-    };
-
-    if (msg === prefix + `KOTEŁ`) {
-        (async () => {
-            const response = await fetch('https://thiscatdoesnotexist.com/')
-            if (!response.ok) throw new Error(`unexpected response ${response.statusText}`);
-            //console.log(response.body);
-            await streamPipeline(response.body, fs.createWriteStream('./placeholder.jpg'));
-            const attachment = new Discord.MessageAttachment('./placeholder.jpg');
-            message.channel.send(attachment);
-            
-        })();
-    };
-
-    if (msg === prefix + `CURSEDKOTEŁ` || msg.startsWith(`ROZPIERDOL KOTA`) || msg === prefix + `KOTBINGO`) {
-        (async () => {
-            const response = await fetch("https://d2ph5fj80uercy.cloudfront.net/" + getRandomCat())
-            if (!response.ok) throw new Error(`unexpected response ${response.statusText}`);
-            //console.log(response.body);
-            await streamPipeline(response.body, fs.createWriteStream('./placeholder.jpg'));
-            const attachment = new Discord.MessageAttachment('./placeholder.jpg');
-            message.channel.send(attachment);
-            
-        })();
-    };
-
-    if (msg === prefix + `INICJUJ` || msg === prefix + `INICJACJA`) {
-        (async () => {
-            id = Math.floor(Math.random() * 100000);
-            const response = await fetch('http://www.thiswaifudoesnotexist.net/example-' + id + '.jpg')
-            if (!response.ok) throw new Error(`unexpected response ${response.statusText}`);
-            await streamPipeline(response.body, fs.createWriteStream('./placeholder.jpg'));
-            const attachment = new Discord.MessageAttachment('./placeholder.jpg');
-            message.channel.send(attachment);
-        })();
-    };
-    /*
-    if (msg.startsWith(`SPIERDALAJ`) && message.member.roles.find(r => rname === "Natchuz")) {
-        console.log("INITIALIZING BTFO");
-        message.channel.messages.fetch({ limit: 2 }).then(messages => {
-            let lastMessage = messages.array()[1];
-            let lastMessageMember = lastMessage.guild.members.fetch(lastMessage.author.id).then(idiot => {
-                console.log(`BTFOing ${lastMessage.author.username}#${lastMessage.author.discriminator} for \"${lastMessage.content}\"`);
-                lastMessage.author.send(`**${message.author.username}:** ${message.content}`)
-                idiot.kick('spadaj');
-            })
-        });
-    }
-    */
-});
-
-async function cronInspire() {
+const inspireJob = new cron.CronJob(
+  '0 30 7 * * *',
+  async function () {
     const res = await fetch('https://inspirobot.me/api?generate=true')
-    if (!res.ok) throw new Error(`unexpected response ${res.statusText}`);
+    if (!res.ok) throw new Error(`Unexpected response ${res.statusText}`)
     const response = await fetch(await res.text())
-    if (!response.ok) throw new Error(`unexpected response ${response.statusText}`);
-    await streamPipeline(response.body, fs.createWriteStream('./placeholder.jpg'));
-    const attachment = new Discord.MessageAttachment('./placeholder.jpg');
-    client.channels.cache.get(cronInspireChannel).send("**Inspiracja na dziś:**", {files: [attachment]})
-    console.log("Croninspire Sent!")
+    if (!response.ok) throw new Error(`Unexpected response ${response.statusText}`)
+    await streamPipeline(response.body, fs.createWriteStream('./placeholder.jpg'))
+    const attachment = new Discord.MessageAttachment('./placeholder.jpg')
+    const inspireChannel = client.channels.cache.get('719825061552455760')
+    inspireChannel.send({ content: '**Inspiracja na dziś:', files: [attachment] })
+  },
+  null,
+  true,
+  'Europe/Warsaw'
+)
+inspireJob.start()
+
+/*
+for (const file of planFiles) {
+  const classPlan = require(`./plany_lekcji/${file}`)
+  for (const time in classPlan.periods) {
+    // console.log(classPlan.periods[time])
+    const hours = classPlan.periods[time].split(' ')
+    hours.splice(1, 1)
+    // console.log(hours)
+    const timeStart = hours[0].split(':')
+    const timeEnd = hours[1].split(':')
+    // console.log(timeStart)
+    // console.log(timeEnd)
+    // console.log('\n')
+    planJobs.push(new cron.CronJob(
+      `0 ${timeStart[1]} ${timeStart[0]} * * *`,
+      async function () {
+        const res = await fetch('https://inspirobot.me/api?generate=true')
+        if (!res.ok) throw new Error(`Unexpected response ${res.statusText}`)
+        const response = await fetch(await res.text())
+        if (!response.ok) throw new Error(`Unexpected response ${response.statusText}`)
+        await streamPipeline(response.body, fs.createWriteStream('./placeholder.jpg'))
+        const attachment = new Discord.MessageAttachment('./placeholder.jpg')
+        const planChannel = client.channels.cache.get('884370476128944148')
+        planChannel.send({ content: '**Zaczyna się lekcja:', files: [attachment] })
+        }
+      },
+      null,
+      true,
+      'Europe/Warsaw'
+    ))
+  }
+}
+*/
+
+async function refreshSchoolNoticeCache () {
+  fs.readFile('oglo.json', function (err, data) {
+    if (err) {
+      throw err
+    }
+    const noticeJson = JSON.parse(data)
+    for (const notice of noticeJson) {
+      console.log(notice)
+      if (!ogloszenia.has(notice)) {
+        console.log(`${notice}  --- Unknown ID, adding to cache.`)
+        ogloszenia.set(notice, 'true')
+      }
+    }
+  })
 }
 
-client.on('ready', () => {
-    client.user.setStatus('online');
-    client.user.setActivity("Adam hitting women", {
-        type: "STREAMING",
-        url: "https://www.twitch.tv/meten_"
-      });
-    console.log(`Logged in as ${client.user.tag}`);
-});
+async function updateSchoolNoticeJson () {
+  fs.writeFile('oglo.json', JSON.stringify(ogloszenia.keys()), 'utf-8', function (err) {
+    if (err) {
+      throw err
+    }
+  })
+}
 
-client.login(CONFIG.token);
+async function getSchoolNoticesJson () {
+  console.log('Checking for new announcements via api.librus.pl')
+  const res = await fetch(
+    'https://api.librus.pl/2.0/SchoolNotices',
+    {
+      headers: {
+        Host: 'api.librus.pl',
+        Connection: 'keep-alive',
+        Accept: 'application/json',
+        DNT: '1',
+        Authorization: config.librusAuthorization,
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.114 Safari/537.36',
+        Origin: 'https://portal.librus.pl',
+        'Sec-Fetch-Site': 'same-site',
+        'Sec-Fetch-Mode': 'cors',
+        'Sec-Fetch-Dest': 'empty',
+        Referer: 'https://portal.librus.pl/',
+        'Accept-Encoding': 'gzip, deflate, br',
+        'Accept-Language': 'en-GB,en;q=0.9'
+      }
+    }
+  )
+  const resText = await res.text()
+  const noticeJson = JSON.parse(resText)
+  // console.log(noticeJson)
+  const dzwonekChannel = client.channels.cache.get('780946974274093076')
+  for (const notice in noticeJson.SchoolNotices) {
+    // console.log(noticeJson.SchoolNotices[notice].Id)
+    if (!ogloszenia.has(noticeJson.SchoolNotices[notice].Id)) {
+      console.log(`${noticeJson.SchoolNotices[notice].Id}  --- New ID, adding!`)
+      ogloszenia.set(noticeJson.SchoolNotices[notice].Id, 'true')
+      let text = (
+        `**:loudspeaker: Nowe Ogłoszenie w Librusie**
+        **${noticeJson.SchoolNotices[notice].Subject}**
+        ${noticeJson.SchoolNotices[notice].Content}`.replace(/  +/g, '')
+      )
+      console.log(text.length)
+      if (text.length > 2000) {
+        console.log('string too long')
+        text = text.slice(0, 1996)
+        text += '...'
+      }
+      dzwonekChannel.send(text)
+    }
+  }
+  updateSchoolNoticeJson()
+  setTimeout(getSchoolNoticesJson, ((Math.round(Math.random() * (12 - 4) + 4)) * 60000))
+}
+
+async function updateSlashCommands () {
+  const coms = []
+  for (const file of commandFiles) {
+    const command = require(`./commands/${file}`)
+    client.commands.set(command.name, command)
+
+    const data = new SlashCommandBuilder()
+      .setName(command.name)
+      .setDescription(command.description)
+      .toJSON()
+    coms.push(data)
+
+    for (const alias in command.aliases) {
+      client.commands.set(command.aliases[alias], command)
+    }
+  }
+  const response = await client.application?.commands.set(coms)
+  console.log(response)
+}
+
+client.once('ready', () => {
+  client.user.setStatus('online')
+  client.user.setActivity('twoja stara')
+
+  updateSlashCommands()
+  console.log(`Ready! Logged in as ${client.user.tag}`)
+  refreshSchoolNoticeCache()
+  setTimeout(getSchoolNoticesJson, 3000)
+})
+
+client.on('messageCreate', async message => {
+  if (message.author.bot) return
+  if (!client.application?.owner) await client.application?.fetch()
+
+  if (message.content.startsWith(config.prefix)) {
+    const args = message.content.slice(config.prefix.length).trim().split(/ +/)
+    const command = args.shift().toLowerCase()
+    if (!client.commands.has(command)) return
+    try {
+      await client.commands.get(command).execute(message, args)
+    } catch (error) {
+      console.error(error)
+      message.channel.send('There was an error trying to execute that command!')
+    }
+  }
+})
+
+client.on('interactionCreate', async interaction => {
+  if (!interaction.isCommand()) return
+
+  if (!client.commands.has(interaction.commandName)) return
+
+  try {
+    await client.commands.get(interaction.commandName).execute(interaction)
+  } catch (error) {
+    console.error(error)
+    try {
+      await interaction.reply({ content: 'There was an error while executing this command!', ephemeral: true })
+    } catch (error) {
+      console.log('Error: Couldn\'t reply, probably already replied, trying to edit')
+      console.log(error)
+      await interaction.editReply({ content: 'There was an error while executing this command!', ephemeral: true })
+    }
+  }
+})
+
+client.login(config.token)
