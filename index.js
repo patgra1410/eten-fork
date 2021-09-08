@@ -125,20 +125,19 @@ async function getSchoolNoticesJson () {
   for (const notice in noticeJson.SchoolNotices) {
     // console.log(noticeJson.SchoolNotices[notice].Id)
     if (!ogloszenia.has(noticeJson.SchoolNotices[notice].Id)) {
-      console.log(`${noticeJson.SchoolNotices[notice].Id}  --- New ID, adding!`)
-      ogloszenia.set(noticeJson.SchoolNotices[notice].Id, 'true')
       let text = (
         `**:loudspeaker: Nowe Ogłoszenie w Librusie**
         **${noticeJson.SchoolNotices[notice].Subject}**
         ${noticeJson.SchoolNotices[notice].Content}`.replace(/  +/g, '')
       )
-      console.log(text.length)
       if (text.length > 2000) {
         console.log('string too long')
         text = text.slice(0, 1996)
         text += '...'
       }
       dzwonekChannel.send(text)
+      console.log(`${noticeJson.SchoolNotices[notice].Id}  --- Sent, adding the new ID!`)
+      ogloszenia.set(noticeJson.SchoolNotices[notice].Id, 'true')
     }
   }
   updateSchoolNoticeJson()
