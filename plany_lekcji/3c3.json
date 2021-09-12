@@ -1,221 +1,261 @@
 {
+    "title": "3C",
     "periods": [
         "07:20 - 08:05",
         "08:15 - 09:00",
         "09:10 - 09:55",
-        "10:10 - 10:55",
+        "20:20 - 20:19",
         "11:05 - 11:50",
         "12:00 - 12:45",
         "12:55 - 13:40",
         "14:00 - 14:45"
     ],
-    "days": [
-        "Poniedziałek",
-        "Wtorek",
-        "Środa",
-        "Czwartek",
-        "Piątek"
-    ],
-    "Poniedziałek": [
-        {
-            "title": "Matematyka",
-            "teacher": "Markiewicz Natalia",
-            "room": "218",
-            "chujnia": false
-        },
-        {
-            "title": "Matematyka",
-            "teacher": "Markiewicz Natalia",
-            "room": "218",
-            "chujnia": false
-        },
-        {
-            "title": "Język polski",
-            "teacher": "Maria Ważna",
-            "room": "218",
-            "chujnia": true
-        },
-        {
-            "title": "Język polski",
-            "teacher": "Maria Ważna",
-            "room": "218",
-            "chujnia": true
-        },
-        {
-            "title": "Historia i społeczeństwo",
-            "teacher": "Ewa Królikowska",
-            "room": "218",
-            "chujnia": false
-        },
-        {
-            "title": "Informatyka",
-            "teacher": "Śmigielska Joanna",
-            "room": "217",
-            "chujnia": false
-        }
-    ],
-    "Wtorek": [
-        {
-            "title": "Język niemiecki",
-            "teacher": "Małgorzata Pluta",
-            "room": "100/17???",
-            "chujnia": true
-        },
-        {
-            "title": "Godzina wychowawcza",
-            "teacher": "Magdalena Moryc-Stańczyk",
-            "room": "218",
-            "chujnia": false
-        },
-        {
-            "title": "Matematyka",
-            "teacher": "Markiewicz Natalia",
-            "room": "218",
-            "chujnia": false
-        },
-        {
-            "title": "Matematyka",
-            "teacher": "Markiewicz Natalia",
-            "room": "218",
-            "chujnia": false
-        },
-        {
-            "title": "WF",
-            "teacher": "Wielu",
-            "room": "OSiR/Salka",
-            "chujnia": false
-        },
-        {
-            "title": "Religia",
-            "teacher": "Piotr Cieślak",
-            "room": "218",
-            "chujnia": false
-        }
-    ],
-    "Środa": [
-        {
-            "title": "Fakultet fizyka",
-            "teacher": "Joanna Bogdanowicz",
-            "room": "???",
-            "chujnia": false
-        },
-        {
-            "title": "Ang / Fiz",
-            "teacher": "Magdalena Moryc-Stańczyk / Monika Sadowska / Joanna Bogdanowicz",
-            "room": "218/???",
-            "chujnia": false
-        },
-        {
-            "title": "Matematyka",
-            "teacher": "Markiewicz Natalia",
-            "room": "218",
-            "chujnia": false
-        },
-        {
-            "title": "Język polski",
-            "teacher": "Maria Ważna",
-            "room": "218",
-            "chujnia": true
-        },
-        {
-            "title": "Ang / Fiz",
-            "teacher": "Magdalena Moryc-Stańczyk / Monika Sadowska / Joanna Bogdanowicz",
-            "room": "218/???",
-            "chujnia": false
-        },
-        {
-            "title": "WF",
-            "teacher": "Wielu",
-            "room": "OSiR/Salka",
-            "chujnia": false
-        }
-    ],
-    "Czwartek": [
-        {
-            "title": "Informatyka",
-            "teacher": "Joanna Śmigielska / Joanna Koza",
-            "room": "217/214",
-            "chujnia": false
-        },
-        {
-            "title": "Informatyka",
-            "teacher": "Joanna Śmigielska / Joanna Koza",
-            "room": "217/214",
-            "chujnia": false
-        },
-        {
-            "title": "Historia i społeczeństwo",
-            "teacher": "Ewa Królikowska",
-            "room": "218",
-            "chujnia": false
-        },
-        {
-            "title": "Język polski",
-            "teacher": "Maria Ważna",
-            "room": "218",
-            "chujnia": true
-        },
-        {
-            "title": "WF",
-            "teacher": "Wielu",
-            "room": "OSiR/Salka",
-            "chujnia": false
-        },
-        {
-            "title": "Matematyka",
-            "teacher": "Markiewicz Natalia",
-            "room": "218",
-            "chujnia": false
-        },
-        {
-            "title": "Język angielski",
-            "teacher": "Magdalena Moryc-Stańczyk / Monika Sadowska",
-            "room": "219/218",
-            "chujnia": false
-        }
-    ],
-    "Piątek": [
-        {
-            "title": "Matematyka",
-            "teacher": "Markiewicz Natalia",
-            "room": "218",
-            "chujnia": false
-        },
-        {
-            "title": "Język niemiecki",
-            "teacher": "Małgorzata Pluta",
-            "room": "100/17???",
-            "chujnia": true
-        },
-        {
-            "title": "Religia",
-            "teacher": "Piotr Cieślak",
-            "room": "218",
-            "chujnia": false
-        },
-        {
-            "title": "Fizyka",
-            "teacher": "Joanna Bogdanowicz",
-            "room": "218",
-            "chujnia": false
-        },
-        {
-            "title": "Fizyka",
-            "teacher": "Joanna Bogdanowicz",
-            "room": "218",
-            "chujnia": false
-        },
-        {
-            "title": "Język angielski",
-            "teacher": "Magdalena Moryc-Stańczyk / Monika Sadowska",
-            "room": "216/218",
-            "chujnia": false
-        },
-        {
-            "title": "Język polski",
-            "teacher": "Maria Ważna",
-            "room": "218",
-            "chujnia": true
-        }
+    "schedule": [
+        [
+            {
+                "lekcja": false
+            },
+            {
+                "name": "Matematyka",
+                "teacher": "Markiewicz Natalia",
+                "room": "218",
+                "chujnia": false,
+                "lekcja": true
+            },
+            {
+                "name": "Matematyka",
+                "teacher": "Markiewicz Natalia",
+                "room": "218",
+                "chujnia": false,
+                "lekcja": true
+            },
+            {
+                "name": "Język polski",
+                "teacher": "Maria Ważna",
+                "room": "218",
+                "chujnia": true,
+                "lekcja": true
+            },
+            {
+                "name": "Język polski",
+                "teacher": "Maria Ważna",
+                "room": "218",
+                "chujnia": true,
+                "lekcja": true
+            },
+            {
+                "name": "Historia i społeczeństwo",
+                "teacher": "Ewa Królikowska",
+                "room": "218",
+                "chujnia": false,
+                "lekcja": true
+            },
+            {
+                "name": "Informatyka",
+                "teacher": "Śmigielska Joanna",
+                "room": "217",
+                "chujnia": false,
+                "lekcja": true
+            }
+        ],
+        [
+            {
+                "lekcja": false
+            },
+            {
+                "name": "Język niemiecki",
+                "teacher": "Małgorzata Pluta",
+                "room": "100/17???",
+                "chujnia": true,
+                "lekcja": true
+            },
+            {
+                "name": "Godzina wychowawcza",
+                "teacher": "Magdalena Moryc-Stańczyk",
+                "room": "218",
+                "chujnia": false,
+                "lekcja": true
+            },
+            {
+                "name": "Matematyka",
+                "teacher": "Markiewicz Natalia",
+                "room": "218",
+                "chujnia": false,
+                "lekcja": true
+            },
+            {
+                "name": "Matematyka",
+                "teacher": "Markiewicz Natalia",
+                "room": "218",
+                "chujnia": false,
+                "lekcja": true
+            },
+            {
+                "name": "WF",
+                "teacher": "Wielu",
+                "room": "OSiR/Salka",
+                "chujnia": false,
+                "lekcja": true
+            },
+            {
+                "name": "Religia",
+                "teacher": "Piotr Cieślak",
+                "room": "218",
+                "chujnia": false,
+                "lekcja": true
+            }
+        ],
+        [
+            {
+                "name": "Fakultet fizyka",
+                "teacher": "Joanna Bogdanowicz",
+                "room": "???",
+                "chujnia": false,
+                "lekcja": true
+            },
+            {
+                "name": "Ang / Fiz",
+                "teacher": "Magdalena Moryc-Stańczyk / Monika Sadowska / Joanna Bogdanowicz",
+                "room": "218/???",
+                "chujnia": false,
+                "lekcja": true
+            },
+            {
+                "name": "Matematyka",
+                "teacher": "Markiewicz Natalia",
+                "room": "218",
+                "chujnia": false,
+                "lekcja": true
+            },
+            {
+                "name": "Język polski",
+                "teacher": "Maria Ważna",
+                "room": "218",
+                "chujnia": true,
+                "lekcja": true
+            },
+            {
+                "name": "Ang / Fiz",
+                "teacher": "Magdalena Moryc-Stańczyk / Monika Sadowska / Joanna Bogdanowicz",
+                "room": "218/???",
+                "chujnia": false,
+                "lekcja": true
+            },
+            {
+                "name": "WF",
+                "teacher": "Wielu",
+                "room": "OSiR/Salka",
+                "chujnia": false,
+                "lekcja": true
+            }
+        ],
+        [
+            {
+                "lekcja": false
+            },
+            {
+                "name": "Informatyka",
+                "teacher": "Joanna Śmigielska / Joanna Koza",
+                "room": "217/214",
+                "chujnia": false,
+                "lekcja": true
+            },
+            {
+                "name": "Informatyka",
+                "teacher": "Joanna Śmigielska / Joanna Koza",
+                "room": "217/214",
+                "chujnia": false,
+                "lekcja": true
+            },
+            {
+                "name": "Historia i społeczeństwo",
+                "teacher": "Ewa Królikowska",
+                "room": "218",
+                "chujnia": false,
+                "lekcja": true
+            },
+            {
+                "name": "Język polski",
+                "teacher": "Maria Ważna",
+                "room": "218",
+                "chujnia": true,
+                "lekcja": true
+            },
+            {
+                "name": "WF",
+                "teacher": "Wielu",
+                "room": "OSiR/Salka",
+                "chujnia": false,
+                "lekcja": true
+            },
+            {
+                "name": "Matematyka",
+                "teacher": "Markiewicz Natalia",
+                "room": "218",
+                "chujnia": false,
+                "lekcja": true
+            },
+            {
+                "name": "Język angielski",
+                "teacher": "Magdalena Moryc-Stańczyk / Monika Sadowska",
+                "room": "219/218",
+                "chujnia": false,
+                "lekcja": true
+            }
+        ],
+        [
+            {
+                "lekcja": false
+            },
+            {
+                "name": "Matematyka",
+                "teacher": "Markiewicz Natalia",
+                "room": "218",
+                "chujnia": false,
+                "lekcja": true
+            },
+            {
+                "name": "Język niemiecki",
+                "teacher": "Małgorzata Pluta",
+                "room": "100/17???",
+                "chujnia": true,
+                "lekcja": true
+            },
+            {
+                "name": "Religia",
+                "teacher": "Piotr Cieślak",
+                "room": "218",
+                "chujnia": false,
+                "lekcja": true
+            },
+            {
+                "name": "Fizyka",
+                "teacher": "Joanna Bogdanowicz",
+                "room": "218",
+                "chujnia": false,
+                "lekcja": true
+            },
+            {
+                "name": "Fizyka",
+                "teacher": "Joanna Bogdanowicz",
+                "room": "218",
+                "chujnia": false,
+                "lekcja": true
+            },
+            {
+                "name": "Język angielski",
+                "teacher": "Magdalena Moryc-Stańczyk / Monika Sadowska",
+                "room": "216/218",
+                "chujnia": false,
+                "lekcja": true
+            },
+            {
+                "name": "Język polski",
+                "teacher": "Maria Ważna",
+                "room": "218",
+                "chujnia": true,
+                "lekcja": true
+            }
+        ]
     ]
 }

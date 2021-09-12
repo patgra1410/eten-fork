@@ -20,6 +20,7 @@ const commandFiles = fs.readdirSync('./commands').filter(file => file.endsWith('
 
 // TODO: Handling for editReply and stuff
 
+// Daily Inspiration cron
 const inspireJob = new cron.CronJob(
   '0 0 6 * * *',
   async function () {
@@ -39,6 +40,8 @@ const inspireJob = new cron.CronJob(
 inspireJob.start()
 
 async function refreshSchoolNoticeCache () {
+  // Read known School Notices from data/knownOglo.json - should be called only once on start,
+  // the info should really be pulled from the live cache
   fs.readFile('data/knownOglo.json', function (err, data) {
     if (err) {
       throw err
@@ -55,6 +58,7 @@ async function refreshSchoolNoticeCache () {
 }
 
 async function updateSchoolNoticeCacheJson () {
+  // Save known (sent) School Notices to data/knownOglo.json for future re-caching
   fs.writeFile('data/knownOglo.json', JSON.stringify(ogloszenia.keys()), 'utf-8', function (err) {
     if (err) {
       throw err
@@ -63,6 +67,7 @@ async function updateSchoolNoticeCacheJson () {
 }
 
 async function updateBearer () {
+  // Update bearer token and save to data/librusBearer.txt
   let setCookies = []
   let cookies = []
   let sendableCookies = []
@@ -133,7 +138,7 @@ async function updateBearer () {
 }
 
 async function getSchoolNoticesJson () {
-  // Get School Notices and save them to data/knownOglo.json
+  // Get School Notices, send new ones and save them to data/knownOglo.json (call updateSchoolNoticeCacheJson)
   console.log('Checking for new announcements via api.librus.pl')
   const res = await fetch(
     'https://api.librus.pl/2.0/SchoolNotices',
@@ -153,7 +158,7 @@ async function getSchoolNoticesJson () {
     console.log(noticeJson)
     console.log('Token probably expired, getting a new one.')
     await updateBearer()
-    console.log('(Skipping to get new Bearer token)')
+    console.log('(Bearer updated, skipping rest of func and calling again)')
     getSchoolNoticesJson()
     return
   }
@@ -168,6 +173,12 @@ async function getSchoolNoticesJson () {
         **__${noticeJson.SchoolNotices[notice].Subject}__**
         ${noticeJson.SchoolNotices[notice].Content}`.replace(/  +/g, '')
       )
+      // Put all relevant classes in Bold
+      text = text.replace(/3[a-iA-i ]*[AC]|3[A-Ia-i ]*[AaCc][A-Ia-i ]*3/g, '**$&**')
+      // 3A(3)
+      text = text.replace(/^.*(3[a-iA-i ]*[A]|3[A-Ia-i ]*[Aa][A-Ia-i ]*3).*$/gm, '<@&885211379408207962> $&')
+      // 3C(3)
+      text = text.replace(/^.*(3[a-iA-i ]*[C]|3[A-Ia-i ]*[Cc][A-Ia-i ]*3).*$/gm, '<@&885211432025731092> $&')
       if (text.length > 2000) {
         console.log('string too long')
         text = text.slice(0, 1996)
