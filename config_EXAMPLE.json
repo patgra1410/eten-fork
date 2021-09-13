@@ -1,0 +1,6 @@
+{
+	"prefix": "!",
+	"token": "YourBotTokenGoesHere",
+	"librusLogin": "user@domain.tld",
+	"librusPass": "password"
+}

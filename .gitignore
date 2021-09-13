@@ -2,6 +2,7 @@
 config.json
 placeholder.jpg
 data/librusBearer.txt
+data/weather.png
 
 # Logs
 logs

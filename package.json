@@ -1,13 +1,14 @@
 {
 	"name": "eten",
 	"version": "1.0.0",
-	"description": "Bot zajebistoœci",
+	"description": "Bot zajebistoï¿½ci",
 	"main": "index.js",
 	"author": "meten",
 	"dependencies": {
-		"discord.js": "^13.1.0",
 		"@discordjs/builders": "^0.5.0",
 		"cron": "^1.8.2",
+		"discord.js": "^13.1.0",
+		"merge-images": "^2.0.0",
 		"node-cache": "^5.1.2",
 		"node-fetch": "^2.6.2"
 	}

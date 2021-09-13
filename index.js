@@ -21,23 +21,47 @@ const commandFiles = fs.readdirSync('./commands').filter(file => file.endsWith('
 // TODO: Handling for editReply and stuff
 
 // Daily Inspiration cron
-const inspireJob = new cron.CronJob(
+const dailyJob = new cron.CronJob(
   '0 0 6 * * *',
   async function () {
     const res = await fetch('https://inspirobot.me/api?generate=true')
     if (!res.ok) throw new Error(`Unexpected response ${res.statusText}`)
     const response = await fetch(await res.text())
     if (!response.ok) throw new Error(`Unexpected response ${response.statusText}`)
-    await streamPipeline(response.body, fs.createWriteStream('./placeholder.jpg'))
-    const attachment = new Discord.MessageAttachment('./placeholder.jpg')
+    await streamPipeline(response.body, fs.createWriteStream('./data/placeholder.jpg'))
+    const attachment = new Discord.MessageAttachment('./data/placeholder.jpg')
     const inspireChannel = client.channels.cache.get('719825061552455760')
     inspireChannel.send({ content: '**Inspiracja na dziś:', files: [attachment] })
+
+    const result = await fetch('https://m.meteo.pl/warszawa/60')
+    if (!result.ok) throw new Error(`Unexpected response ${result.statusText}`)
+    const resultText = await result.text()
+    const imageRegex = /src="(https:\/\/www\.meteo\.pl\/um\/metco\/mgram_pict\.php\?ntype=0u&fdate=[0-9]+&row=406&col=250&lang=pl)"/g
+    const link = imageRegex.exec(resultText)[1]
+    const imgResult = await fetch(link, {
+      headers: {
+        Accept: 'image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8',
+        'Accept-Encoding': 'gzip, deflate, br',
+        'Accept-Language': 'en-GB,en;q=0.9',
+        Host: 'www.meteo.pl',
+        Referer: 'https://m.meteo.pl/',
+        'Sec-Fetch-Dest': 'image',
+        'Sec-Fetch-Mode': 'no-cors',
+        'Sec-Fetch-Site': 'same-site',
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.114 Safari/537.36'
+      }
+    })
+    if (!imgResult.ok) throw new Error(`Unexpected response ${result.statusText}`)
+    await streamPipeline(imgResult.body, fs.createWriteStream('./data/weather.png'))
+    const weatherAttachment = new Discord.MessageAttachment('./data/weather.png')
+    const dzwonekChannel = client.channels.cache.get('884370476128944148')
+    dzwonekChannel.send({ files: [weatherAttachment] })
   },
   null,
   true,
   'Europe/Warsaw'
 )
-inspireJob.start()
+dailyJob.start()
 
 async function refreshSchoolNoticeCache () {
   // Read known School Notices from data/knownOglo.json - should be called only once on start,
@@ -90,9 +114,7 @@ async function updateBearer () {
   // console.log(cookies)
   sendableCookies = cookies.join('; ')
 
-  const body = { email: '***REMOVED***', password: '***REMOVED***' }
-  // console.log(body)
-  // console.log(JSON.stringify(body))
+  const body = { email: config.librusLogin, password: config.librusPass }
   console.log('POST https://portal.librus.pl/rodzina/login/action')
   const actionResult = await fetch('https://portal.librus.pl/rodzina/login/action', {
     method: 'POST',
