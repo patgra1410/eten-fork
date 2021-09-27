@@ -8,8 +8,13 @@
 		"@discordjs/builders": "^0.5.0",
 		"cron": "^1.8.2",
 		"discord.js": "^13.1.0",
+		"join-images": "^1.0.0",
 		"merge-images": "^2.0.0",
 		"node-cache": "^5.1.2",
-		"node-fetch": "^2.6.2"
+		"node-fetch": "^2.6.2",
+		"sharp": "^0.29.1"
+	},
+	"devDependencies": {
+		"standard": "*"
 	}
 }

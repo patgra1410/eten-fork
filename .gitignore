@@ -3,6 +3,8 @@ config.json
 placeholder.jpg
 data/librusBearer.txt
 data/weather.png
+data/weatherFinal.png
+test.js
 
 # Logs
 logs

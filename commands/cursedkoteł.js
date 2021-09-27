@@ -51,10 +51,11 @@ module.exports = {
         break
     }
     const response = await fetch('https://d2ph5fj80uercy.cloudfront.net/' + theMessage)
+      .catch(error => { throw new Error(error) })
     if (!response.ok) throw new Error(`Unexpected response ${response.statusText}`)
     // console.log(response.body);
-    await streamPipeline(response.body, fs.createWriteStream('./placeholder.jpg'))
-    const attachment = new Discord.MessageAttachment('./placeholder.jpg')
+    await streamPipeline(response.body, fs.createWriteStream('./data/placeholder.jpg'))
+    const attachment = new Discord.MessageAttachment('./data/placeholder.jpg')
     interaction.reply({ files: [attachment] })
   }
 }
