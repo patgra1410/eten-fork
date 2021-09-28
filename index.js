@@ -306,6 +306,12 @@ client.on('messageCreate', async message => {
 })
 
 client.on('interactionCreate', async interaction => {
+  if(interaction.isButton())
+  {
+    await client.commands.get('pilkarze').execute(interaction)
+    return
+  }
+
   if (!interaction.isCommand()) return
 
   if (!client.commands.has(interaction.commandName)) return
