@@ -6,6 +6,7 @@
 	"author": "meten",
 	"dependencies": {
 		"@discordjs/builders": "^0.5.0",
+		"canvas": "^2.8.0",
 		"cron": "^1.8.2",
 		"discord.js": "^13.1.0",
 		"join-images": "^1.0.0",

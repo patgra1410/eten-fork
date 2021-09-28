@@ -267,8 +267,8 @@ client.once('ready', async () => {
   updateSlashCommands()
   console.log(`Ready! Logged in as ${client.user.tag}`)
   dzwonekChannel = client.channels.cache.get('884370476128944148')
-  librusCurrentBearer = await updateBearer()
-  setTimeout(getSchoolNoticesJson, 2000)
+  // librusCurrentBearer = await updateBearer()
+  // setTimeout(getSchoolNoticesJson, 2000)
 })
 
 client.on('messageCreate', async message => {
@@ -294,6 +294,7 @@ client.on('messageCreate', async message => {
   if (message.content.startsWith(config.prefix)) {
     const args = message.content.slice(config.prefix.length).trim().split(/ +/)
     const command = args.shift().toLowerCase()
+    
     if (!client.commands.has(command)) return
     try {
       await client.commands.get(command).execute(message, args)
