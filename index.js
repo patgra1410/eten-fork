@@ -234,6 +234,7 @@ async function getSchoolNoticesJson () {
     console.error(error)
     console.log('\x1b[31mSomething within updating notices failed. Retrying in 2 mins.\x1b[0m')
     setTimeout(getSchoolNoticesJson, (2 * 60000))
+    return
   } finally {
     console.log('\x1b[42m(Done)\x1b[0m')
     setTimeout(getSchoolNoticesJson, ((Math.round(Math.random() * (6 - 4) + 4)) * 60000))
