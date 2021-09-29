@@ -267,8 +267,14 @@ client.once('ready', async () => {
   updateSlashCommands()
   console.log(`Ready! Logged in as ${client.user.tag}`)
   dzwonekChannel = client.channels.cache.get('884370476128944148')
-  // librusCurrentBearer = await updateBearer()
-  // setTimeout(getSchoolNoticesJson, 2000)
+
+  if(!fs.existsSync('./data/ranking.json'))
+  {
+    fs.writeFileSync('./data/ranking.json', '{}')
+  }
+
+  librusCurrentBearer = await updateBearer()
+  setTimeout(getSchoolNoticesJson, 2000)
 })
 
 client.on('messageCreate', async message => {

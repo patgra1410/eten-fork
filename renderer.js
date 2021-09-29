@@ -29,8 +29,9 @@ class Edge
 
 module.exports=class Board
 {
-    constructor(spacing, offsetX, offsetY, uids)
+    constructor(spacing, offsetX, offsetY, uids, usernames)
     {
+        this.usernames=usernames
         this.uids=uids
         this.turn=0
         this.win=-1
@@ -127,9 +128,25 @@ module.exports=class Board
 
     async draw() {
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height)
-
+        
         this.ctx.fillStyle='#36393f'
         this.ctx.fillRect(0,0,this.canvas.width, this.canvas.height)
+        this.ctx.textAlign='center'
+        this.ctx.font='30px Arial'
+
+        this.ctx.save()
+        this.ctx.translate(this.offsetX-this.offsetX/2+10, this.canvas.height/2)
+        this.ctx.rotate(-Math.PI/2)
+        this.ctx.fillStyle='blue'
+        this.ctx.fillText(this.usernames[0], 0, 0)
+        this.ctx.restore()
+
+        this.ctx.save()
+        this.ctx.translate(this.offsetX*11+this.offsetX/2-10, this.canvas.height/2)
+        this.ctx.rotate(+Math.PI/2)
+        this.ctx.fillStyle='red'
+        this.ctx.fillText(this.usernames[1], 0, 0)
+        this.ctx.restore()
 
         this.ctx.fillStyle='#fff'
         for(var i in this.points)

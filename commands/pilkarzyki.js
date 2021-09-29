@@ -1,5 +1,6 @@
 const Board=require('../renderer.js')
 const Discord = require('discord.js')
+const fs=require('fs')
 
 var uids={}
 var boards={}
@@ -8,23 +9,27 @@ var gameID=1
 function buttons(id)
 {
     var indexes=boards[id].possibleMovesIndexes()
+    if(boards[id].turn==0)
+        var style='PRIMARY'
+    else
+        var style='DANGER'
 
     var row1=new Discord.MessageActionRow()
             .addComponents(
                 new Discord.MessageButton()
                     .setCustomId('0')
                     .setLabel('Lewo góra')
-                    .setStyle('PRIMARY')
+                    .setStyle(style)
                     .setDisabled(!indexes.includes(0)),
                 new Discord.MessageButton()
                     .setCustomId('1')
                     .setLabel('Góra')
-                    .setStyle('PRIMARY')
+                    .setStyle(style)
                     .setDisabled(!indexes.includes(1)),
                 new Discord.MessageButton()
                     .setCustomId('2')
                     .setLabel('Prawo góra')
-                    .setStyle('PRIMARY')
+                    .setStyle(style)
                     .setDisabled(!indexes.includes(2))
             )
         var row2=new Discord.MessageActionRow()
@@ -32,17 +37,17 @@ function buttons(id)
                 new Discord.MessageButton()
                     .setCustomId('3')
                     .setLabel('Lewo     ')
-                    .setStyle('PRIMARY')
+                    .setStyle(style)
                     .setDisabled(!indexes.includes(3)),
                 new Discord.MessageButton()
                     .setCustomId('disabled')
                     .setLabel(' ')
-                    .setStyle('PRIMARY')
+                    .setStyle(style)
                     .setDisabled(true),
                 new Discord.MessageButton()
                     .setCustomId('4')
                     .setLabel('Prawo     ')
-                    .setStyle('PRIMARY')
+                    .setStyle(style)
                     .setDisabled(!indexes.includes(4))
             )
         var row3=new Discord.MessageActionRow()
@@ -50,17 +55,17 @@ function buttons(id)
                 new Discord.MessageButton()
                     .setCustomId('5')
                     .setLabel('Lewo dół')
-                    .setStyle('PRIMARY')
+                    .setStyle(style)
                     .setDisabled(!indexes.includes(5)),
                 new Discord.MessageButton()
                     .setCustomId('6')
                     .setLabel('Dół')
-                    .setStyle('PRIMARY')
+                    .setStyle(style)
                     .setDisabled(!indexes.includes(6)),
                 new Discord.MessageButton()
                     .setCustomId('7')
                     .setLabel('Prawo dół')
-                    .setStyle('PRIMARY')
+                    .setStyle(style)
                     .setDisabled(!indexes.includes(7))
             )
 
@@ -115,6 +120,27 @@ module.exports = {
 
                 if(boards[uids[[interaction.user.id]]].win!=-1)
                 {
+                    var ranking=JSON.parse(fs.readFileSync('./data/ranking.json'))
+                    var gameuids=boards[uids[[interaction.user.id]]].uids
+                    
+                    if(ranking[gameuids[0]]===undefined)
+                        ranking[gameuids[0]]={lost: 0, won: 0}
+                    if(ranking[gameuids[1]]===undefined)
+                        ranking[gameuids[1]]={lost: 0, won: 0}
+                    
+                    if(boards[uids[[interaction.user.id]]].win==0)
+                    {
+                        ranking[gameuids[0]]['won']++
+                        ranking[gameuids[1]]['lost']++
+                    }
+                    else
+                    {
+                        ranking[gameuids[0]]['lost']++
+                        ranking[gameuids[1]]['won']++
+                    }
+
+                    fs.writeFileSync('./data/ranking.json', JSON.stringify(ranking))
+
                     delete boards[uids[[interaction.user.id]]]
                 }
 
@@ -138,7 +164,17 @@ module.exports = {
         
         var uid1=interaction.author.id
         var uid2=interaction.mentions.users.keys().next().value
-        // console.log(uid1, uid2)
+
+        if(uids[uid1]!==undefined)
+        {
+            interaction.reply('Juz grasz grę')
+            return
+        }
+        if(uids[uid2]!==undefined)
+        {
+            interaction.reply('<@'+uid2+'> już gra w grę')
+            return
+        }
 
         if(uid1===uid2)
         {
@@ -148,7 +184,8 @@ module.exports = {
 
         uids[uid1]=gameID
         uids[uid2]=gameID
-        boards[gameID]=new Board(50, 50, 50, [uid1, uid2])
+        
+        boards[gameID]=new Board(50, 50, 50, [uid1, uid2], [interaction.author.username, interaction.mentions.users.entries().next().value[1].username])
         var id=gameID
         gameID++
         
