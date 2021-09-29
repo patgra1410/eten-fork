@@ -2,7 +2,8 @@ const Board=require('../renderer.js')
 const Discord = require('discord.js')
 
 var uids={}
-var boards=[]
+var boards={}
+var gameID=1
 
 function buttons(id)
 {
@@ -110,11 +111,13 @@ module.exports = {
                 console.log(boards[uids[[interaction.user.id]]].message)
                 boards[uids[[interaction.user.id]]].message.edit({components: []})
                 var message=await boards[uids[[interaction.user.id]]].message.channel.send({content: msg, files: [attachment], components: components})
-                // var message=await interaction.update({content: msg, files: [attachment], components: buttons(uids[[interaction.user.id]])})
                 boards[uids[[interaction.user.id]]].message=message
 
-                // var indexes=boards[]
-                // console.log(interaction)
+                if(boards[uids[[interaction.user.id]]].win!=-1)
+                {
+                    delete boards[uids[[interaction.user.id]]]
+                }
+
                 return
             }
         } catch(error) {
@@ -143,10 +146,11 @@ module.exports = {
             return
         }
 
-        uids[uid1]=boards.length
-        uids[uid2]=boards.length
-        boards.push(new Board(50, 50, 50, [uid1, uid2]))
-        var id=boards.length-1
+        uids[uid1]=gameID
+        uids[uid2]=gameID
+        boards[gameID]=new Board(50, 50, 50, [uid1, uid2])
+        var id=gameID
+        gameID++
         
         boards[id].draw()
         const attachment = new Discord.MessageAttachment('./data/board.png')

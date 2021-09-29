@@ -128,7 +128,7 @@ module.exports=class Board
     async draw() {
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height)
 
-        this.ctx.fillStyle='#2c2f33'
+        this.ctx.fillStyle='#36393f'
         this.ctx.fillRect(0,0,this.canvas.width, this.canvas.height)
 
         this.ctx.fillStyle='#fff'
