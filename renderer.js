@@ -29,8 +29,9 @@ class Edge
 
 module.exports=class Board
 {
-    constructor(spacing, offsetX, offsetY)
+    constructor(spacing, offsetX, offsetY, uids)
     {
+        this.uids=uids
         this.turn=0
         this.win=-1
 
@@ -182,10 +183,9 @@ module.exports=class Board
         await fs.writeFile("data/board.png", buf)
     }
 
-
-    possibleMoves(x, y)
+    possibleMovesIndexes(x, y)
     {
-        if(x===undefined && y==undefined)
+        if(x===undefined && y===undefined)
         {
             x=this.ball.x
             y=this.ball.y
@@ -194,14 +194,42 @@ module.exports=class Board
         var moves=[]
         var directions=[[-1, -1], [0, -1], [1, -1], [-1, 0], [1, 0], [-1, 1], [0, 1], [1, 1]]
 
-        for(var i in directions)
+        for(var i=0; i<directions.length; i++)
         {
             var dir=directions[i]
             if(!this.points[this.pos[x][y]].edges.includes(this.pos[ x+dir[0] ][ y+dir[1] ]))
-            {
-                moves.push(this.pos[ x+dir[0] ][ y+dir[1] ])
-            }
+                moves.push(i)
         }
+
+        return moves
+    }
+
+    possibleMoves(x, y)
+    {
+        if(x===undefined && y===undefined)
+        {
+            x=this.ball.x
+            y=this.ball.y
+        }
+
+        var indexes=this.possibleMovesIndexes(x, y)
+        var moves=[]
+        var directions=[[-1, -1], [0, -1], [1, -1], [-1, 0], [1, 0], [-1, 1], [0, 1], [1, 1]]
+
+        for(var i=0; i<indexes.length; i++)
+        {
+            var index=indexes[i]
+            moves.push(this.pos[ x+directions[index][0] ][ y+directions[index][1] ])
+        }
+
+        // for(var i in directions)
+        // {
+        //     var dir=directions[i]
+        //     if(!this.points[this.pos[x][y]].edges.includes(this.pos[ x+dir[0] ][ y+dir[1] ]))
+        //     {
+        //         moves.push(this.pos[ x+dir[0] ][ y+dir[1] ])
+        //     }
+        // }
 
         return moves
     }
@@ -238,6 +266,11 @@ module.exports=class Board
             this.win=(this.turn+1)%2
 
         return true
+    }
+
+    turnUID()
+    {
+        return this.uids[this.turn]
     }
 }
 

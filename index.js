@@ -166,6 +166,7 @@ async function getSchoolNoticesJson () {
         librusCurrentBearer = await updateBearer()
       } catch (error) {
         throw new Error(`updateBearer() failed! ${error}`)
+        return // TODO dodalem losowo
       } finally {
         console.log('(Bearer updated, retrying)')
         getSchoolNoticesJson()
@@ -235,10 +236,9 @@ async function getSchoolNoticesJson () {
     console.log('\x1b[31mSomething within updating notices failed. Retrying in 2 mins.\x1b[0m')
     setTimeout(getSchoolNoticesJson, (2 * 60000))
     return
-  } finally {
-    console.log('\x1b[42m(Done)\x1b[0m')
-    setTimeout(getSchoolNoticesJson, ((Math.round(Math.random() * (6 - 4) + 4)) * 60000))
-  }
+  } 
+  console.log('\x1b[42m(Done)\x1b[0m')
+  setTimeout(getSchoolNoticesJson, ((Math.round(Math.random() * (6 - 4) + 4)) * 60000))
 }
 
 async function updateSlashCommands () {
@@ -308,7 +308,7 @@ client.on('messageCreate', async message => {
 client.on('interactionCreate', async interaction => {
   if(interaction.isButton())
   {
-    await client.commands.get('pilkarze').execute(interaction)
+    await client.commands.get('pilkarzyki').execute(interaction)
     return
   }
 
