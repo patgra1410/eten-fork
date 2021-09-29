@@ -109,7 +109,7 @@ module.exports = {
                 
                 console.log(boards[uids[[interaction.user.id]]].message)
                 boards[uids[[interaction.user.id]]].message.edit({components: []})
-                var message=await boards[uids[[interaction.user.id]]].message.channel.send({content: msg, files: [attachment], components: components]})
+                var message=await boards[uids[[interaction.user.id]]].message.channel.send({content: msg, files: [attachment], components: components})
                 // var message=await interaction.update({content: msg, files: [attachment], components: buttons(uids[[interaction.user.id]])})
                 boards[uids[[interaction.user.id]]].message=message
 
