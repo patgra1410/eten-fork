@@ -109,7 +109,7 @@ module.exports = {
                 return
             }
         } catch(error) {
-            // console.log(error)
+            console.log(error)
         }
 
         if(args===undefined)

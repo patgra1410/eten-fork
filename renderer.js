@@ -242,7 +242,7 @@ module.exports=class Board
     move(index)
     {
         var moves=this.possibleMoves()
-        console.log(this.possibleMoves())
+        
         if(index>=moves.length || this.win!=-1)
             return false
 
