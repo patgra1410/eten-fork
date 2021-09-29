@@ -19,8 +19,6 @@ module.exports = {
             return 0
         })
 
-        console.log(interaction)
-
         var desc=""
         for(var i=0; i<rank.length; i++)
         {
