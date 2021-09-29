@@ -254,7 +254,7 @@ module.exports=class Board
 
     dump(i)
     {
-        fs.writeFileSync('./data/board'+i+'.dump', inspect(this))
+        fs.writeFileSync('./data/board'+i+'.dump', inspect(this, {depth: 10}))
     }
 
     move(index)
