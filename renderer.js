@@ -1,6 +1,7 @@
 const { createCanvas }=require('canvas')
 const readline=require('readline')
-const fs=require('fs').promises
+const { inspect }=require('util')
+const fs=require('fs')
 
 class Point
 {
@@ -126,7 +127,7 @@ module.exports=class Board
         this.points[pos[10][6]].edges.push(pos[11][5])
     }
 
-    async draw() {
+    draw() {
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height)
         
         this.ctx.fillStyle='#36393f'
@@ -197,7 +198,7 @@ module.exports=class Board
 
         var data=this.canvas.toDataURL().replace(/^data:image\/\w+;base64,/, "")
         var buf=Buffer.from(data, "base64")
-        await fs.writeFile("data/board.png", buf)
+        fs.writeFileSync("data/board.png", buf)
     }
 
     possibleMovesIndexes(x, y)
@@ -253,8 +254,7 @@ module.exports=class Board
 
     dump(i)
     {
-        console.log(typeof(this.canvas))
-        fs.writeFileSync('./data/board'+i+'.dump', JSON.stringify(this, function(key, val) { return (typeof val === 'function') ? '[function]' : val; }, 4))
+        fs.writeFileSync('./data/board'+i+'.dump', inspect(this))
     }
 
     move(index)
