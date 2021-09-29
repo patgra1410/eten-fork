@@ -158,6 +158,15 @@ module.exports = {
             return
         }
 
+        if(args.length>=1 && args[0]=='save')
+        {
+            for([key, value] of Object.entries(boards))
+            {
+                value.dump(key)
+            }
+            return
+        }
+
         if(args.length<1 || interaction.mentions.users.length==0)
         {
             interaction.reply('Potrzebny jest drugi gracz')
@@ -178,11 +187,11 @@ module.exports = {
             return
         }
 
-        if(uid1===uid2)
-        {
-            interaction.reply('Nie możesz grać z samym sobą')
-            return
-        }
+        // if(uid1===uid2)
+        // {
+        //     interaction.reply('Nie możesz grać z samym sobą')
+        //     return
+        // }
 
         uids[uid1]=gameID
         uids[uid2]=gameID

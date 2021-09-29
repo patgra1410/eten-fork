@@ -251,9 +251,10 @@ module.exports=class Board
         return moves
     }
 
-    dump()
+    dump(i)
     {
-        console.log(this)
+        console.log(typeof(this.canvas))
+        fs.writeFileSync('./data/board'+i+'.dump', JSON.stringify(this, function(key, val) { return (typeof val === 'function') ? '[function]' : val; }, 4))
     }
 
     move(index)
