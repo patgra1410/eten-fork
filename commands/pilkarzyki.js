@@ -113,7 +113,6 @@ module.exports = {
                 else
                     var components=[]
                 
-                console.log(boards[uids[[interaction.user.id]]].message)
                 boards[uids[[interaction.user.id]]].message.edit({components: []})
                 var message=await boards[uids[[interaction.user.id]]].message.channel.send({content: msg, files: [attachment], components: components})
                 boards[uids[[interaction.user.id]]].message=message
@@ -154,7 +153,6 @@ module.exports = {
 
         if(args===undefined)
         {
-            // console.log('xdd')
             return
         }
 
