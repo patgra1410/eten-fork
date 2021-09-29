@@ -113,8 +113,12 @@ module.exports = {
                 else
                     var components=[]
                 
-                boards[uids[[interaction.user.id]]].message.edit({components: []})
-                var message=await boards[uids[[interaction.user.id]]].message.channel.send({content: msg, files: [attachment], components: components})
+                // boards[uids[[interaction.user.id]]].message.edit({components: []})
+                var img=await interaction.client.guilds.cache.get('856926964094337044').channels.cache.get('892842178143997982').send({files: [attachment]})
+
+                // var message=await boards[uids[[interaction.user.id]]].message.channel.send({content: msg, files: [attachment], components: components})
+                msg+='\n'+img.attachments.first().url
+                var message=await interaction.update({content: msg, files: [], components: components})
                 boards[uids[[interaction.user.id]]].message=message
 
                 if(boards[uids[[interaction.user.id]]].win!=-1)
@@ -185,11 +189,11 @@ module.exports = {
             return
         }
 
-        // if(uid1===uid2)
-        // {
-        //     interaction.reply('Nie możesz grać z samym sobą')
-        //     return
-        // }
+        if(uid1===uid2)
+        {
+            interaction.reply('Nie możesz grać z samym sobą')
+            return
+        }
 
         uids[uid1]=gameID
         uids[uid2]=gameID
@@ -200,9 +204,11 @@ module.exports = {
         
         boards[id].draw()
         const attachment = new Discord.MessageAttachment('./data/board.png')
+        var img=await interaction.client.guilds.cache.get('856926964094337044').channels.cache.get('892842178143997982').send({files: [attachment]})
         
-        var msg='Tura: <@'+boards[id].turnUID()+'>'
+        var msg='Tura: <@'+boards[id].turnUID()+'>\n'+img.attachments.first().url
 
+        var message=await interaction.reply({content: msg, files: [], components: buttons(id)})
         var message=await interaction.reply({content: msg, files: [attachment], components: buttons(id)})
         boards[id].message=message
   }
