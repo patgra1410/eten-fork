@@ -142,6 +142,8 @@ module.exports = {
                     fs.writeFileSync('./data/ranking.json', JSON.stringify(ranking))
 
                     delete boards[uids[[interaction.user.id]]]
+                    delete uids[gameuids[0]]
+                    delete uids[gameuids[1]]
                 }
 
                 return
