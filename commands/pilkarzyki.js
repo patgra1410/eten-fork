@@ -101,8 +101,12 @@ module.exports = {
                     var msg='Tura: <@'+boards[uids[[interaction.user.id]]].turnUID()+'>'
                 else
                     var msg='<@'+boards[uids[[interaction.user.id]]].uids[boards[uids[[interaction.user.id]]].win]+'> wygrał'
-        
-                await interaction.update({content: msg, files: [attachment], components: buttons(uids[[interaction.user.id]])})
+                
+                console.log(boards[uids[[interaction.user.id]]].message)
+                boards[uids[[interaction.user.id]]].message.edit({components: []})
+                boards[uids[[interaction.user.id]]].message.channel.send({content: msg, files: [attachment], components: buttons(uids[[interaction.user.id]])})
+                // var message=await interaction.update({content: msg, files: [attachment], components: buttons(uids[[interaction.user.id]])})
+                boards[uids[[interaction.user.id]]].message=message
 
                 // var indexes=boards[]
                 // console.log(interaction)
@@ -144,6 +148,7 @@ module.exports = {
         
         var msg='Tura: <@'+boards[id].turnUID()+'>'
 
-        interaction.reply({content: msg, files: [attachment], components: buttons(id)})
+        var message=await interaction.reply({content: msg, files: [attachment], components: buttons(id)})
+        boards[id].message=message
   }
 }
