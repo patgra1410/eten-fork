@@ -68,8 +68,19 @@ function buttons(id)
                     .setStyle(style)
                     .setDisabled(!indexes.includes(7))
             )
+        var row4=new Discord.MessageActionRow()
+            .addComponents(
+                new Discord.MessageButton()
+                    .setCustomId('remis')
+                    .setLabel('Remis')
+                    .setStyle('SECONDARY'),
+                new Discord.MessageButton()
+                    .setCustomId('surrender')
+                    .setLabel('Poddaj się')
+                    .setStyle('SECONDARY')
+            )
 
-    return [row1, row2, row3]
+    return [row1, row2, row3, row4]
 }
 
 module.exports = {
@@ -88,23 +99,80 @@ module.exports = {
                 if(uids[interaction.user.id]===undefined)
                     return
 
-                if(interaction.user.id!=boards[uids[interaction.user.id]].turnUID())
-                    return
-                
-                var indexes=boards[uids[interaction.user.id]].possibleMovesIndexes()
-                if(!indexes.includes(parseInt(interaction.customId)))
-                    return
-                
-                if(!boards[uids[[interaction.user.id]]].move(indexes.indexOf(parseInt(interaction.customId))))
+                if(interaction.customId=='surrender')
                 {
+                    var ranking=JSON.parse(fs.readFileSync('./data/ranking.json'))
+                    var gameuids=boards[uids[[interaction.user.id]]].uids
+
+                    if(gameuids[0]==interaction.user.id)
+                        var winner=gameuids[1]
+                    else
+                        var winner=gameuids[0]
+
+                    ranking[interaction.user.id]['lost']++
+                    ranking[winner]['won']++
+                    fs.writeFileSync('./data/ranking.json', JSON.stringify(ranking))
+
+                    boards[uids[[interaction.user.id]]].draw()
+                    const attachment = new Discord.MessageAttachment('./data/board.png')
+                    var img=await interaction.client.guilds.cache.get('856926964094337044').channels.cache.get('892842178143997982').send({files: [attachment]})
+                    var msg='<@'+winner+'> wygrał przez poddanie się\n'+img.attachments.first().url 
+                    var message=await interaction.update({content: msg, files: [], components: []}) 
+                    
+                    delete boards[uids[[interaction.user.id]]]
+                    delete uids[winner]
+                    delete uids[interaction.user.id]
+
                     return
+                }
+                else if(interaction.customId=='remis')
+                {
+                    if(boards[uids[interaction.user.id]].remis.includes(interaction.user.id))
+                        return
+                    
+                    boards[uids[interaction.user.id]].remis.push(interaction.user.id)
+                    if(boards[uids[interaction.user.id]].remis.length==2)
+                    {
+                        boards[uids[[interaction.user.id]]].draw()
+                        const attachment = new Discord.MessageAttachment('./data/board.png')
+                        var img=await interaction.client.guilds.cache.get('856926964094337044').channels.cache.get('892842178143997982').send({files: [attachment]})
+                        var msg='Remis\n'+img.attachments.first().url
+                        var message=await interaction.update({content: msg, files: [], components: []})
+                        
+                        var gameuids=boards[uids[interaction.user.id]].uids
+                        delete boards[uids[interaction.user.id]]
+                        delete uids[gameuids[0]]
+                        delete uids[gameuids[1]]
+                        
+                        return
+                    }
+                }
+                else
+                {
+                    if(interaction.user.id!=boards[uids[interaction.user.id]].turnUID())
+                        return
+                    
+                    var indexes=boards[uids[interaction.user.id]].possibleMovesIndexes()
+                    if(!indexes.includes(parseInt(interaction.customId)))
+                        return
+                    
+                    if(!boards[uids[[interaction.user.id]]].move(indexes.indexOf(parseInt(interaction.customId))))
+                    {
+                        return
+                    }
                 }
 
                 boards[uids[[interaction.user.id]]].draw()
                 const attachment = new Discord.MessageAttachment('./data/board.png')
                 
                 if(boards[uids[[interaction.user.id]]].win==-1)
+                {
                     var msg='Tura: <@'+boards[uids[[interaction.user.id]]].turnUID()+'>'
+                    if(boards[uids[interaction.user.id]].remis.length>0)
+                    {
+                        msg+=' ('+boards[uids[interaction.user.id]].remis.length+'/2 osoby poprosiły o remis)'
+                    }
+                }
                 else
                     var msg='<@'+boards[uids[[interaction.user.id]]].uids[boards[uids[[interaction.user.id]]].win]+'> wygrał'
                 
@@ -195,6 +263,11 @@ module.exports = {
             return
         }
 
+        var ranking=JSON.parse(fs.readFileSync('./data/ranking.json'))
+        ranking[uid1]={lost: 0, won: 0}
+        ranking[uid2]={lost: 0, won: 0}
+        fs.writeFileSync('./data/ranking.json', JSON.stringify(ranking))
+
         uids[uid1]=gameID
         uids[uid2]=gameID
         
@@ -209,7 +282,7 @@ module.exports = {
         var msg='Tura: <@'+boards[id].turnUID()+'>\n'+img.attachments.first().url
 
         var message=await interaction.reply({content: msg, files: [], components: buttons(id)})
-        var message=await interaction.reply({content: msg, files: [attachment], components: buttons(id)})
+        // var message=await interaction.reply({content: msg, files: [attachment], components: buttons(id)})
         boards[id].message=message
   }
 }

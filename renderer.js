@@ -32,6 +32,7 @@ module.exports=class Board
 {
     constructor(spacing, offsetX, offsetY, uids, usernames)
     {
+        this.remis=[]
         this.usernames=usernames
         this.uids=uids
         this.turn=0
