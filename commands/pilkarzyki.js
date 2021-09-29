@@ -264,8 +264,10 @@ module.exports = {
         }
 
         var ranking=JSON.parse(fs.readFileSync('./data/ranking.json'))
-        ranking[uid1]={lost: 0, won: 0}
-        ranking[uid2]={lost: 0, won: 0}
+        if(ranking[uid1]===undefined)
+            ranking[uid1]={lost: 0, won: 0}
+        if(ranking[uid2]===undefined)
+            ranking[uid2]={lost: 0, won: 0}
         fs.writeFileSync('./data/ranking.json', JSON.stringify(ranking))
 
         uids[uid1]=gameID
