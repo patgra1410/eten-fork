@@ -273,8 +273,8 @@ client.once('ready', async () => {
     fs.writeFileSync('./data/ranking.json', '{}')
   }
 
-  librusCurrentBearer = await updateBearer()
-  setTimeout(getSchoolNoticesJson, 2000)
+  // librusCurrentBearer = await updateBearer()
+  // setTimeout(getSchoolNoticesJson, 2000)
 })
 
 client.on('messageCreate', async message => {
