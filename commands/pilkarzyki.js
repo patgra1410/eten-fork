@@ -1,23 +1,11 @@
 const Board=require('../renderer.js')
 const Discord = require('discord.js')
 const fs=require('fs')
-const glicko2=require('glicko2')
+const Elo=require('elo-rating')
 
 var uids={}
 var boards={}
 var gameID=1
-var glicko=new glicko2.Glicko2({
-  // tau : "Reasonable choices are between 0.3 and 1.2, though the system should
-  //      be tested to decide which value results in greatest predictive accuracy."
-  tau : 0.5,
-  // rating : default rating
-  rating : 1500,
-  //rd : Default rating deviation 
-  //     small number = good confidence on the rating accuracy
-  rd : 200,
-  //vol : Default volatility (expected fluctation on the player rating)
-  vol : 0.06
-})
 
 function buttons(id)
 {
@@ -117,29 +105,24 @@ module.exports = {
                     var ranking=JSON.parse(fs.readFileSync('./data/ranking.json'))
                     var gameuids=boards[uids[[interaction.user.id]]].uids
 
-                    var player1=glicko.makePlayer(ranking[gameuids[0]]['rating'], ranking[gameuids[0]]['rd'], ranking[gameuids[0]]['vol'])
-                    var player2=glicko.makePlayer(ranking[gameuids[1]]['rating'], ranking[gameuids[1]]['rd'], ranking[gameuids[1]]['vol'])
+                    var rating1=ranking[gameuids[0]]['rating']
+                    var rating2=ranking[gameuids[1]]['rating']
                     
                     if(gameuids[0]==interaction.user.id)
                     {
                         var winner=gameuids[1]
-                        glicko.updateRatings([[player1, player2, 0]])
+                        var win=false
                     }
                     else
                     {
                         var winner=gameuids[0]
-                        glicko.updateRatings([[player1, player2, 1]])
+                        var win=true
                     }
 
-                    ranking[gameuids[0]]['rating']=player1.getRating()
-                    ranking[gameuids[0]]['rd']=player1.getRd()
-                    ranking[gameuids[0]]['vol']=player1.getVol()
+                    var newRating=ELo.calculate(rating1, rating2, win)
 
-                    ranking[gameuids[1]]['rating']=player2.getRating()
-                    ranking[gameuids[1]]['rd']=player2.getRd()
-                    ranking[gameuids[1]]['vol']=player2.getVol()
-
-                    delete player1, player2
+                    ranking[gameuids[0]]['rating']=newRating['playerRating']
+                    ranking[gameuids[1]]['rating']=newRating['opponentRating']
 
                     ranking[interaction.user.id]['lost']++
                     ranking[winner]['won']++
@@ -226,31 +209,25 @@ module.exports = {
                     var ranking=JSON.parse(fs.readFileSync('./data/ranking.json'))
                     var gameuids=boards[uids[[interaction.user.id]]].uids
                     
-                    var player1=glicko.makePlayer(ranking[gameuids[0]]['rating'], ranking[gameuids[0]]['rd'], ranking[gameuids[0]]['vol'])
-                    var player2=glicko.makePlayer(ranking[gameuids[1]]['rating'], ranking[gameuids[1]]['rd'], ranking[gameuids[1]]['vol'])
-                    
+                    var player1=ranking[gameuids[0]]['rating']
+                    var player2=ranking[gameuids[1]]['rating']
+
                     if(boards[uids[[interaction.user.id]]].win==0)
                     {
-                        glicko.updateRatings([[player1, player2, 1]])
+                        var newRanking=Elo.calculate(player1, player2, true)
                         ranking[gameuids[0]]['won']++
                         ranking[gameuids[1]]['lost']++
                     }
                     else
                     {
+                        var newRanking=Elo.calculate(player1, player2, false)
                         glicko.updateRatings([[pla1, player2, 0]])
                         ranking[gameuids[0]]['lost']++
                         ranking[gameuids[1]]['won']++
                     }
 
-                    ranking[gameuids[0]]['rating']=player1.getRating()
-                    ranking[gameuids[0]]['rd']=player1.getRd()
-                    ranking[gameuids[0]]['vol']=player1.getVol()
-
-                    ranking[gameuids[1]]['rating']=player2.getRating()
-                    ranking[gameuids[1]]['rd']=player2.getRd()
-                    ranking[gameuids[1]]['vol']=player2.getVol()
-
-                    delete player1, player2
+                    ranking[gameuids[0]]['rating']=newRating['playerRating']
+                    ranking[gameuids[1]]['rating']=newRating['opponentRating']
 
                     fs.writeFileSync('./data/ranking.json', JSON.stringify(ranking))
 
@@ -308,27 +285,14 @@ module.exports = {
         var ranking=JSON.parse(fs.readFileSync('./data/ranking.json'))
         if(ranking[uid1]===undefined)
             ranking[uid1]={lost: 0, won: 0}
-        if(ranking[uid1]['glicko']===undefined)
-        {
-            ranking[uid1]['glicko']=true
-            var temp=glicko.makePlayer()
-            ranking[uid1]['rating']=temp.getRating()
-            ranking[uid1]['rd']=temp.getRd()
-            ranking[uid1]['vol']=temp.getVol()
-            delete temp
-        }
+        if(ranking[uid1]['rating']===undefined)
+            ranking[uid1]['rating']=1500
 
         if(ranking[uid2]===undefined)
             ranking[uid2]={lost: 0, won: 0}
-        if(ranking[uid2]['glicko']===undefined)
-        {
-            ranking[uid2]['glicko']=true
-            var temp=glicko.makePlayer()
-            ranking[uid2]['rating']=temp.getRating()
-            ranking[uid2]['rd']=temp.getRd()
-            ranking[uid2]['vol']=temp.getVol()
-            delete temp
-        }
+        if(ranking[uid2]['rating']===undefined)
+            ranking[uid2]['rating']=1500
+        
         fs.writeFileSync('./data/ranking.json', JSON.stringify(ranking))
 
         uids[uid1]=gameID

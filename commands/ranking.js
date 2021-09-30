@@ -11,10 +11,9 @@ module.exports = {
         for([key, value] of Object.entries(ranking))
         {
             if(value['rating']===undefined)
-                value['rating']=0
+                value['rating']=1500
             rank.push({id: key, won: value['won'], lost: value['lost'], rating: value['rating']})
         }
-        console.log(rank)
             // rank.push([value['won']/(value['won']+value['lost']), key])
 
         // rank.sort(function(a,b) {
@@ -31,7 +30,7 @@ module.exports = {
         {
             var r=rank[i]
             // desc+=String(i+1)+". <@"+r[1]+">: "+String(Math.round(r[0]*100*10)/10)+'% wygranych meczów ('+ranking[r[1]]['won']+' wygranych, '+ranking[r[1]]['lost']+' przegranych)\n'
-            desc+=String(i+1)+". <@"+r['id']+"> rating "+String(Math.round(r['rating']))+' ('+r['won']+' wygranych, '+r['lost']+' przegranych)\n'
+            desc+=String(i+1)+". <@"+r['id']+"> ELO rating "+String(Math.round(r['rating']))+' ('+r['won']+' wygranych, '+r['lost']+' przegranych)\n'
         }
 
         embed=new Discord.MessageEmbed()
