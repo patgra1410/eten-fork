@@ -3,10 +3,12 @@ const streamPipeline = util.promisify(require('stream').pipeline)
 const fetch = require('node-fetch')
 const fs = require('fs')
 const Discord = require('discord.js')
+const { SlashCommandBuilder } = require('@discordjs/builders')
 
 module.exports = {
-  name: 'cursedkoteł',
-  description: 'kiedy widze nowy filmik damonka :trolldog',
+  data: new SlashCommandBuilder()
+    .setName('cursedkoteł')
+    .setDescription('kiedy widze nowy filmik damonka :trolldog'),
   aliases: ['kotbingo', 'rozpierdolkota'],
   async execute (interaction) {
     const folderNumber = Math.floor((Math.random() * 6) + 1)

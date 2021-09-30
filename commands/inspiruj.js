@@ -3,10 +3,12 @@ const streamPipeline = util.promisify(require('stream').pipeline)
 const fetch = require('node-fetch')
 const fs = require('fs')
 const Discord = require('discord.js')
+const { SlashCommandBuilder } = require('@discordjs/builders')
 
 module.exports = {
-  name: 'inspiruj',
-  description: 'Zainspiruj się',
+  data: new SlashCommandBuilder()
+    .setName('inspiruj')
+    .setDescription( 'Zainspiruj się'),
   aliases: ['inspiracja'],
   async execute (interaction) {
     const res = await fetch('https://inspirobot.me/api?generate=true')

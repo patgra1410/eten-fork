@@ -5,10 +5,12 @@ const fs = require('fs')
 const util = require('util')
 const streamPipeline = util.promisify(require('stream').pipeline)
 const Discord = require('discord.js')
+const { SlashCommandBuilder } = require('@discordjs/builders')
 
 module.exports = {
-  name: 'pogoda',
-  description: 'Pogoda z meteo.pl',
+  data: new SlashCommandBuilder()
+    .setName('pogoda')
+    .setDescription('Pogoda z meteo.pl'),
   async execute (interaction) {
     const result = await fetch('https://m.meteo.pl/warszawa/60')
     if (!result.ok) throw new Error(`Unexpected response ${result.statusText}`)

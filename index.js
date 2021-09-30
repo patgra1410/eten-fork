@@ -242,22 +242,18 @@ async function getSchoolNoticesJson () {
 }
 
 async function updateSlashCommands () {
-  const coms = []
+  const slashCommands = []
   for (const file of commandFiles) {
     const command = require(`./commands/${file}`)
-    client.commands.set(command.name, command)
+    client.commands.set(command.data.name, command)
 
-    const data = new SlashCommandBuilder()
-      .setName(command.name)
-      .setDescription(command.description)
-      .toJSON()
-    coms.push(data)
+    slashCommands.push(command.data.toJSON())
 
     for (const alias in command.aliases) {
       client.commands.set(command.aliases[alias], command)
     }
   }
-  const response = await client.application?.commands.set(coms)
+  const response = await client.application?.commands.set(slashCommands)
   console.log(response)
 }
 

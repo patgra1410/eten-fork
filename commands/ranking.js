@@ -1,9 +1,11 @@
 const fs = require('fs')
 const Discord = require('discord.js')
+const { SlashCommandBuilder } = require('@discordjs/builders')
 
 module.exports = {
-  name: 'ranking',
-  description: 'Ranking do piłkarzyków',
+  data: new SlashCommandBuilder()
+    .setName('ranking')
+    .setDescription('Ranking do piłkarzyków'),
   async execute (interaction) {
         var ranking=JSON.parse(fs.readFileSync('./data/ranking.json'))
         var rank=[]
