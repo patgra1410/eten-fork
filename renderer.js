@@ -37,6 +37,9 @@ module.exports=class Board
         this.uids=uids
         this.turn=0
         this.win=-1
+        this.thickness=3
+        this.blue='#5865f2'
+        this.red='#f04747'
 
         this.spacing=spacing
         this.offsetX=offsetX
@@ -135,18 +138,19 @@ module.exports=class Board
         // this.ctx.fillRect(0,0,this.canvas.width, this.canvas.height)
         this.ctx.textAlign='center'
         this.ctx.font='30px Arial'
+        this.ctx.lineWidth=this.thickness
 
         this.ctx.save()
         this.ctx.translate(this.offsetX-this.offsetX/2+10, this.canvas.height/2)
         this.ctx.rotate(-Math.PI/2)
-        this.ctx.fillStyle='blue'
+        this.ctx.fillStyle=this.blue
         this.ctx.fillText(this.usernames[0], 0, 0)
         this.ctx.restore()
 
         this.ctx.save()
         this.ctx.translate(this.offsetX*11+this.offsetX/2-10, this.canvas.height/2)
         this.ctx.rotate(+Math.PI/2)
-        this.ctx.fillStyle='red'
+        this.ctx.fillStyle=this.red
         this.ctx.fillText(this.usernames[1], 0, 0)
         this.ctx.restore()
 
@@ -156,7 +160,7 @@ module.exports=class Board
             var point=this.points[i]
             if(point.outside)
                 continue
-            this.ctx.fillRect(this.offsetX+this.spacing*(point.x-1), this.offsetY+this.spacing*(point.y-1), 1, 1)
+            this.ctx.fillRect(this.offsetX+this.spacing*(point.x-1)-this.thickness/2, this.offsetY+this.spacing*(point.y-1)-this.thickness/2, this.thickness, this.thickness)
         }
         
         this.ctx.strokeStyle='#fff'
@@ -165,9 +169,9 @@ module.exports=class Board
             var edge=this.edges[i]
             
             if(edge.index==-3)
-                this.ctx.strokeStyle='blue'
+                this.ctx.strokeStyle=this.blue
             else if(edge.index==-2)
-                this.ctx.strokeStyle='red'
+                this.ctx.strokeStyle=this.red
             else
                 this.ctx.strokeStyle='#fff'
 
@@ -179,13 +183,13 @@ module.exports=class Board
 
         if(this.turn==0)
         {
-            this.ctx.strokeStyle='blue'
-            this.ctx.fillStyle='blue'
+            this.ctx.strokeStyle=this.blue
+            this.ctx.fillStyle=this.blue
         }
         else if(this.turn==1)
         {
-            this.ctx.strokeStyle='red'
-            this.ctx.fillStyle='red'
+            this.ctx.strokeStyle=this.red
+            this.ctx.fillStyle=this.red
         }
         else
         {
