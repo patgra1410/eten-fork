@@ -23,7 +23,11 @@ module.exports = {
         //         return -1
         //     return 0
         // })
-        rank.sort(function(a,b) { return b['rating']-a['rating'] })
+        rank.sort(function(a,b) {
+            if(b['rating']==a['rating'])
+                return (b['won']/(b['won']+b['lost']))-(a['won']/(a['won']+a['lost']))
+            return b['rating']-a['rating'] 
+        })
 
         var desc=""
         for(var i=0; i<rank.length; i++)
