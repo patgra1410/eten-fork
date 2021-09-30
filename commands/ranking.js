@@ -31,7 +31,7 @@ module.exports = {
         {
             var r=rank[i]
             // desc+=String(i+1)+". <@"+r[1]+">: "+String(Math.round(r[0]*100*10)/10)+'% wygranych meczów ('+ranking[r[1]]['won']+' wygranych, '+ranking[r[1]]['lost']+' przegranych)\n'
-            desc+=String(i+1)+". Ranking: <@"+r['id']+">: "+String(Math.round(r['rating']))+' ('+r['won']+' wygranych, '+r['lost']+' przegranych)\n'
+            desc+=String(i+1)+". <@"+r['id']+"> rating "+String(Math.round(r['rating']))+' ('+r['won']+' wygranych, '+r['lost']+' przegranych)\n'
         }
 
         embed=new Discord.MessageEmbed()
