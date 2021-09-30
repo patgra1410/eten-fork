@@ -119,7 +119,7 @@ module.exports = {
                         var win=true
                     }
 
-                    var newRating=ELo.calculate(rating1, rating2, win)
+                    var newRating=Elo.calculate(rating1, rating2, win)
 
                     ranking[gameuids[0]]['rating']=newRating['playerRating']
                     ranking[gameuids[1]]['rating']=newRating['opponentRating']
@@ -182,7 +182,8 @@ module.exports = {
                 
                 if(boards[uids[[interaction.user.id]]].win==-1)
                 {
-                    var msg='Tura: <@'+boards[uids[[interaction.user.id]]].turnUID()+'>'
+                    var msg='Tura: <@'+boards[uids[[interaction.user.id]]].turnUID()+'> '
+
                     if(boards[uids[interaction.user.id]].remis.length>0)
                     {
                         msg+=' ('+boards[uids[interaction.user.id]].remis.length+'/2 osoby poprosiły o remis)'
@@ -214,13 +215,13 @@ module.exports = {
 
                     if(boards[uids[[interaction.user.id]]].win==0)
                     {
-                        var newRanking=Elo.calculate(player1, player2, true)
+                        var newRating=Elo.calculate(player1, player2, true)
                         ranking[gameuids[0]]['won']++
                         ranking[gameuids[1]]['lost']++
                     }
                     else
                     {
-                        var newRanking=Elo.calculate(player1, player2, false)
+                        var newRating=Elo.calculate(player1, player2, false)
                         glicko.updateRatings([[pla1, player2, 0]])
                         ranking[gameuids[0]]['lost']++
                         ranking[gameuids[1]]['won']++

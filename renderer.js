@@ -131,8 +131,8 @@ module.exports=class Board
     draw() {
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height)
         
-        this.ctx.fillStyle='#36393f'
-        this.ctx.fillRect(0,0,this.canvas.width, this.canvas.height)
+        // this.ctx.fillStyle='#36393f'
+        // this.ctx.fillRect(0,0,this.canvas.width, this.canvas.height)
         this.ctx.textAlign='center'
         this.ctx.font='30px Arial'
 
