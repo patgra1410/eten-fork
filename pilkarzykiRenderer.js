@@ -1,5 +1,4 @@
 const { createCanvas }=require('canvas')
-const readline=require('readline')
 const { inspect }=require('util')
 const fs=require('fs')
 
@@ -13,8 +12,6 @@ class Point
         this.border=border
         this.outside=outside
         this.edges=[]
-
-        this.end=false
     }
 }
 
@@ -30,7 +27,7 @@ class Edge
 
 module.exports=class Board
 {
-    constructor(spacing, offsetX, offsetY, uids, usernames)
+    constructor(spacing, offsetX, offsetY, uids, usernames, id=0)
     {
         this.remis=[]
         this.usernames=usernames
@@ -41,6 +38,7 @@ module.exports=class Board
         this.blue='#5865f2'
         this.red='#f04747'
 
+        this.id=id
         this.spacing=spacing
         this.offsetX=offsetX
         this.offsetY=offsetY
@@ -134,8 +132,6 @@ module.exports=class Board
     draw() {
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height)
         
-        // this.ctx.fillStyle='#36393f'
-        // this.ctx.fillRect(0,0,this.canvas.width, this.canvas.height)
         this.ctx.textAlign='center'
         this.ctx.font='30px Arial'
         this.ctx.lineWidth=this.thickness
@@ -203,7 +199,7 @@ module.exports=class Board
 
         var data=this.canvas.toDataURL().replace(/^data:image\/\w+;base64,/, "")
         var buf=Buffer.from(data, "base64")
-        fs.writeFileSync("data/board.png", buf)
+        fs.writeFileSync('data/boardPilkarzyki'+this.id+'.png', buf)
     }
 
     possibleMovesIndexes(x, y)
@@ -259,7 +255,7 @@ module.exports=class Board
 
     dump(i)
     {
-        fs.writeFileSync('./data/board'+i+'.dump', inspect(this, {depth: 10}))
+        fs.writeFileSync('./data/boardPilkarzyki'+i+'.dump', inspect(this, {depth: 10}))
     }
 
     move(index)

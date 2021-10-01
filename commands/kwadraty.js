@@ -1,5 +1,5 @@
-const Board=require('../pilkarzykiRenderer.js')
-const Discord = require('discord.js')
+const Board=require('../kwadratyRenderer.js')
+const Discord=require('discord.js')
 const fs=require('fs')
 const Elo=require('elo-rating')
 const { SlashCommandBuilder, SlashCommandUserOption } = require('@discordjs/builders')
@@ -9,94 +9,35 @@ var boards={}
 var gameID=1
 var accepts=[]
 
-function buttons(id)
+function buttons()
 {
-    var indexes=boards[id].possibleMovesIndexes()
-    if(boards[id].turn==0)
-        var style='PRIMARY'
-    else
-        var style='DANGER'
-
-    var row1=new Discord.MessageActionRow()
+    var row=new Discord.MessageActionRow()
             .addComponents(
                 new Discord.MessageButton()
-                    .setCustomId('pilkarzyki#0')
-                    .setLabel('Lewo góra')
-                    .setStyle(style)
-                    .setDisabled(!indexes.includes(0)),
-                new Discord.MessageButton()
-                    .setCustomId('pilkarzyki#1')
-                    .setLabel('Góra')
-                    .setStyle(style)
-                    .setDisabled(!indexes.includes(1)),
-                new Discord.MessageButton()
-                    .setCustomId('pilkarzyki#2')
-                    .setLabel('Prawo góra')
-                    .setStyle(style)
-                    .setDisabled(!indexes.includes(2))
-            )
-        var row2=new Discord.MessageActionRow()
-            .addComponents(
-                new Discord.MessageButton()
-                    .setCustomId('pilkarzyki#3')
-                    .setLabel('Lewo     ')
-                    .setStyle(style)
-                    .setDisabled(!indexes.includes(3)),
-                new Discord.MessageButton()
-                    .setCustomId('pilkarzyki#disabled')
-                    .setLabel(' ')
-                    .setStyle(style)
-                    .setDisabled(true),
-                new Discord.MessageButton()
-                    .setCustomId('pilkarzyki#4')
-                    .setLabel('Prawo     ')
-                    .setStyle(style)
-                    .setDisabled(!indexes.includes(4))
-            )
-        var row3=new Discord.MessageActionRow()
-            .addComponents(
-                new Discord.MessageButton()
-                    .setCustomId('pilkarzyki#5')
-                    .setLabel('Lewo dół')
-                    .setStyle(style)
-                    .setDisabled(!indexes.includes(5)),
-                new Discord.MessageButton()
-                    .setCustomId('pilkarzyki#6')
-                    .setLabel('Dół')
-                    .setStyle(style)
-                    .setDisabled(!indexes.includes(6)),
-                new Discord.MessageButton()
-                    .setCustomId('pilkarzyki#7')
-                    .setLabel('Prawo dół')
-                    .setStyle(style)
-                    .setDisabled(!indexes.includes(7))
-            )
-        var row4=new Discord.MessageActionRow()
-            .addComponents(
-                new Discord.MessageButton()
-                    .setCustomId('pilkarzyki#remis')
+                    .setCustomId('kwadraty#remis')
                     .setLabel('Remis')
                     .setStyle('SECONDARY'),
                 new Discord.MessageButton()
-                    .setCustomId('pilkarzyki#surrender')
+                    .setCustomId('kwadraty#surrender')
                     .setLabel('Poddaj się')
                     .setStyle('SECONDARY')
             )
 
-    return [row1, row2, row3, row4]
+    return [row]
 }
 
 module.exports = {
     data: new SlashCommandBuilder()
-        .setName('pilkarzyki')
-        .setDescription('Pilkarzyki')
+        .setName('kwadraty')
+        .setDescription('Ta gra co Staś pokazywał w pierwszej klasie')
         .addUserOption(
             new SlashCommandUserOption()
                 .setName('gracz')
                 .setDescription('Drugi gracz')
                 .setRequired(true)
             ),
-    async execute (interaction, args) {
+    async execute(interaction, args)
+    {
         if(interaction.isButton!==undefined && interaction.isButton())
         {
             interaction.customId=interaction.customId.slice(interaction.customId.indexOf('#')+1)
@@ -166,16 +107,17 @@ module.exports = {
                     gameID++
                     
                     boards[id].draw()
-                    const attachment = new Discord.MessageAttachment('./data/boardPilkarzyki'+id+'.png')
+                    const attachment = new Discord.MessageAttachment('./data/boardKwadraty'+id+'.png')
                     var img=await interaction.client.guilds.cache.get('856926964094337044').channels.cache.get('892842178143997982').send({files: [attachment]})
                     
                     var msg='Tura: <@'+boards[id].turnUID()+'>\n'+img.attachments.first().url
 
-                    var message=await interaction.update({content: msg, files: [], components: buttons(id)})
-                    // var message=await interaction.reply({content: msg, files: [attachment], components: buttons(id)})
-                    boards[id].message=message
+                    var message=await interaction.update({content: msg, files: [], components: buttons()})
+                    
+                    boards[id].message=rightAccept.message
                 }
             }
+
             if(uids[interaction.user.id]===undefined)
                 return
 
@@ -184,8 +126,8 @@ module.exports = {
                 var ranking=JSON.parse(fs.readFileSync('./data/ranking.json'))
                 var gameuids=boards[uids[[interaction.user.id]]].uids
 
-                var rating1=ranking['pilkarzyki'][gameuids[0]]['rating']
-                var rating2=ranking['pilkarzyki'][gameuids[1]]['rating']
+                var rating1=ranking['kwadraty'][gameuids[0]]['rating']
+                var rating2=ranking['kwadraty'][gameuids[1]]['rating']
                 
                 if(gameuids[0]==interaction.user.id)
                 {
@@ -200,15 +142,15 @@ module.exports = {
 
                 var newRating=Elo.calculate(rating1, rating2, win)
 
-                ranking['pilkarzyki'][gameuids[0]]['rating']=newRating['playerRating']
-                ranking['pilkarzyki'][gameuids[1]]['rating']=newRating['opponentRating']
+                ranking['kwadraty'][gameuids[0]]['rating']=newRating['playerRating']
+                ranking['kwadraty'][gameuids[1]]['rating']=newRating['opponentRating']
 
-                ranking['pilkarzyki'][interaction.user.id]['lost']++
-                ranking['pilkarzyki'][winner]['won']++
+                ranking['kwadraty'][interaction.user.id]['lost']++
+                ranking['kwadraty'][winner]['won']++
                 fs.writeFileSync('./data/ranking.json', JSON.stringify(ranking))
 
                 boards[uids[[interaction.user.id]]].draw()
-                const attachment = new Discord.MessageAttachment('./data/board'+uids[[interaction.user.id]]+'.png')
+                const attachment = new Discord.MessageAttachment('./data/boardKwadraty'+uids[[interaction.user.id]]+'.png')
                 var img=await interaction.client.guilds.cache.get('856926964094337044').channels.cache.get('892842178143997982').send({files: [attachment]})
                 var msg='<@'+winner+'> wygrał przez poddanie się\n'+img.attachments.first().url 
                 var message=await interaction.update({content: msg, files: [], components: []}) 
@@ -228,10 +170,10 @@ module.exports = {
                 if(boards[uids[interaction.user.id]].remis.length==2)
                 {
                     boards[uids[[interaction.user.id]]].draw()
-                    const attachment = new Discord.MessageAttachment('./data/board'+uids[[interaction.user.id]]+'.png')
+                    const attachment = new Discord.MessageAttachment('./data/boardKwadraty'+uids[[interaction.user.id]]+'.png')
                     var img=await interaction.client.guilds.cache.get('856926964094337044').channels.cache.get('892842178143997982').send({files: [attachment]})
                     var msg='Remis\n'+img.attachments.first().url
-                    var message=await interaction.update({content: msg, files: [], components: []})
+                    await interaction.update({content: msg, files: [], components: []})
                     
                     var gameuids=boards[uids[interaction.user.id]].uids
                     delete boards[uids[interaction.user.id]]
@@ -241,83 +183,8 @@ module.exports = {
                     return
                 }
             }
-            else
-            {
-                if(interaction.user.id!=boards[uids[interaction.user.id]].turnUID())
-                    return
-                
-                var indexes=boards[uids[interaction.user.id]].possibleMovesIndexes()
-                if(!indexes.includes(parseInt(interaction.customId)))
-                    return
-                
-                if(!boards[uids[[interaction.user.id]]].move(indexes.indexOf(parseInt(interaction.customId))))
-                {
-                    return
-                }
-            }
-
-            boards[uids[[interaction.user.id]]].draw()
-            const attachment = new Discord.MessageAttachment('./data/board'+uids[[interaction.user.id]]+'.png')
-            
-            if(boards[uids[[interaction.user.id]]].win==-1)
-            {
-                var msg='Tura: <@'+boards[uids[[interaction.user.id]]].turnUID()+'> '
-
-                if(boards[uids[interaction.user.id]].remis.length>0)
-                {
-                    msg+=' ('+boards[uids[interaction.user.id]].remis.length+'/2 osoby poprosiły o remis)'
-                }
-            }
-            else
-                var msg='<@'+boards[uids[[interaction.user.id]]].uids[boards[uids[[interaction.user.id]]].win]+'> wygrał'
-            
-            if(boards[uids[[interaction.user.id]]].win==-1)
-                var components=buttons(uids[[interaction.user.id]])
-            else
-                var components=[]
-            
-            // boards[uids[[interaction.user.id]]].message.edit({components: []})
-            var img=await interaction.client.guilds.cache.get('856926964094337044').channels.cache.get('892842178143997982').send({files: [attachment]})
-
-            // var message=await boards[uids[[interaction.user.id]]].message.channel.send({content: msg, files: [attachment], components: components})
-            msg+='\n'+img.attachments.first().url
-            var message=await interaction.update({content: msg, files: [], components: components})
-            boards[uids[[interaction.user.id]]].message=message
-
-            if(boards[uids[[interaction.user.id]]].win!=-1)
-            {
-                var ranking=JSON.parse(fs.readFileSync('./data/ranking.json'))
-                var gameuids=boards[uids[[interaction.user.id]]].uids
-                
-                var player1=ranking['pilkarzyki'][gameuids[0]]['rating']
-                var player2=ranking['pilkarzyki'][gameuids[1]]['rating']
-
-                if(boards[uids[[interaction.user.id]]].win==0)
-                {
-                    var newRating=Elo.calculate(player1, player2, true)
-                    ranking['pilkarzyki'][gameuids[0]]['won']++
-                    ranking['pilkarzyki'][gameuids[1]]['lost']++
-                }
-                else
-                {
-                    var newRating=Elo.calculate(player1, player2, false)
-                    ranking['pilkarzyki'][gameuids[0]]['lost']++
-                    ranking['pilkarzyki'][gameuids[1]]['won']++
-                }
-
-                ranking['pilkarzyki'][gameuids[0]]['rating']=newRating['playerRating']
-                ranking['pilkarzyki'][gameuids[1]]['rating']=newRating['opponentRating']
-
-                fs.writeFileSync('./data/ranking.json', JSON.stringify(ranking))
-
-                delete boards[uids[[interaction.user.id]]]
-                delete uids[gameuids[0]]
-                delete uids[gameuids[1]]
-            }
-
-            return
         }
-        
+
         if (interaction.isCommand!==undefined && interaction.isCommand()) {
             var secondUser=interaction.options.getUser('gracz')
             var uid2=secondUser.id
@@ -333,7 +200,7 @@ module.exports = {
             {
                 for([key, value] of Object.entries(boards))
                 {
-                    value.dump(key)
+                    value.dump()
                 }
                 return
             }
@@ -346,8 +213,7 @@ module.exports = {
             var uid2=interaction.mentions.users.keys().next().value
             var uid1=interaction.author.id
             var usernames=[interaction.author.username, interaction.mentions.users.entries().next().value[1].username]
-        }
-        
+        } 
 
         if(uids[uid1]!==undefined)
         {
@@ -367,15 +233,15 @@ module.exports = {
         }
 
         var ranking=JSON.parse(fs.readFileSync('./data/ranking.json'))
-        if(ranking['pilkarzyki'][uid1]===undefined)
-            ranking['pilkarzyki'][uid1]={lost: 0, won: 0}
-        if(ranking['pilkarzyki'][uid1]['rating']===undefined)
-            ranking['pilkarzyki'][uid1]['rating']=1500
+        if(ranking['kwadraty'][uid1]===undefined)
+            ranking['kwadraty'][uid1]={lost: 0, won: 0}
+        if(ranking['kwadraty'][uid1]['rating']===undefined)
+            ranking['kwadraty'][uid1]['rating']=1500
 
-        if(ranking['pilkarzyki'][uid2]===undefined)
-            ranking['pilkarzyki'][uid2]={lost: 0, won: 0}
-        if(ranking['pilkarzyki'][uid2]['rating']===undefined)
-            ranking['pilkarzyki'][uid2]['rating']=1500
+        if(ranking['kwadraty'][uid2]===undefined)
+            ranking['kwadraty'][uid2]={lost: 0, won: 0}
+        if(ranking['kwadraty'][uid2]['rating']===undefined)
+            ranking['kwadraty'][uid2]['rating']=1500
         
         fs.writeFileSync('./data/ranking.json', JSON.stringify(ranking))
 
@@ -394,11 +260,11 @@ module.exports = {
             .addComponents(
                 new Discord.MessageButton()
                     .setLabel('Tak')
-                    .setCustomId('pilkarzyki#acceptYes#'+uid1+'#'+uid2)
+                    .setCustomId('kwadraty#acceptYes#'+uid1+'#'+uid2)
                     .setStyle('PRIMARY'),
                 new Discord.MessageButton()
                     .setLabel('Nie')
-                    .setCustomId('pilkarzyki#acceptNo#'+uid1+'#'+uid2)
+                    .setCustomId('kwadraty#acceptNo#'+uid1+'#'+uid2)
                     .setStyle('PRIMARY')
             )
 
@@ -407,5 +273,76 @@ module.exports = {
         // console.log(message)
         newAccept['message']=message
         accepts.push(newAccept)
-  }
+    },
+    async onMessage(message)
+    {
+        if(uids[message.author.id]===undefined)
+            return
+        var gid=uids[message.author.id]
+
+        if(boards[gid].turnUID()!=message.author.id)
+            return
+
+        if(!boards[gid].move(message.content))
+            return
+
+        boards[gid].draw()
+        const attachment=new Discord.MessageAttachment('./data/boardKwadraty'+gid+'.png')
+        var img=await message.client.guilds.cache.get('856926964094337044').channels.cache.get('892842178143997982').send({files: [attachment]})
+
+        if(boards[gid].win==-1)
+        {
+            var msg='Tura: <@'+boards[gid].turnUID()+'> '
+            if(boards[gid].remis.length>0)
+            {
+                msg+=' ('+boards[gid].remis.length+'/2 osoby poprosiły o remis)'
+            }
+        }
+        else
+        {
+            var msg='<@'+boards[gid].uids[boards[gid].win]+'> wygrał'
+        }
+
+        if(boards[gid].win==-1)
+            var components=buttons()
+        else
+            var components=[]
+
+        msg+='\n'+img.attachments.first().url
+        var message2=await boards[gid].message.edit({content: msg, components: components})
+        boards[gid].message=message2
+
+        message.delete()
+
+        if(boards[gid].win!=-1)
+        {
+            var ranking=JSON.parse(fs.readFileSync('./data/ranking.json'))
+            var gameuids=boards[gid].uids
+            
+            var player1=ranking['kwadraty'][gameuids[0]]['rating']
+            var player2=ranking['pilkarzyki'][gameuids[1]]['rating']
+
+            if(boards[gid].win==0)
+            {
+                var newRating=Elo.calculate(player1, player2, true)
+                ranking['kwadraty'][gameuids[0]]['won']++
+                ranking['kwadraty'][gameuids[1]]['lost']++
+            }
+            else
+            {
+                var newRating=Elo.calculate(player1, player2, false)
+                ranking['kwadraty'][gameuids[0]]['lost']++
+                ranking['kwadraty'][gameuids[1]]['won']++
+            }
+
+            ranking['kwadraty'][gameuids[0]]['rating']=newRating['playerRating']
+            ranking['kwadraty'][gameuids[1]]['rating']=newRating['opponentRating']
+
+            fs.writeFileSync('./data/ranking.json', JSON.stringify(ranking))
+
+            delete boards[gid]
+            delete uids[gameuids[0]]
+            delete uids[gameuids[1]]
+        }
+    }
 }

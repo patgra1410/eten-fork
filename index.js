@@ -293,6 +293,11 @@ client.on('messageCreate', async message => {
     }
   }
 
+  if(message.content.length==4)
+  {
+    await client.commands.get('kwadraty').onMessage(message)
+  }
+
   if (message.content.startsWith(config.prefix)) {
     const args = message.content.slice(config.prefix.length).trim().split(/ +/)
     const command = args.shift().toLowerCase()
@@ -310,7 +315,7 @@ client.on('messageCreate', async message => {
 client.on('interactionCreate', async interaction => {
   if(interaction.isButton())
   {
-    await client.commands.get('pilkarzyki').execute(interaction)
+    await client.commands.get(interaction.customId.split('#')[0]).execute(interaction)
     return
   }
 
