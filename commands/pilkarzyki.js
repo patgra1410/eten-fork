@@ -130,7 +130,7 @@ module.exports = {
                     var uid1=uidsButton[1]
                     var uid2=uidsButton[2]
 
-                    var rightAccept
+                    var rightAccept=undefined
                     for(var i=0; i<accepts.length; i++)
                     {
                         var accept=accepts[i]
@@ -140,6 +140,8 @@ module.exports = {
                             break
                         }
                     }
+                    if(rightAccept===undefined)
+                        return
 
                     var newAccepts=[]
                     for(var i=0; i<accepts.length; i++)
@@ -148,6 +150,9 @@ module.exports = {
                             newAccepts.push(accepts[i])
                         else
                         {
+                            // if(accepts[i]['fromAccept']==uid1 && accepts[i]['uidToAccept']==uid2)
+                            //     continue
+                            
                             accepts[i]['message'].edit({content: accepts[i]['message'].content, components: []})
                         }
                     }
@@ -399,6 +404,7 @@ module.exports = {
 
         var msg="<@"+uid2+'>: '+usernames[0]+' chce z tobą zagrać'
         var message=await interaction.reply({content: msg, components: [row]})
+        // console.log(message)
         newAccept['message']=message
         accepts.push(newAccept)
   }
