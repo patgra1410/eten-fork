@@ -2,11 +2,13 @@ const Board=require('../renderer.js')
 const Discord = require('discord.js')
 const fs=require('fs')
 const Elo=require('elo-rating')
-const { SlashCommandBuilder, SlashCommandMentionableOption, SlashCommandUserOption } = require('@discordjs/builders')
+const { SlashCommandBuilder, SlashCommandUserOption } = require('@discordjs/builders')
+const { disconnect } = require('process')
 
 var uids={}
 var boards={}
 var gameID=1
+var accepts=[]
 
 function buttons(id)
 {
@@ -98,6 +100,77 @@ module.exports = {
     async execute (interaction, args) {
         if(interaction.isButton!==undefined && interaction.isButton())
         {
+            if(interaction.customId.startsWith('accept'))
+            {
+                if(interaction.customId.startsWith('acceptNo'))
+                {
+                    var uidsButton=interaction.customId.split('#')
+                    if(uidsButton[2]!=interaction.user.id)
+                        return
+                    var uid1=uidsButton[1]
+                    var uid2=uidsButton[2]
+
+                    for(var i=0; i<accepts.length; i++)
+                    {
+                        var accept=accepts[i]
+                        if(accept['uidToAccept']==uid2 && accept['acceptFrom']==uid1)
+                        {
+                            var msg=accept['usernames'][1]+' nie zaakceptował gry z '+accept['usernames'][0]
+                            await accept['message'].edit({content: msg, components: []})
+                            accepts.splice(i, 1)
+                            return
+                        }
+                    }
+                }
+                else
+                {
+                    var uidsButton=interaction.customId.split('#')
+                    if(uidsButton[2]!=interaction.user.id)
+                        return
+                    var uid1=uidsButton[1]
+                    var uid2=uidsButton[2]
+
+                    var rightAccept
+                    for(var i=0; i<accepts.length; i++)
+                    {
+                        var accept=accepts[i]
+                        if(accept['uidToAccept']==uid2 && accept['acceptFrom']==uid1)
+                        {
+                            rightAccept=accept
+                            break
+                        }
+                    }
+
+                    var newAccepts=[]
+                    for(var i=0; i<accepts.length; i++)
+                    {
+                        if(accepts[i]['fromAccept']!=uid1 && accepts[i]['uidToAccept']!=uid2)
+                            newAccepts.push(accepts[i])
+                        else
+                        {
+                            accepts[i]['message'].edit({content: accepts[i]['message'].content, components: []})
+                        }
+                    }
+                    accepts=newAccepts
+
+                    uids[uid1]=gameID
+                    uids[uid2]=gameID
+                    
+                    boards[gameID]=new Board(50, 50, 50, [uid1, uid2], rightAccept.usernames)
+                    var id=gameID
+                    gameID++
+                    
+                    boards[id].draw()
+                    const attachment = new Discord.MessageAttachment('./data/board.png')
+                    var img=await interaction.client.guilds.cache.get('856926964094337044').channels.cache.get('892842178143997982').send({files: [attachment]})
+                    
+                    var msg='Tura: <@'+boards[id].turnUID()+'>\n'+img.attachments.first().url
+
+                    var message=await interaction.update({content: msg, files: [], components: buttons(id)})
+                    // var message=await interaction.reply({content: msg, files: [attachment], components: buttons(id)})
+                    boards[id].message=message
+                }
+            }
             if(uids[interaction.user.id]===undefined)
                 return
 
@@ -301,21 +374,32 @@ module.exports = {
         
         fs.writeFileSync('./data/ranking.json', JSON.stringify(ranking))
 
-        uids[uid1]=gameID
-        uids[uid2]=gameID
-        
-        boards[gameID]=new Board(50, 50, 50, [uid1, uid2], usernames)
-        var id=gameID
-        gameID++
-        
-        boards[id].draw()
-        const attachment = new Discord.MessageAttachment('./data/board.png')
-        var img=await interaction.client.guilds.cache.get('856926964094337044').channels.cache.get('892842178143997982').send({files: [attachment]})
-        
-        var msg='Tura: <@'+boards[id].turnUID()+'>\n'+img.attachments.first().url
+        for(var i=0; i<accepts.length; i++)
+        {
+            if(accepts[i]['uidToAccept']==uid2 && accepts[i]['acceptFrom']==uid1)
+            {
+                await interaction.reply({content: 'Już wyzwałeś tą osobę.'})
+                return
+            }
+        }
 
-        var message=await interaction.reply({content: msg, files: [], components: buttons(id)})
-        // var message=await interaction.reply({content: msg, files: [attachment], components: buttons(id)})
-        boards[id].message=message
+        var newAccept={usernames: usernames, uids: uids, uidToAccept: uid2, acceptFrom: uid1}
+
+        var row=new Discord.MessageActionRow()
+            .addComponents(
+                new Discord.MessageButton()
+                    .setLabel('Tak')
+                    .setCustomId('acceptYes#'+uid1+'#'+uid2)
+                    .setStyle('PRIMARY'),
+                new Discord.MessageButton()
+                    .setLabel('Nie')
+                    .setCustomId('acceptNo#'+uid1+'#'+uid2)
+                    .setStyle('PRIMARY')
+            )
+
+        var msg="<@"+uid2+'>: '+usernames[0]+' chce z tobą zagrać'
+        var message=await interaction.reply({content: msg, components: [row]})
+        newAccept['message']=message
+        accepts.push(newAccept)
   }
 }
