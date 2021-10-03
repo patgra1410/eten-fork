@@ -320,7 +320,7 @@ module.exports = {
             var gameuids=boards[gid].uids
             
             var player1=ranking['kwadraty'][gameuids[0]]['rating']
-            var player2=ranking['pilkarzyki'][gameuids[1]]['rating']
+            var player2=ranking['kwadraty'][gameuids[1]]['rating']
 
             if(boards[gid].win==0)
             {
