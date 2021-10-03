@@ -1,5 +1,4 @@
 const Discord = require('discord.js')
-const { SlashCommandBuilder } = require('@discordjs/builders')
 const config = require('./config.json')
 const fs = require('fs')
 const cron = require('cron')
@@ -153,24 +152,42 @@ async function getSchoolNoticesJson () {
         }
       }
     )
-    if (!changesResult.ok) {
-      throw new Error(`unexpected response ${changesResult.statusText}`)
+    // Vars used later
+    let librusQueryErrorFlag = false
+    let changesJson
+    // If can't parse, raise error flag (probably malformed/shitty result).
+    try {
+      changesJson = JSON.parse(await changesResult.text())
+    } catch (error) {
+      librusQueryErrorFlag = true
     }
-    const changesJson = JSON.parse(await changesResult.text())
-    // Check if the JSON is the one we're looking for and the token is not expired
-    if (!('Changes' in changesJson)) {
-      console.log(changesJson)
-      console.log('Token probably expired, getting a new one.')
-      // Get a new bearer and continue.
+    // If: Result is not code 200
+    // OR
+    // the JSON is not the expected one (incorrect)
+    // OR
+    // JSON parse in general failed,
+    // log error, get a new bearer, retry.
+    //
+    // If any of this massively fails for some reason (like updating bearer),
+    // it will just retry getSchoolNoticesJson in 2 mins
+    // (see the catch block at the end)
+    if (!changesResult.ok || !('Changes' in changesJson) || librusQueryErrorFlag) {
+      // Log what's up.
+      console.log(changesResult.statusText)
+      console.log('GET Request with Token failed. Bearer token probably expired.')
+      if (!librusQueryErrorFlag) {
+        console.log('Additionally, here\'s the parsed JSON of the result.')
+        console.log(changesJson)
+      }
+      console.log('Trying to update token.')
+      // Try to get a new bearer, retry getSchoolNoticesJson on success.
       try {
         librusCurrentBearer = await updateBearer()
       } catch (error) {
         throw new Error(`updateBearer() failed! ${error}`)
-        return // TODO dodalem losowo
-      } finally {
-        console.log('(Bearer updated, retrying)')
-        getSchoolNoticesJson()
       }
+      console.log('(Bearer updated, retrying)')
+      getSchoolNoticesJson()
       return
     }
     // Iterate over changes since last time we checked
@@ -232,11 +249,12 @@ async function getSchoolNoticesJson () {
       }
     }
   } catch (error) {
+    console.log('\x1b[31mSomething in updating notices failed:\x1b[0m')
     console.error(error)
-    console.log('\x1b[31mSomething within updating notices failed. Retrying in 2 mins.\x1b[0m')
+    console.log('\x1b[31mRetrying getSchoolNoticesJson() in 2 mins.\x1b[0m')
     setTimeout(getSchoolNoticesJson, (2 * 60000))
     return
-  } 
+  }
   console.log('\x1b[42m(Done)\x1b[0m')
   setTimeout(getSchoolNoticesJson, ((Math.round(Math.random() * (6 - 4) + 4)) * 60000))
 }
@@ -264,8 +282,7 @@ client.once('ready', async () => {
   console.log(`Ready! Logged in as ${client.user.tag}`)
   dzwonekChannel = client.channels.cache.get('884370476128944148')
 
-  if(!fs.existsSync('./data/ranking.json'))
-  {
+  if (!fs.existsSync('./data/ranking.json')) {
     fs.writeFileSync('./data/ranking.json', '{}')
   }
 
@@ -293,15 +310,15 @@ client.on('messageCreate', async message => {
     }
   }
 
-  if(message.content.length==4)
-  {
+  // TODO: ===
+  if (message.content.length == 4) {
     await client.commands.get('kwadraty').onMessage(message)
   }
 
   if (message.content.startsWith(config.prefix)) {
     const args = message.content.slice(config.prefix.length).trim().split(/ +/)
     const command = args.shift().toLowerCase()
-    
+
     if (!client.commands.has(command)) return
     try {
       await client.commands.get(command).execute(message, args)
@@ -313,8 +330,7 @@ client.on('messageCreate', async message => {
 })
 
 client.on('interactionCreate', async interaction => {
-  if(interaction.isButton())
-  {
+  if (interaction.isButton()) {
     await client.commands.get(interaction.customId.split('#')[0]).execute(interaction)
     return
   }
