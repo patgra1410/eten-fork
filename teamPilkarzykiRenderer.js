@@ -213,8 +213,6 @@ module.exports=class Board
         this.ctx.font='30px Arial'
         this.ctx.lineWidth=this.thickness
 
-        // TODO usernames on board
-
         this.ctx.save()
         this.ctx.translate(this.offsetX-this.offsetX/2+10, this.canvas.height/2)
         this.ctx.rotate(-Math.PI/2)
