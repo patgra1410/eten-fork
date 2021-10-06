@@ -182,7 +182,7 @@ module.exports = {
             if(interaction.customId=='surrender')
             {
                 var ranking=JSON.parse(fs.readFileSync('./data/ranking.json'))
-                var gameuids=boards[uids[[interaction.user.id]]].uids
+                var gameuids=boards[uids[interaction.user.id]].uids
 
                 var rating1=ranking['pilkarzyki'][gameuids[0]]['rating']
                 var rating2=ranking['pilkarzyki'][gameuids[1]]['rating']
@@ -207,13 +207,13 @@ module.exports = {
                 ranking['pilkarzyki'][winner]['won']++
                 fs.writeFileSync('./data/ranking.json', JSON.stringify(ranking))
 
-                boards[uids[[interaction.user.id]]].draw()
-                const attachment = new Discord.MessageAttachment('./data/boardPilkarzyki'+uids[[interaction.user.id]]+'.png')
+                boards[uids[interaction.user.id]].draw()
+                const attachment = new Discord.MessageAttachment('./data/boardPilkarzyki'+uids[interaction.user.id]+'.png')
                 var img=await interaction.client.guilds.cache.get('856926964094337044').channels.cache.get('892842178143997982').send({files: [attachment]})
                 var msg='<@'+winner+'> wygrał przez poddanie się\n'+img.attachments.first().url 
                 var message=await interaction.update({content: msg, files: [], components: []}) 
                 
-                delete boards[uids[[interaction.user.id]]]
+                delete boards[uids[interaction.user.id]]
                 delete uids[winner]
                 delete uids[interaction.user.id]
 
@@ -227,8 +227,8 @@ module.exports = {
                 boards[uids[interaction.user.id]].remis.push(interaction.user.id)
                 if(boards[uids[interaction.user.id]].remis.length==2)
                 {
-                    boards[uids[[interaction.user.id]]].draw()
-                    const attachment = new Discord.MessageAttachment('./data/boardPilkarzyki'+uids[[interaction.user.id]]+'.png')
+                    boards[uids[interaction.user.id]].draw()
+                    const attachment = new Discord.MessageAttachment('./data/boardPilkarzyki'+uids[interaction.user.id]+'.png')
                     var img=await interaction.client.guilds.cache.get('856926964094337044').channels.cache.get('892842178143997982').send({files: [attachment]})
                     var msg='Remis\n'+img.attachments.first().url
                     var message=await interaction.update({content: msg, files: [], components: []})
@@ -250,18 +250,18 @@ module.exports = {
                 if(!indexes.includes(parseInt(interaction.customId)))
                     return
                 
-                if(!boards[uids[[interaction.user.id]]].move(indexes.indexOf(parseInt(interaction.customId))))
+                if(!boards[uids[interaction.user.id]].move(indexes.indexOf(parseInt(interaction.customId))))
                 {
                     return
                 }
             }
 
-            boards[uids[[interaction.user.id]]].draw()
-            const attachment = new Discord.MessageAttachment('./data/boardPilkarzyki'+uids[[interaction.user.id]]+'.png')
+            boards[uids[interaction.user.id]].draw()
+            const attachment = new Discord.MessageAttachment('./data/boardPilkarzyki'+uids[interaction.user.id]+'.png')
             
-            if(boards[uids[[interaction.user.id]]].win==-1)
+            if(boards[uids[interaction.user.id]].win==-1)
             {
-                var msg='Tura: <@'+boards[uids[[interaction.user.id]]].turnUID()+'> '
+                var msg='Tura: <@'+boards[uids[interaction.user.id]].turnUID()+'> '
 
                 if(boards[uids[interaction.user.id]].remis.length>0)
                 {
@@ -269,30 +269,30 @@ module.exports = {
                 }
             }
             else
-                var msg='<@'+boards[uids[[interaction.user.id]]].uids[boards[uids[[interaction.user.id]]].win]+'> wygrał'
+                var msg='<@'+boards[uids[interaction.user.id]].uids[boards[uids[interaction.user.id]].win]+'> wygrał'
             
-            if(boards[uids[[interaction.user.id]]].win==-1)
-                var components=buttons(uids[[interaction.user.id]])
+            if(boards[uids[interaction.user.id]].win==-1)
+                var components=buttons(uids[interaction.user.id])
             else
                 var components=[]
             
-            // boards[uids[[interaction.user.id]]].message.edit({components: []})
+            // boards[uids[interaction.user.id]].message.edit({components: []})
             var img=await interaction.client.guilds.cache.get('856926964094337044').channels.cache.get('892842178143997982').send({files: [attachment]})
 
-            // var message=await boards[uids[[interaction.user.id]]].message.channel.send({content: msg, files: [attachment], components: components})
+            // var message=await boards[uids[interaction.user.id]].message.channel.send({content: msg, files: [attachment], components: components})
             msg+='\n'+img.attachments.first().url
             var message=await interaction.update({content: msg, files: [], components: components})
-            boards[uids[[interaction.user.id]]].message=message
+            boards[uids[interaction.user.id]].message=message
 
-            if(boards[uids[[interaction.user.id]]].win!=-1)
+            if(boards[uids[interaction.user.id]].win!=-1)
             {
                 var ranking=JSON.parse(fs.readFileSync('./data/ranking.json'))
-                var gameuids=boards[uids[[interaction.user.id]]].uids
+                var gameuids=boards[uids[interaction.user.id]].uids
                 
                 var player1=ranking['pilkarzyki'][gameuids[0]]['rating']
                 var player2=ranking['pilkarzyki'][gameuids[1]]['rating']
 
-                if(boards[uids[[interaction.user.id]]].win==0)
+                if(boards[uids[interaction.user.id]].win==0)
                 {
                     var newRating=Elo.calculate(player1, player2, true)
                     ranking['pilkarzyki'][gameuids[0]]['won']++
@@ -310,7 +310,7 @@ module.exports = {
 
                 fs.writeFileSync('./data/ranking.json', JSON.stringify(ranking))
 
-                delete boards[uids[[interaction.user.id]]]
+                delete boards[uids[interaction.user.id]]
                 delete uids[gameuids[0]]
                 delete uids[gameuids[1]]
             }

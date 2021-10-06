@@ -106,14 +106,14 @@ module.exports=class Board
         this.edges=edges
         
         var directions=[[-1, -1], [0, -1], [1, -1], [-1, 0], [1, 0], [-1, 1], [0, 1], [1, 1]]
-        for(var i in this.points)
+        for(var i in this.points) // for every point
         {
             var point=this.points[i]
             
             if(!point.border)
                 continue
 
-            for(var j in directions)
+            for(var j in directions) // in every move direction
             {
                 var dir=directions[j]
                 var newX=point.x+dir[0]
@@ -144,7 +144,7 @@ module.exports=class Board
         this.ctx.restore()
 
         this.ctx.save()
-        this.ctx.translate(this.offsetX*11+this.offsetX/2-10, this.canvas.height/2)
+        this.ctx.translate(this.canvas.width-this.offsetX/2-10, this.canvas.height/2)
         this.ctx.rotate(+Math.PI/2)
         this.ctx.fillStyle=this.red
         this.ctx.fillText(this.usernames[1], 0, 0)
@@ -241,15 +241,6 @@ module.exports=class Board
             moves.push(this.pos[ x+directions[index][0] ][ y+directions[index][1] ])
         }
 
-        // for(var i in directions)
-        // {
-        //     var dir=directions[i]
-        //     if(!this.points[this.pos[x][y]].edges.includes(this.pos[ x+dir[0] ][ y+dir[1] ]))
-        //     {
-        //         moves.push(this.pos[ x+dir[0] ][ y+dir[1] ])
-        //     }
-        // }
-
         return moves
     }
 
@@ -292,5 +283,3 @@ module.exports=class Board
         return this.uids[this.turn]
     }
 }
-
-// board=new Board(50, 50, 50)

@@ -12,7 +12,8 @@ module.exports = {
             .setDescription('gra')
             .setRequired(true)
             .addChoice('Piłkarzyki', 'pilkarzyki')
-            .addChoice('kwadraty', 'kwadraty')
+            .addChoice('Kwadraty', 'kwadraty')
+            .addChoice('TeamPilkarzyki', 'teampilkarzyki')
     ),
   async execute (interaction, args) {
         if(interaction.isCommand!==undefined && interaction.isCommand())
@@ -24,7 +25,7 @@ module.exports = {
                 interaction.reply('Nie wybrałeś gry')
                 return
             }
-            if(!['pilkarzyki', 'kwadraty'].includes(args[0]))
+            if(!['pilkarzyki', 'kwadraty', 'teampilkarzyki'].includes(args[0]))
             {
                 interaction.reply('Zła gra')
                 return
@@ -42,15 +43,7 @@ module.exports = {
             if(value['won']+value['lost']!=0)
                 rank.push({id: key, won: value['won'], lost: value['lost'], rating: value['rating']})
         }
-            // rank.push([value['won']/(value['won']+value['lost']), key])
 
-        // rank.sort(function(a,b) {
-        //     if(a[0]<b[0])
-        //         return 1
-        //     if(a[0]>b[0])
-        //         return -1
-        //     return 0
-        // })
         rank.sort(function(a,b) {
             if(b['rating']==a['rating'])
                 return (b['won']/(b['won']+b['lost']))-(a['won']/(a['won']+a['lost']))
@@ -61,7 +54,6 @@ module.exports = {
         for(var i=0; i<rank.length; i++)
         {
             var r=rank[i]
-            // desc+=String(i+1)+". <@"+r[1]+">: "+String(Math.round(r[0]*100*10)/10)+'% wygranych meczów ('+ranking[r[1]]['won']+' wygranych, '+ranking[r[1]]['lost']+' przegranych)\n'
             desc+=String(i+1)+". <@"+r['id']+"> ELO rating "+String(Math.round(r['rating']))+' ('+r['won']+' wygranych, '+r['lost']+' przegranych)\n'
         }
 
@@ -69,6 +61,8 @@ module.exports = {
             var title='Ranking piłkarzyków'
         else if(type=='kwadraty')
             var title='Ranking kwadratów'
+        else if(type=='teampilkarzyki')
+            var title='Ranking drużynowych piłkarzyków'
         embed=new Discord.MessageEmbed()
             .setColor('#0099ff')
             .setTitle(title)
