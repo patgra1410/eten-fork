@@ -155,6 +155,7 @@ module.exports = {
                 var msg='<@'+winner+'> wygrał przez poddanie się\n'+img.attachments.first().url 
                 var message=await interaction.update({content: msg, files: [], components: []}) 
                 
+                boards[uids[[interaction.user.id]]].removeBoard()
                 delete boards[uids[[interaction.user.id]]]
                 delete uids[winner]
                 delete uids[interaction.user.id]
@@ -176,6 +177,7 @@ module.exports = {
                     await interaction.update({content: msg, files: [], components: []})
                     
                     var gameuids=boards[uids[interaction.user.id]].uids
+                    boards[uids[[interaction.user.id]]].removeBoard()
                     delete boards[uids[interaction.user.id]]
                     delete uids[gameuids[0]]
                     delete uids[gameuids[1]]
@@ -340,6 +342,7 @@ module.exports = {
 
             fs.writeFileSync('./data/ranking.json', JSON.stringify(ranking))
 
+            boards[gid].removeBoard()
             delete boards[gid]
             delete uids[gameuids[0]]
             delete uids[gameuids[1]]

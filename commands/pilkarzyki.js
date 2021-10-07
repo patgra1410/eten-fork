@@ -223,6 +223,7 @@ module.exports = {
                 var msg='<@'+winner+'> wygrał przez poddanie się\n'+img.attachments.first().url 
                 var message=await interaction.update({content: msg, files: [], components: []}) 
                 
+                boards[uids[interaction.user.id]].removeBoard()
                 delete boards[uids[interaction.user.id]]
                 delete uids[winner]
                 delete uids[interaction.user.id]
@@ -257,6 +258,7 @@ module.exports = {
                     ranking['najdluzszagrapilkarzyki'][uidsString]=Math.max(boards[uids[interaction.user.id]].totalMoves, ranking['najdluzszagrapilkarzyki'][uidsString])
                     fs.writeFileSync('./data/ranking.json', JSON.stringify(ranking))
 
+                    boards[uids[interaction.user.id]].removeBoard()
                     delete boards[uids[interaction.user.id]]
                     delete uids[gameuids[0]]
                     delete uids[gameuids[1]]
@@ -355,6 +357,7 @@ module.exports = {
 
                 fs.writeFileSync('./data/ranking.json', JSON.stringify(ranking))
 
+                boards[uids[interaction.user.id]].removeBoard()
                 delete boards[uids[interaction.user.id]]
                 delete uids[gameuids[0]]
                 delete uids[gameuids[1]]

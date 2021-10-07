@@ -360,8 +360,17 @@ module.exports=class Board
         return this.uids[this.turn]
     }
 
+    removeBoard()
+    {
+        try {
+            fs.unlinkSync('/data/boardTeamPilkarzyki'+this.id+'.png')
+        } catch(error) {
+            console.log(error)
+        }
+    }
+
     dump(i)
     {
-        fs.writeFileSync('./data/boardPilkarzyki'+i+'.dump', inspect(this, {depth: 10}))
+        fs.writeFileSync('./data/boardTeamPilkarzyki'+i+'.dump', inspect(this, {depth: 10}))
     }
 }

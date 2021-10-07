@@ -201,6 +201,15 @@ module.exports=class Board
         return this.uids[this.turn]
     }
 
+    removeBoard()
+    {
+        try {
+            fs.unlinkSync('/data/boardKwadraty'+this.id+'.png')
+        } catch(error) {
+            console.log(error)
+        }
+    }
+
     dump()
     {
         fs.writeFileSync('./data/boardKwadraty'+this.id+'.dump', inspect(this, {depth: 10}))

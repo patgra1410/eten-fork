@@ -267,7 +267,7 @@ module.exports=class Board
         this.edges.push(new Edge(-3+this.turn, this.points[moves[index]], this.points[this.pos[this.ball.x][this.ball.y]]))
 
         this.totalMoves++
-        
+
         var point=this.points[moves[index]]
         this.ball.x=point.x
         this.ball.y=point.y
@@ -284,6 +284,15 @@ module.exports=class Board
             this.win=(this.turn+1)%2
 
         return true
+    }
+    
+    removeBoard()
+    {
+        try {
+            fs.unlinkSync('/data/boardPilkarzyki'+this.id+'.png')
+        } catch(error) {
+            console.log(error)
+        }
     }
 
     turnUID()

@@ -162,7 +162,8 @@ module.exports={
                                     .setCustomId('teampilkarzyki#acceptNo#'+buttonsID)
                                     .setStyle('PRIMARY')
                             )
-                        accepts[acceptID]['message'].edit({content: msg, components: [row]})
+                        // accepts[acceptID]['message'].edit({content: msg, components: [row]})
+                        interaction.update({content: msg, components: [row]})
                         return
                     }
 
@@ -253,6 +254,7 @@ module.exports={
                     wholeRanking['teampilkarzyki']=ranking
                     fs.writeFileSync('./data/ranking.json', JSON.stringify(wholeRanking))
 
+                    boards[boardID].removeBoard()
                     for(uid of boards[boardID].uids)
                         delete uids[uid]
                     delete boards[boardID]
@@ -288,7 +290,8 @@ module.exports={
                         wholeRanking['najdluzszagrateampilkarzyki'][uidsString]=0
                     wholeRanking['najdluzszagrateampilkarzyki'][uidsString]=Math.max(boards[boardID].totalMoves, wholeRanking['najdluzszagrateampilkarzyki'][uidsString])
                     fs.writeFileSync('./data/ranking.json', JSON.stringify(wholeRanking))
-
+                    
+                    boards[boardID].removeBoard()
                     for(uid of boards[boardID].uids)
                         delete uids[uid]
                     delete boards[boardID]
@@ -387,6 +390,7 @@ module.exports={
                 wholeRanking['teampilkarzyki']=ranking
                 fs.writeFileSync('./data/ranking.json', JSON.stringify(wholeRanking))
 
+                boards[boardID].removeBoard()
                 for(uid of boards[boardID].uids)
                     delete uids[uid]
                 delete boards[boardID]
