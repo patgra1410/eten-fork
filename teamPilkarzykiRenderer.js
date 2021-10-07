@@ -43,6 +43,12 @@ module.exports=class Board
         this.thickness=3
         this.blue='#5865f2'
         this.red='#f04747'
+        this.totalMoves=0
+        this.longestMove={}
+        this.currentMoveLength=0
+
+        for(var uid of this.uids)
+            this.longestMove[uid]=0
 
         this.ball=new Point(-1, 6, 6)
 
@@ -67,7 +73,7 @@ module.exports=class Board
                 
                 var border=false
                 if( (y==2 && 3<=x && x<=5) || (y==2 && 7<=x && x<=9) || (y==10 && 3<=x && x<=5) || (y==10 && 7<=x && x<=9) ||
-                    (x==2 && 3<=y && y<=5) || (x==2 && 7<=y && y<=9) || (x==10 && 3<=y && y<=5) || (x==10 && 3<=y && y<=5) ||
+                    (x==2 && 3<=y && y<=5) || (x==2 && 7<=y && y<=9) || (x==10 && 3<=y && y<=5) || (x==10 && 7<=y && y<=9) ||
                     (y==1 && 5<=x && x<=7) || (y==11 && 5<=x && x<=7) || (x==1 && 5<=y && y<=7) || (x==11 && 5<=y && y<=7) ||
                     (x==3 && y==3) || (x==9 && y==3) || (x==3 && y==9) || (x==9 && y==9) ) 
                     border=true
@@ -329,6 +335,8 @@ module.exports=class Board
             this.edges.push( new Edge(this.points[moves[index]], this.points[this.pos[this.ball.x][this.ball.y]], this.blue) )
         else
            this.edges.push( new Edge(this.points[moves[index]], this.points[this.pos[this.ball.x][this.ball.y]], this.red) )
+
+        this.totalMoves++
 
         var point=this.points[moves[index]]   
         this.ball.x=point.x

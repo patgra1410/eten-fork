@@ -42,6 +42,12 @@ module.exports=class Board
         this.spacing=spacing
         this.offsetX=offsetX
         this.offsetY=offsetY
+        this.totalMoves=0
+        this.longestMove={}
+        this.currentMoveLength=0
+
+        for(var uid of this.uids)
+            this.longestMove[uid]=0
 
         this.ball=new Point(-1, 6, 4)
         
@@ -260,6 +266,8 @@ module.exports=class Board
         this.points[moves[index]].edges.push(this.pos[this.ball.x][this.ball.y])
         this.edges.push(new Edge(-3+this.turn, this.points[moves[index]], this.points[this.pos[this.ball.x][this.ball.y]]))
 
+        this.totalMoves++
+        
         var point=this.points[moves[index]]
         this.ball.x=point.x
         this.ball.y=point.y

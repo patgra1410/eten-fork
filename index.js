@@ -331,7 +331,11 @@ client.on('messageCreate', async message => {
 
 client.on('interactionCreate', async interaction => {
   if (interaction.isButton()) {
-    await client.commands.get(interaction.customId.split('#')[0]).execute(interaction)
+    try {
+      await client.commands.get(interaction.customId.split('#')[0]).execute(interaction)
+    } catch(error) {
+      console.log(error)
+    }
     return
   }
 
@@ -340,7 +344,11 @@ client.on('interactionCreate', async interaction => {
   if (!client.commands.has(interaction.commandName)) return
 
   try {
-    await client.commands.get(interaction.commandName).execute(interaction)
+    try {
+      await client.commands.get(interaction.commandName).execute(interaction)
+    } catch(error) {
+      console.log(error)
+    }
   } catch (error) {
     console.error(error)
     try {

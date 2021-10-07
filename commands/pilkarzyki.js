@@ -184,6 +184,16 @@ module.exports = {
                 var ranking=JSON.parse(fs.readFileSync('./data/ranking.json'))
                 var gameuids=boards[uids[interaction.user.id]].uids
 
+                var tempuids=gameuids
+                var uidsString=""
+                for(var uid of tempuids.sort())
+                    uidsString+=uid+'#'
+                uidsString=uidsString.substring(0, uidsString.length-1)
+                
+                if(ranking['najdluzszagrapilkarzyki'][uidsString]===undefined)
+                    ranking['najdluzszagrapilkarzyki'][uidsString]=0
+                ranking['najdluzszagrapilkarzyki'][uidsString]=Math.max(boards[uids[interaction.user.id]].totalMoves, ranking['najdluzszagrapilkarzyki'][uidsString])
+
                 var rating1=ranking['pilkarzyki'][gameuids[0]]['rating']
                 var rating2=ranking['pilkarzyki'][gameuids[1]]['rating']
                 
@@ -234,6 +244,19 @@ module.exports = {
                     var message=await interaction.update({content: msg, files: [], components: []})
                     
                     var gameuids=boards[uids[interaction.user.id]].uids
+
+                    var ranking=JSON.parse(fs.readFileSync('./data/ranking.json'))
+                    var tempuids=gameuids
+                    var uidsString=""
+                    for(var uid of tempuids.sort())
+                        uidsString+=uid+'#'
+                    uidsString=uidsString.substring(0, uidsString.length-1)
+
+                    if(ranking['najdluzszagrapilkarzyki'][uidsString]===undefined)
+                        ranking['najdluzszagrapilkarzyki'][uidsString]=0
+                    ranking['najdluzszagrapilkarzyki'][uidsString]=Math.max(boards[uids[interaction.user.id]].totalMoves, ranking['najdluzszagrapilkarzyki'][uidsString])
+                    fs.writeFileSync('./data/ranking.json', JSON.stringify(ranking))
+
                     delete boards[uids[interaction.user.id]]
                     delete uids[gameuids[0]]
                     delete uids[gameuids[1]]
@@ -250,9 +273,21 @@ module.exports = {
                 if(!indexes.includes(parseInt(interaction.customId)))
                     return
                 
+                boards[uids[interaction.user.id]].currentMoveLength++
                 if(!boards[uids[interaction.user.id]].move(indexes.indexOf(parseInt(interaction.customId))))
-                {
                     return
+
+                if(boards[uids[interaction.user.id]].turnUID()!=interaction.user.id)
+                {
+                    boards[uids[interaction.user.id]].longestMove[interaction.user.id]=Math.max(boards[uids[interaction.user.id]].currentMoveLength, boards[uids[interaction.user.id]].longestMove[interaction.user.id])
+                    boards[uids[interaction.user.id]].currentMoveLength=0
+
+                    ranking=JSON.parse(fs.readFileSync('./data/ranking.json'))
+                    if(ranking['najdluzszyruch'][interaction.user.id]===undefined)
+                        ranking['najdluzszyruch'][interaction.user.id]=0
+                    ranking['najdluzszyruch'][interaction.user.id]=Math.max(ranking['najdluzszyruch'][interaction.user.id], boards[uids[interaction.user.id]].longestMove[interaction.user.id])
+
+                    fs.writeFileSync('./data/ranking.json', JSON.stringify(ranking))
                 }
             }
 
@@ -288,6 +323,16 @@ module.exports = {
             {
                 var ranking=JSON.parse(fs.readFileSync('./data/ranking.json'))
                 var gameuids=boards[uids[interaction.user.id]].uids
+
+                var tempuids=gameuids
+                var uidsString=""
+                    for(var uid of tempuids.sort())
+                        uidsString+=uid+'#'
+                uidsString=uidsString.substring(0, uidsString.length-1)
+
+                if(ranking['najdluzszagrapilkarzyki'][uidsString]===undefined)
+                    ranking['najdluzszagrapilkarzyki'][uidsString]=0
+                ranking['najdluzszagrapilkarzyki'][uidsString]=Math.max(boards[uids[interaction.user.id]].totalMoves, ranking['najdluzszagrapilkarzyki'][uidsString])
                 
                 var player1=ranking['pilkarzyki'][gameuids[0]]['rating']
                 var player2=ranking['pilkarzyki'][gameuids[1]]['rating']

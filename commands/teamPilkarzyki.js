@@ -14,7 +14,7 @@ var newAcceptID=1
 function buttons(id)
 {
     var indexes=boards[id].possibleMoveIndexes()
-    if(boards[id].turn==0)
+    if(boards[id].turn%2==0)
         var style='PRIMARY'
     else
         var style='DANGER'
@@ -192,7 +192,7 @@ module.exports={
                     const attachment=new Discord.MessageAttachment('./data/boardTeamPilkarzyki'+id+'.png')
                     var img=await interaction.client.guilds.cache.get('856926964094337044').channels.cache.get('892842178143997982').send({files: [attachment]})
 
-                    var msg='Tura <@'+boards[id].turnUID()+'>\n'+img.attachments.first().url
+                    var msg='Tura: <@'+boards[id].turnUID()+'>\n'+img.attachments.first().url
 
                     var message=await interaction.update({content: msg, files: [], components: buttons(id)})
                     boards[id].message=message
@@ -222,11 +222,28 @@ module.exports={
                     var msg="<@"+boards[boardID].uids[losers]+'> i <@'+boards[boardID].uids[losers+2]+'> poddali się\n'+img.attachments.first().url
                     await interaction.update({content: msg, components: []})
 
-                    // TODO ELO ranking
-
                     var wholeRanking=JSON.parse(fs.readFileSync('./data/ranking.json'))
                     var ranking=wholeRanking['teampilkarzyki']
                     var guids=boards[boardID].uids
+
+                    var tempuids=guids
+                    var uidsString=""
+                    for(uid of tempuids.sort())
+                        uidsString+=uid+'#'
+                    uidsString=uidsString.substring(0, uidsString.length-1)
+
+                    if(wholeRanking['najdluzszagrateampilkarzyki'][uidsString]===undefined)
+                        wholeRanking['najdluzszagrateampilkarzyki'][uidsString]=0
+                    wholeRanking['najdluzszagrateampilkarzyki'][uidsString]=Math.max(boards[boardID].totalMoves, wholeRanking['najdluzszagrateampilkarzyki'][uidsString])
+
+                    var losersAverage=(ranking[guids[losers]]['rating']+ranking[guids[losers+2]]['rating'])/2
+                    var winnersAverage=(ranking[guids[winners]]['rating']+ranking[guids[winners+2]]['rating'])/2
+
+                    ranking[guids[winners]]['rating']=Elo.calculate(ranking[guids[winners]]['rating'], losersAverage, true)['playerRating']
+                    ranking[guids[winners+2]]['rating']=Elo.calculate(ranking[guids[winners+2]]['rating'], losersAverage, true)['playerRating']
+
+                    ranking[guids[losers]]['rating']=Elo.calculate(ranking[guids[losers]]['rating'], winnersAverage, false)['playerRating']
+                    ranking[guids[losers+2]]['rating']=Elo.calculate(ranking[guids[losers+2]]['rating'], winnersAverage, false)['playerRating']
 
                     ranking[guids[losers]]['lost']++
                     ranking[guids[losers+2]]['lost']++
@@ -258,6 +275,20 @@ module.exports={
                     var msg='Remis\n'+img.attachments.first().url
                     await interaction.update({content: msg, components: []})
 
+                    var wholeRanking=JSON.parse(fs.readFileSync('./data/ranking.json'))
+                    var guids=boards[boardID].uids
+
+                    var tempuids=guids
+                    var uidsString=""
+                        for(uid of tempuids.sort())
+                            uidsString+=uid+'#'
+                    uidsString=uidsString.substring(0, uidsString.length-1)
+                    
+                    if(wholeRanking['najdluzszagrateampilkarzyki'][uidsString]===undefined)
+                        wholeRanking['najdluzszagrateampilkarzyki'][uidsString]=0
+                    wholeRanking['najdluzszagrateampilkarzyki'][uidsString]=Math.max(boards[boardID].totalMoves, wholeRanking['najdluzszagrateampilkarzyki'][uidsString])
+                    fs.writeFileSync('./data/ranking.json', JSON.stringify(wholeRanking))
+
                     for(uid of boards[boardID].uids)
                         delete uids[uid]
                     delete boards[boardID]
@@ -276,8 +307,22 @@ module.exports={
                 if(!indexes.includes(parseInt(interaction.customId)))
                     return
                 
-                    if(!boards[boardID].move(indexes.indexOf(parseInt(interaction.customId))))
-                        return
+                boards[boardID].currentMoveLength++
+                if(!boards[boardID].move(indexes.indexOf(parseInt(interaction.customId))))
+                    return
+
+                if(boards[boardID].turnUID()!=interaction.user.id)
+                {
+                    boards[boardID].longestMove[interaction.user.id]=Math.max(boards[boardID].currentMoveLength, boards[boardID].longestMove[interaction.user.id])
+                    boards[boardID].currentMoveLength=0
+
+                    ranking=JSON.parse(fs.readFileSync('./data/ranking.json'))
+                    if(ranking['najdluzszyruch'][interaction.user.id]===undefined)
+                        ranking['najdluzszyruch'][interaction.user.id]=0
+                    ranking['najdluzszyruch'][interaction.user.id]=Math.max(ranking['najdluzszyruch'][interaction.user.id], boards[boardID].longestMove[interaction.user.id])
+
+                    fs.writeFileSync('./data/ranking.json', JSON.stringify(ranking))
+                }
             }
 
             boards[boardID].draw()
@@ -285,7 +330,7 @@ module.exports={
             if(boards[boardID].win==-1)
             {
                 var components=buttons(boardID)
-                var msg='Tura <@'+boards[boardID].turnUID()+'> '
+                var msg='Tura: <@'+boards[boardID].turnUID()+'> '
                 if(boards[boardID].remis.length>0)
                     msg+=' ('+boards[boardID].remis.length+'/4 osoby poprosiły o remis) '
 
@@ -308,14 +353,31 @@ module.exports={
 
             if(boards[boardID].win!=-1)
             {
-                // TODO ELO ranking
-
                 var winners=boards[boardID].win
                 var losers=(winners+1)%2
 
                 var wholeRanking=JSON.parse(fs.readFileSync('./data/ranking.json'))
                 var ranking=wholeRanking['teampilkarzyki']
                 var guids=boards[boardID].uids
+
+                var tempuids=guids
+                var uidsString=""
+                    for(uid of tempuids.sort())
+                        uidsString+=uid+'#'
+                uidsString=uidsString.substring(0, uidsString.length-1)
+
+                if(wholeRanking['najdluzszagrateampilkarzyki'][uidsString]===undefined)
+                    wholeRanking['najdluzszagrateampilkarzyki'][uidsString]=0
+                wholeRanking['najdluzszagrateampilkarzyki'][uidsString]=Math.max(boards[boardID].totalMoves, wholeRanking['najdluzszagrateampilkarzyki'][uidsString])
+
+                var losersAverage=(ranking[guids[losers]]['rating']+ranking[guids[losers+2]]['rating'])/2
+                var winnersAverage=(ranking[guids[winners]]['rating']+ranking[guids[winners+2]]['rating'])/2
+
+                ranking[guids[winners]]['rating']=Elo.calculate(ranking[guids[winners]]['rating'], losersAverage, true)['playerRating']
+                ranking[guids[winners+2]]['rating']=Elo.calculate(ranking[guids[winners+2]]['rating'], losersAverage, true)['playerRating']
+
+                ranking[guids[losers]]['rating']=Elo.calculate(ranking[guids[losers]]['rating'], winnersAverage, false)['playerRating']
+                ranking[guids[losers+2]]['rating']=Elo.calculate(ranking[guids[losers+2]]['rating'], winnersAverage, false)['playerRating']
 
                 ranking[guids[losers]]['lost']++
                 ranking[guids[losers+2]]['lost']++
@@ -324,6 +386,10 @@ module.exports={
 
                 wholeRanking['teampilkarzyki']=ranking
                 fs.writeFileSync('./data/ranking.json', JSON.stringify(wholeRanking))
+
+                for(uid of boards[boardID].uids)
+                    delete uids[uid]
+                delete boards[boardID]
             }
 
             return
