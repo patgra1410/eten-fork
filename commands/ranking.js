@@ -46,7 +46,7 @@ module.exports = {
                 rank.push({uids: key, len: value})
 
             rank.sort(function(a, b) {
-                return a['len']<b['len']
+                return b['len']-a['len']
             })
 
             var desc=""

@@ -227,7 +227,7 @@ module.exports={
                     var ranking=wholeRanking['teampilkarzyki']
                     var guids=boards[boardID].uids
 
-                    var tempuids=guids
+                    var tempuids=[...guids]
                     var uidsString=""
                     for(uid of tempuids.sort())
                         uidsString+=uid+'#'
@@ -280,7 +280,7 @@ module.exports={
                     var wholeRanking=JSON.parse(fs.readFileSync('./data/ranking.json'))
                     var guids=boards[boardID].uids
 
-                    var tempuids=guids
+                    var tempuids=[...guids]
                     var uidsString=""
                         for(uid of tempuids.sort())
                             uidsString+=uid+'#'
@@ -363,7 +363,7 @@ module.exports={
                 var ranking=wholeRanking['teampilkarzyki']
                 var guids=boards[boardID].uids
 
-                var tempuids=guids
+                var tempuids=[...guids]
                 var uidsString=""
                     for(uid of tempuids.sort())
                         uidsString+=uid+'#'

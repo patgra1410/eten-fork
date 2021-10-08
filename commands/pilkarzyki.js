@@ -184,7 +184,7 @@ module.exports = {
                 var ranking=JSON.parse(fs.readFileSync('./data/ranking.json'))
                 var gameuids=boards[uids[interaction.user.id]].uids
 
-                var tempuids=gameuids
+                var tempuids=[...gameuids]
                 var uidsString=""
                 for(var uid of tempuids.sort())
                     uidsString+=uid+'#'
@@ -247,7 +247,7 @@ module.exports = {
                     var gameuids=boards[uids[interaction.user.id]].uids
 
                     var ranking=JSON.parse(fs.readFileSync('./data/ranking.json'))
-                    var tempuids=gameuids
+                    var tempuids=[...gameuids]
                     var uidsString=""
                     for(var uid of tempuids.sort())
                         uidsString+=uid+'#'
@@ -325,8 +325,9 @@ module.exports = {
             {
                 var ranking=JSON.parse(fs.readFileSync('./data/ranking.json'))
                 var gameuids=boards[uids[interaction.user.id]].uids
+                console.log(gameuids)
 
-                var tempuids=gameuids
+                var tempuids=[...gameuids]
                 var uidsString=""
                     for(var uid of tempuids.sort())
                         uidsString+=uid+'#'
@@ -338,6 +339,11 @@ module.exports = {
                 
                 var player1=ranking['pilkarzyki'][gameuids[0]]['rating']
                 var player2=ranking['pilkarzyki'][gameuids[1]]['rating']
+
+                console.log(gameuids)
+                console.log(boards[uids[interaction.user.id]].win)
+                console.log(ranking['pilkarzyki'][gameuids[0]])
+                console.log(ranking['pilkarzyki'][gameuids[1]])
 
                 if(boards[uids[interaction.user.id]].win==0)
                 {
