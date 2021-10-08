@@ -282,9 +282,10 @@ client.once('ready', async () => {
   console.log(`Ready! Logged in as ${client.user.tag}`)
   dzwonekChannel = client.channels.cache.get('884370476128944148')
 
-  if (!fs.existsSync('./data/ranking.json')) {
+  if (!fs.existsSync('./data/ranking.json'))
     fs.writeFileSync('./data/ranking.json', '{}')
-  }
+  if(!fs.existsSync('./data/userSettings.json'))
+    fs.writeFileSync('./data/userSettings.json', '{}')
 
   librusCurrentBearer = await updateBearer()
   setTimeout(getSchoolNoticesJson, 2000)

@@ -45,9 +45,14 @@ module.exports=class Board
         this.turn=0
         this.win=-1
         this.thickness=3
-        this.blue='#5865f2'
-        this.red='#f04747'
         this.scores=[0,0]
+
+        var settings=JSON.parse(fs.readFileSync('./data/userSettings.json'))
+        this.colors=['#5865f2', '#f04747']
+
+        for(var i=0; i<this.uids.length; i++)
+            if(settings[this.uids[i]]!==undefined && settings[this.uids[i]]['color']!==undefined)
+                this.colors[i]=settings[this.uids[i]]['color']
 
         this.id=id
         this.spacing=spacing
@@ -127,9 +132,9 @@ module.exports=class Board
                 if(this.counted[x][y]==0)
                     continue
                 if(this.counted[x][y]==1)
-                    this.ctx.fillStyle=this.blue
+                    this.ctx.fillStyle=this.colors[0]
                 else
-                    this.ctx.fillStyle=this.red
+                    this.ctx.fillStyle=this.colors[1]
 
                 this.ctx.fillRect(this.offsetX+this.spacing*(x-1), this.offsetY+this.spacing*(y-1), this.spacing, this.spacing)
             }
@@ -204,7 +209,7 @@ module.exports=class Board
     removeBoard()
     {
         try {
-            fs.unlinkSync('/data/boardKwadraty'+this.id+'.png')
+            fs.unlinkSync('./data/boardKwadraty'+this.id+'.png')
         } catch(error) {
             console.log(error)
         }

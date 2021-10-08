@@ -35,8 +35,15 @@ module.exports=class Board
         this.turn=0
         this.win=-1
         this.thickness=3
-        this.blue='#5865f2'
-        this.red='#f04747'
+
+        var settings=JSON.parse(fs.readFileSync('./data/userSettings.json'))
+        this.colors=['#5865f2', '#f04747']
+
+        console.log(this.uids)
+        for(var i=0; i<this.uids.length; i++)
+            if(settings[this.uids[i]]!==undefined && settings[this.uids[i]]['color']!==undefined)
+                this.colors[i]=settings[this.uids[i]]['color']
+        console.log(this.colors)
 
         this.id=id
         this.spacing=spacing
@@ -145,14 +152,14 @@ module.exports=class Board
         this.ctx.save()
         this.ctx.translate(this.offsetX-this.offsetX/2+10, this.canvas.height/2)
         this.ctx.rotate(-Math.PI/2)
-        this.ctx.fillStyle=this.blue
+        this.ctx.fillStyle=this.colors[0]
         this.ctx.fillText(this.usernames[0], 0, 0)
         this.ctx.restore()
 
         this.ctx.save()
         this.ctx.translate(this.canvas.width-this.offsetX/2-10, this.canvas.height/2)
         this.ctx.rotate(+Math.PI/2)
-        this.ctx.fillStyle=this.red
+        this.ctx.fillStyle=this.colors[1]
         this.ctx.fillText(this.usernames[1], 0, 0)
         this.ctx.restore()
 
@@ -171,9 +178,9 @@ module.exports=class Board
             var edge=this.edges[i]
             
             if(edge.index==-3)
-                this.ctx.strokeStyle=this.blue
+                this.ctx.strokeStyle=this.colors[0]
             else if(edge.index==-2)
-                this.ctx.strokeStyle=this.red
+                this.ctx.strokeStyle=this.colors[1]
             else
                 this.ctx.strokeStyle='#fff'
 
@@ -183,21 +190,9 @@ module.exports=class Board
             this.ctx.stroke()
         }
 
-        if(this.turn==0)
-        {
-            this.ctx.strokeStyle=this.blue
-            this.ctx.fillStyle=this.blue
-        }
-        else if(this.turn==1)
-        {
-            this.ctx.strokeStyle=this.red
-            this.ctx.fillStyle=this.red
-        }
-        else
-        {
-            this.ctx.strokeStyle='#fff'
-            this.ctx.fillStyle='#fff'
-        }
+        this.ctx.strokeStyle=this.colors[this.turn]
+        this.ctx.fillStyle=this.colors[this.turn]
+        
         this.ctx.beginPath()
         this.ctx.arc(this.offsetX+this.spacing*(this.ball.x-1), this.offsetY+this.spacing*(this.ball.y-1), 5, 0, 2*Math.PI, false)
         this.ctx.fill()
@@ -289,7 +284,7 @@ module.exports=class Board
     removeBoard()
     {
         try {
-            fs.unlinkSync('/data/boardPilkarzyki'+this.id+'.png')
+            fs.unlinkSync('./data/boardPilkarzyki'+this.id+'.png')
         } catch(error) {
             console.log(error)
         }

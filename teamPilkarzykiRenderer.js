@@ -41,11 +41,16 @@ module.exports=class Board
         this.turn=0
         this.win=-1
         this.thickness=3
-        this.blue='#5865f2'
-        this.red='#f04747'
         this.totalMoves=0
         this.longestMove={}
         this.currentMoveLength=0
+
+        var settings=JSON.parse(fs.readFileSync('./data/userSettings.json'))
+        this.colors=['#5865f2', '#f04747', '#5865f2', '#f04747']
+
+        for(var i=0; i<this.uids.length; i++)
+            if(settings[this.uids[i]]!==undefined && settings[this.uids[i]]['color']!==undefined)
+                this.colors[i]=settings[this.uids[i]]['color']
 
         for(var uid of this.uids)
             this.longestMove[uid]=0
@@ -103,8 +108,8 @@ module.exports=class Board
             {
                 var pointA=new Point(pos[x-1][y], x-1, y)
                 var pointB=new Point(pos[x][y], x, y)
-                edges.push(new Edge( pointA, pointB, this.red ))
-                edges.push(new Edge( pointB, pointA, this.red ))
+                edges.push(new Edge( pointA, pointB, (y==1 ? this.colors[1] : this.colors[3]) ))
+                edges.push(new Edge( pointB, pointA, (y==1 ? this.colors[1] : this.colors[3]) ))
             }
         }
         for(var y of [4, 5, 8, 9])
@@ -123,8 +128,8 @@ module.exports=class Board
             {
                 var pointA=new Point(pos[x][y-1], x, y-1)
                 var pointB=new Point(pos[x][y], x, y)
-                edges.push(new Edge( pointA, pointB, this.blue ))
-                edges.push(new Edge( pointB, pointA, this.blue ))
+                edges.push(new Edge( pointA, pointB, (x==1 ? this.colors[0] : this.colors[2]) ))
+                edges.push(new Edge( pointB, pointA, (x==1 ? this.colors[0] : this.colors[2]) ))
             }
         }
         for(var y of [2, 11])
@@ -222,27 +227,27 @@ module.exports=class Board
         this.ctx.save()
         this.ctx.translate(this.offsetX-this.offsetX/2+10, this.canvas.height/2)
         this.ctx.rotate(-Math.PI/2)
-        this.ctx.fillStyle=this.blue
+        this.ctx.fillStyle=this.colors[0]
         this.ctx.fillText(this.usernames[0], 0, 0)
         this.ctx.restore()
 
         this.ctx.save()
         this.ctx.translate(this.canvas.width/2, this.offsetY-this.offsetY/2+10)
-        this.ctx.fillStyle=this.red
+        this.ctx.fillStyle=this.colors[1]
         this.ctx.fillText(this.usernames[1], 0, 0)
         this.ctx.restore()
 
         this.ctx.save()
         this.ctx.translate(this.canvas.width-this.offsetX/2-10, this.canvas.height/2)
         this.ctx.rotate(+Math.PI/2)
-        this.ctx.fillStyle=this.blue
+        this.ctx.fillStyle=this.colors[2]
         this.ctx.fillText(this.usernames[2], 0, 0)
         this.ctx.restore()
 
         this.ctx.save()
         this.ctx.translate(this.canvas.width/2, this.canvas.height-this.offsetY/2-10)
         this.ctx.rotate(Math.PI)
-        this.ctx.fillStyle=this.red
+        this.ctx.fillStyle=this.colors[3]
         this.ctx.fillText(this.usernames[3], 0, 0)
         this.ctx.restore()
 
@@ -264,17 +269,8 @@ module.exports=class Board
             this.ctx.stroke()
         }
 
-        if(this.turn%2==0)
-        {
-            this.ctx.strokeStyle=this.blue
-            this.ctx.fillStyle=this.blue
-        }
-        else
-        {
-            
-            this.ctx.strokeStyle=this.red
-            this.ctx.fillStyle=this.red
-        }
+        this.ctx.strokeStyle=this.colors[this.turn]
+        this.ctx.fillStyle=this.colors[this.turn]
 
         this.ctx.beginPath()
         this.ctx.arc(this.offsetX+this.spacing*(this.ball.x-1), this.offsetY+this.spacing*(this.ball.y-1), 5, 0, 2*Math.PI, false)
@@ -332,9 +328,9 @@ module.exports=class Board
         this.points[this.pos[this.ball.x][this.ball.y]].edges.push(moves[index])
         this.points[moves[index]].edges.push(this.pos[this.ball.x][this.ball.y])
         if(this.turn%2==0)
-            this.edges.push( new Edge(this.points[moves[index]], this.points[this.pos[this.ball.x][this.ball.y]], this.blue) )
+            this.edges.push( new Edge(this.points[moves[index]], this.points[this.pos[this.ball.x][this.ball.y]], this.colors[this.turn]) )
         else
-           this.edges.push( new Edge(this.points[moves[index]], this.points[this.pos[this.ball.x][this.ball.y]], this.red) )
+           this.edges.push( new Edge(this.points[moves[index]], this.points[this.pos[this.ball.x][this.ball.y]], this.colors[this.turn]) )
 
         this.totalMoves++
 
@@ -363,7 +359,7 @@ module.exports=class Board
     removeBoard()
     {
         try {
-            fs.unlinkSync('/data/boardTeamPilkarzyki'+this.id+'.png')
+            fs.unlinkSync('./data/boardTeamPilkarzyki'+this.id+'.png')
         } catch(error) {
             console.log(error)
         }
