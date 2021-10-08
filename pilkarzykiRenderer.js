@@ -39,11 +39,9 @@ module.exports=class Board
         var settings=JSON.parse(fs.readFileSync('./data/userSettings.json'))
         this.colors=['#5865f2', '#f04747']
 
-        console.log(this.uids)
         for(var i=0; i<this.uids.length; i++)
             if(settings[this.uids[i]]!==undefined && settings[this.uids[i]]['color']!==undefined)
                 this.colors[i]=settings[this.uids[i]]['color']
-        console.log(this.colors)
 
         this.id=id
         this.spacing=spacing
@@ -144,6 +142,58 @@ module.exports=class Board
 
     draw() {
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height)
+
+        var settings=JSON.parse(fs.readFileSync('./data/userSettings.json'))
+        if(settings[this.uids[0]]!==undefined && settings[this.uids[0]]['gradient']!==undefined)
+        {
+            var grd=this.ctx.createLinearGradient(this.offsetX, this.canvas.height/2, this.offsetX+5*this.spacing, this.canvas.height/2)
+            if(settings[this.uids[0]]['gradient']['special']=='rainbow')
+            {
+                grd.addColorStop(0, 'red')
+                grd.addColorStop(1/6, 'orange')
+                grd.addColorStop(2/6, 'yellow')
+                grd.addColorStop(3/6, 'green')
+                grd.addColorStop(4/6, 'blue')
+                grd.addColorStop(5/6, 'violet')
+                grd.addColorStop(1, 'rgba(127,0,255,0)')
+            }
+            else
+            {
+                grd.addColorStop(0, settings[this.uids[0]]['gradient']['from'])
+                grd.addColorStop(1, settings[this.uids[0]]['gradient']['to'])
+            }
+            this.ctx.fillStyle=grd
+            this.ctx.fillRect(0, 0, this.offsetX+5*this.spacing, this.canvas.height)
+        }
+        if(settings[this.uids[1]]!==undefined && settings[this.uids[1]]['gradient']!==undefined)
+        {
+            var grd=this.ctx.createLinearGradient(this.canvas.width-this.offsetX, this.canvas.height/2, this.canvas.width/2, this.canvas.height/2)
+            if(settings[this.uids[1]]['gradient']['special']=='rainbow')
+            {
+                grd.addColorStop(0, 'red')
+                grd.addColorStop(1/6, 'orange')
+                grd.addColorStop(2/6, 'yellow')
+                grd.addColorStop(3/6, 'green')
+                grd.addColorStop(4/6, 'blue')
+                grd.addColorStop(5/6, 'violet')
+                grd.addColorStop(1, 'rgba(127,0,255,0)')
+            }
+            else
+            {
+                grd.addColorStop(0, settings[this.uids[1]]['gradient']['from'])
+                grd.addColorStop(1, settings[this.uids[1]]['gradient']['to'])
+            }
+            this.ctx.fillStyle=grd
+            this.ctx.fillRect(this.offsetX+5*this.spacing, 0, this.canvas.width, this.canvas.height)
+        }
+        this.ctx.clearRect(0, 0, this.canvas.width, this.offsetY)
+        this.ctx.clearRect(0, this.offsetY+this.spacing*6, this.canvas.width, this.canvas.height)
+        this.ctx.clearRect(0, 0, this.offsetX, this.canvas.height)
+        this.ctx.clearRect(0, 0, this.offsetX+this.spacing, this.offsetY+2*this.spacing)
+        this.ctx.clearRect(0, this.offsetY+4*this.spacing, this.offsetX+this.spacing, this.canvas.height)
+        this.ctx.clearRect(this.canvas.width-this.offsetX, 0, this.canvas.width, this.canvas.height)
+        this.ctx.clearRect(this.canvas.width-2*this.offsetX, 0, this.canvas.width, this.offsetY+2*this.spacing)
+        this.ctx.clearRect(this.canvas.width-2*this.offsetX, this.canvas.height-this.offsetY-2*this.spacing, this.canvas.width, this.canvas.height)
         
         this.ctx.textAlign='center'
         this.ctx.font='30px Arial'

@@ -9,35 +9,61 @@ module.exports = {
   data: new SlashCommandBuilder()
     .setName('kolor')
     .setDescription('Zmienianie koloru w grach')
-    .addStringOption(
-        new SlashCommandStringOption()
-            .setName('kolor')
-            .setDescription('Kolor w grach')
-            .setRequired(true)
-    ),
+    .addSubcommand(subcommand =>
+        subcommand
+            .setName('zmien')
+            .setDescription('Twój kolor w grach (hex albo nazwa css-owa)')
+            .addStringOption(
+                new SlashCommandStringOption()
+                    .setName('kolor')
+                    .setDescription('Kolor w grach')
+                    .setRequired(true)))
+    .addSubcommand(subcommand =>
+        subcommand
+            .setName('reset')
+            .setDescription('Resetuj swój kolor'))
+    ,
   async execute (interaction, args) {
     if(interaction.isCommand!==undefined && interaction.isCommand())
     {
+        if(interaction.options.getSubcommand()==='reset')
+        {
+            var settings=JSON.parse(fs.readFileSync('./data/userSettings.json'))
+            if(settings[uid]!==undefined && settings[uid]['color']!==undefined)
+                delete settings[uid]['color']
+        
+            interaction.reply('Zresetowano kolor')
+            fs.writeFileSync('./data/userSettings.json', JSON.stringify(settings))
+            return
+        }
         var color=interaction.options.getString('kolor')
         var uid=interaction.user.id
         var username=interaction.user.username
     }
     else
     {
-        if(args===undefined || args.length!=1)
+        if(args===undefined || args.length==0)
         {
             interaction.reply('Potrzebny kolor')
             return
         }
 
-        var color=args[0]
-        var uid=interaction.author.id
-        var username=interaction.author.username
+        if(args[0]=='zmien')
+        {
+            var color=args[1]
+            var uid=interaction.author.id
+            var username=interaction.author.username
+        }
+        else if(args[0]!='reset')
+        {
+            interaction.reply('Zła składnia komendy (pls używaj slash komend są wygodniejsze)')
+            return
+        }
     }
 
     var settings=JSON.parse(fs.readFileSync('./data/userSettings.json'))
 
-    if(color=='default')
+    if(color=='default' || (args!==undefined && args[0]=='reset'))
     {
         if(settings[uid]!==undefined && settings[uid]['color']!==undefined)
             delete settings[uid]['color']
@@ -48,6 +74,8 @@ module.exports = {
     else
     {
         color=color.toLowerCase()
+        if(color=='nigger')
+            color='black'
         if(settings[uid]===undefined)
             settings[uid]={}
         if((/#([0-9,A-F,a-f]{3})/.test(color.substring(0,4)) && color.length==4) || (/#([0-9,A-F,a-f]{6})/.test(color.substring(0,7)) && color.length==7) || possibleColors.includes(color))
