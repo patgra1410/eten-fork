@@ -507,7 +507,7 @@ module.exports={
             )
         
         var msg='Drużynowe piłarzyki: <@'+guids[0]+'> i <@'+guids[2]+'> przeciwko <@'+guids[1]+'> i <@'+guids[3]+'>'    
-        var message=await interaction.reply({content: msg, components: [row]})
+        var message=await interaction.reply({content: msg, components: [row], fetchReply: true})
 
         newAccept['message']=message
         accepts[newAcceptID]=newAccept

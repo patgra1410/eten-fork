@@ -271,7 +271,7 @@ module.exports = {
             )
 
         var msg="<@"+uid2+'>: '+usernames[0]+' chce z tobą zagrać'
-        var message=await interaction.reply({content: msg, components: [row]})
+        var message=await interaction.reply({content: msg, components: [row], fetchReply: true})
         // console.log(message)
         newAccept['message']=message
         accepts.push(newAccept)
