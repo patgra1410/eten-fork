@@ -77,12 +77,20 @@ module.exports = {
         }
         
         settings[interaction.user.id]['gradient']={'from': kolor1, 'to': nKolor}
+        if(settings[interaction.user.id]['dlug']===undefined)
+            settings[interaction.user.id]['dlug']=0
+        settings[interaction.user.id]['dlug']+=2
+        
         fs.writeFileSync('./data/userSettings.json', JSON.stringify(settings))
     }
     else if(interaction.options.getSubcommand()==='special')
     {
         var type=interaction.options.getString('type')
         settings[interaction.user.id]['gradient']={'special': type}
+        if(settings[interaction.user.id]['dlug']===undefined)
+            settings[interaction.user.id]['dlug']=0
+        settings[interaction.user.id]['dlug']+=2
+
         fs.writeFileSync('./data/userSettings.json', JSON.stringify(settings))
     }
     else if(interaction.options.getSubcommand()==='reset')

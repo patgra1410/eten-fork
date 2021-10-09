@@ -81,6 +81,9 @@ module.exports = {
         if((/#([0-9,A-F,a-f]{3})/.test(color.substring(0,4)) && color.length==4) || (/#([0-9,A-F,a-f]{6})/.test(color.substring(0,7)) && color.length==7) || possibleColors.includes(color))
         {
             settings[uid]['color']=color
+            if(settings[interaction.user.id]['dlug']===undefined)
+                settings[interaction.user.id]['dlug']=0
+            settings[interaction.user.id]['dlug']+=2
             fs.writeFileSync('./data/userSettings.json', JSON.stringify(settings))
 
             var board=new Board(50, 50, 50, [uid, ""], [username, ""], -1)

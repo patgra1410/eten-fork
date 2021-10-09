@@ -111,7 +111,7 @@ module.exports = {
             var title='Ranking najdłuższych ruchów'
            
         embed=new Discord.MessageEmbed()
-            .setColor('#0099ff')
+            .setColor('#'+Math.floor(Math.random()*16777215).toString(16))
             .setTitle(title)
             .setDescription(desc)
         
