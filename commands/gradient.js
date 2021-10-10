@@ -34,6 +34,7 @@ module.exports = {
                     .setDescription('Nazwa gradientu')
                     .setRequired(true)
                     .addChoice('Tencza', 'rainbow')
+                    .addChoice('Losowe kolory', 'random')
             ))
     .addSubcommand(subcommand => 
         subcommand

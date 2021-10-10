@@ -11,7 +11,7 @@ module.exports = {
     var ranking=[]
     for([uid, value] of Object.entries(settings))
     {
-        if(value['dlug']!==undefined)
+        if(value['dlug']!==undefined && uid!='230917788699459584')
             ranking.push({uid: uid, val: value['dlug']})
     }
 

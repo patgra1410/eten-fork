@@ -157,6 +157,11 @@ module.exports=class Board
                 grd.addColorStop(5/6, 'violet')
                 grd.addColorStop(1, 'rgba(127,0,255,0)')
             }
+            else if(settings[this.uids[0]]['gradient']['special']=='random')
+            {
+                grd.addColorStop(0, '#'+Math.floor(Math.random()*16777215).toString(16))
+                grd.addColorStop(1, 'rgba('+Math.floor(Math.random()*255)+', '+Math.floor(Math.random()*255)+', '+Math.floor(Math.random()*255)+', 0)')
+            }
             else
             {
                 grd.addColorStop(0, settings[this.uids[0]]['gradient']['from'])
@@ -177,6 +182,11 @@ module.exports=class Board
                 grd.addColorStop(4/6, 'blue')
                 grd.addColorStop(5/6, 'violet')
                 grd.addColorStop(1, 'rgba(127,0,255,0)')
+            }
+            else if(settings[this.uids[0]]['gradient']['special']=='random')
+            {
+                grd.addColorStop(0, '#'+Math.floor(Math.random()*16777215).toString(16))
+                grd.addColorStop(1, 'rgba('+Math.floor(Math.random()*255)+', '+Math.floor(Math.random()*255)+', '+Math.floor(Math.random()*255)+', 0)')
             }
             else
             {
