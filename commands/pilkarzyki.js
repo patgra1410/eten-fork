@@ -165,7 +165,17 @@ module.exports = {
                     var id=gameID
                     gameID++
                     
-                    boards[id].draw()
+                    for(var i=1; i<=10; i++)
+                    {
+                        try {
+                            boards[id].draw()
+                            break
+                        } catch(error) {
+                            console.log('Draw failed '+i+'. time(s)')
+                            if(i==10)
+                                console.log(error)
+                        }
+                    }
                     const attachment = new Discord.MessageAttachment('./data/boardPilkarzyki'+id+'.png')
                     var img=await interaction.client.guilds.cache.get('856926964094337044').channels.cache.get('892842178143997982').send({files: [attachment]})
                     
@@ -217,7 +227,17 @@ module.exports = {
                 ranking['pilkarzyki'][winner]['won']++
                 fs.writeFileSync('./data/ranking.json', JSON.stringify(ranking))
 
-                boards[uids[interaction.user.id]].draw()
+                for(var i=1; i<=10; i++)
+                {
+                    try {
+                        boards[uids[interaction.user.id]].draw()
+                        break
+                    } catch(error) {
+                        console.log('Draw failed '+i+'. time(s)')
+                        if(i==10)
+                            console.log(error)
+                    }
+                }
                 const attachment = new Discord.MessageAttachment('./data/boardPilkarzyki'+uids[interaction.user.id]+'.png')
                 var img=await interaction.client.guilds.cache.get('856926964094337044').channels.cache.get('892842178143997982').send({files: [attachment]})
                 var msg='<@'+winner+'> wygrał przez poddanie się\n'+img.attachments.first().url 
@@ -238,7 +258,17 @@ module.exports = {
                 boards[uids[interaction.user.id]].remis.push(interaction.user.id)
                 if(boards[uids[interaction.user.id]].remis.length==2)
                 {
-                    boards[uids[interaction.user.id]].draw()
+                    for(var i=1; i<=10; i++)
+                    {
+                        try {
+                            boards[uids[interaction.user.id]].draw()
+                            break
+                        } catch(error) {
+                            console.log('Draw failed '+i+'. time(s)')
+                            if(i==10)
+                                console.log(error)
+                        }
+                    }
                     const attachment = new Discord.MessageAttachment('./data/boardPilkarzyki'+uids[interaction.user.id]+'.png')
                     var img=await interaction.client.guilds.cache.get('856926964094337044').channels.cache.get('892842178143997982').send({files: [attachment]})
                     var msg='Remis\n'+img.attachments.first().url
@@ -293,7 +323,17 @@ module.exports = {
                 }
             }
 
-            boards[uids[interaction.user.id]].draw()
+            for(var i=1; i<=10; i++)
+            {
+                try {
+                    boards[uids[interaction.user.id]].draw()
+                    break
+                } catch(error) {
+                    console.log('Draw failed '+i+'. time(s)')
+                    if(i==10)
+                        console.log(error)
+                }
+            }
             const attachment = new Discord.MessageAttachment('./data/boardPilkarzyki'+uids[interaction.user.id]+'.png')
             
             if(boards[uids[interaction.user.id]].win==-1)

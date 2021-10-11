@@ -216,13 +216,112 @@ module.exports=class Board
         }
     }
 
-    draw()
+    gradient()
+    {
+        this.ctx.lineWidth=0
+
+        var settings=JSON.parse(fs.readFileSync('./data/userSettings.json'))
+        for(var i=0; i<=3; i++)
+        {
+            var uid=this.uids[i]
+            if(settings[uid]['gradient']===undefined)
+                return
+
+            if(i==0)
+                var grd=this.ctx.createLinearGradient(this.offsetX, this.canvas.height/2, this.canvas.width/2, this.canvas.height/2)
+            if(i==1)
+                var grd=this.ctx.createLinearGradient(this.canvas.width/2, this.offsetY, this.canvas.width/2, this.canvas.height/2)
+            if(i==2)
+                var grd=this.ctx.createLinearGradient(this.canvas.width-this.offsetX, this.canvas.height/2, this.canvas.width/2, this.canvas.height/2)
+            if(i==3)
+                var grd=this.ctx.createLinearGradient(this.canvas.width/2, this.canvas.height-this.offsetY, this.canvas.width/2, this.canvas.height/2)
+                
+            if(settings[this.uids[i]]['gradient']['special']=='rainbow')
+            {
+                grd.addColorStop(0, 'red')
+                grd.addColorStop(1/6, 'orange')
+                grd.addColorStop(2/6, 'yellow')
+                grd.addColorStop(3/6, 'green')
+                grd.addColorStop(4/6, 'blue')
+                grd.addColorStop(5/6, 'violet')
+                grd.addColorStop(1, 'rgba(127,0,255,0)')
+            }
+            else if(settings[this.uids[i]]['gradient']['special']=='random')
+            {
+                var color=Math.floor(Math.random()*16777215)
+                if(color<0)
+                    color=0
+                if(color>16777215)
+                    color=16777215
+                grd.addColorStop(0, '#'+color.toString(16))
+                grd.addColorStop(1, 'rgba('+Math.floor(Math.random()*255)+', '+Math.floor(Math.random()*255)+', '+Math.floor(Math.random()*255)+', 0)')
+            }
+            else
+            {
+                grd.addColorStop(0, settings[this.uids[i]]['gradient']['from'])
+                grd.addColorStop(1, settings[this.uids[i]]['gradient']['to'])
+            }
+
+            this.ctx.fillStyle=grd
+            this.ctx.beginPath()
+            if(i==0)
+            {
+                this.ctx.moveTo(this.offsetX+this.spacing*2, this.offsetY+this.spacing*8)
+                this.ctx.lineTo(this.offsetX, this.offsetY+this.spacing*8)
+                this.ctx.lineTo(this.offsetX, this.offsetY+this.spacing*2)
+                this.ctx.lineTo(this.offsetX+this.spacing*2, this.offsetY+this.spacing*2)
+            }
+            if(i==1)
+            {
+                this.ctx.moveTo(this.offsetX+this.spacing*2, this.offsetY+this.spacing*2)
+                this.ctx.lineTo(this.offsetX+this.spacing*2, this.offsetY)
+                this.ctx.lineTo(this.offsetX+this.spacing*8, this.offsetY)
+                this.ctx.lineTo(this.offsetX+this.spacing*8, this.offsetY+this.spacing*2)
+            }
+            if(i==2)
+            {
+                this.ctx.moveTo(this.offsetX+this.spacing*8, this.offsetY+this.spacing*2)
+                this.ctx.lineTo(this.offsetX+this.spacing*10, this.offsetY+this.spacing*2)
+                this.ctx.lineTo(this.offsetX+this.spacing*10, this.offsetY+this.spacing*8)
+                this.ctx.lineTo(this.offsetX+this.spacing*8, this.offsetY+this.spacing*8)
+            }
+            if(i==3)
+            {
+                this.ctx.moveTo(this.offsetX+this.spacing*8, this.offsetY+this.spacing*8)
+                this.ctx.lineTo(this.offsetX+this.spacing*8, this.offsetY+this.spacing*10)
+                this.ctx.lineTo(this.offsetX+this.spacing*2, this.offsetY+this.spacing*10)
+                this.ctx.lineTo(this.offsetX+this.spacing*2, this.offsetY+this.spacing*8)
+            }
+
+            this.ctx.lineTo(this.canvas.width/2, this.canvas.height/2)
+            this.ctx.closePath()
+            this.ctx.fill()
+
+            this.ctx.clearRect(this.offsetX, this.offsetY+2*this.spacing, this.spacing, 2*this.spacing)
+            this.ctx.clearRect(this.offsetX, this.offsetY+6*this.spacing, this.spacing, 2*this.spacing)
+
+            this.ctx.clearRect(this.offsetX+2*this.spacing, this.offsetY, 2*this.spacing, this.spacing)
+            this.ctx.clearRect(this.offsetX+6*this.spacing, this.offsetY, 2*this.spacing, this.spacing)
+
+            this.ctx.clearRect(this.offsetX+9*this.spacing, this.offsetY+2*this.spacing, this.spacing, 2*this.spacing)
+            this.ctx.clearRect(this.offsetX+9*this.spacing, this.offsetY+6*this.spacing, this.spacing, 2*this.spacing)
+
+            this.ctx.clearRect(this.offsetX+2*this.spacing, this.offsetY+9*this.spacing, 2*this.spacing, this.spacing)
+            this.ctx.clearRect(this.offsetX+6*this.spacing, this.offsetY+9*this.spacing, 2*this.spacing, this.spacing)
+        }
+    }
+
+    draw(paintGradient=true)
     {
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height)
+
+        if(paintGradient)
+            this.gradient()
 
         this.ctx.textAlign='center'
         this.ctx.font='30px Arial'
         this.ctx.lineWidth=this.thickness
+
 
         this.ctx.save()
         this.ctx.translate(this.offsetX-this.offsetX/2+10, this.canvas.height/2)

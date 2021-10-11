@@ -159,7 +159,12 @@ module.exports=class Board
             }
             else if(settings[this.uids[0]]['gradient']['special']=='random')
             {
-                grd.addColorStop(0, '#'+Math.floor(Math.random()*16777215).toString(16))
+                var color=Math.floor(Math.random()*16777215)
+                if(color<0)
+                    color=0
+                if(color>16777215)
+                    color=16777215
+                grd.addColorStop(0, '#'+color.toString(16))
                 grd.addColorStop(1, 'rgba('+Math.floor(Math.random()*255)+', '+Math.floor(Math.random()*255)+', '+Math.floor(Math.random()*255)+', 0)')
             }
             else
@@ -183,9 +188,14 @@ module.exports=class Board
                 grd.addColorStop(5/6, 'violet')
                 grd.addColorStop(1, 'rgba(127,0,255,0)')
             }
-            else if(settings[this.uids[0]]['gradient']['special']=='random')
+            else if(settings[this.uids[1]]['gradient']['special']=='random')
             {
-                grd.addColorStop(0, '#'+Math.floor(Math.random()*16777215).toString(16))
+                var color=Math.floor(Math.random()*16777215)
+                if(color<0)
+                    color=0
+                if(color>16777215)
+                    color=16777215
+                grd.addColorStop(0, '#'+color.toString(16))
                 grd.addColorStop(1, 'rgba('+Math.floor(Math.random()*255)+', '+Math.floor(Math.random()*255)+', '+Math.floor(Math.random()*255)+', 0)')
             }
             else
