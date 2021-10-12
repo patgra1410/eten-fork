@@ -1,6 +1,7 @@
 const { createCanvas }=require('canvas')
 const { inspect }=require('util')
 const fs=require('fs')
+const { PassThrough } = require('stream')
 
 class Point
 {
@@ -253,7 +254,9 @@ module.exports=class Board
                     color=0
                 if(color>16777215)
                     color=16777215
-                grd.addColorStop(0, '#'+color.toString(16))
+                
+                this.lastColor=color
+                grd.addColorStop(0, '#'+color.toString(16).padStart(6, '0'))
                 grd.addColorStop(1, 'rgba('+Math.floor(Math.random()*255)+', '+Math.floor(Math.random()*255)+', '+Math.floor(Math.random()*255)+', 0)')
             }
             else
@@ -432,6 +435,12 @@ module.exports=class Board
            this.edges.push( new Edge(this.points[moves[index]], this.points[this.pos[this.ball.x][this.ball.y]], this.colors[this.turn]) )
 
         this.totalMoves++
+
+        var ranking=JSON.parse(fs.readFileSync('./data/ranking.json'))
+        if(ranking['sumaruchow'][this.uids[this.turn]]===undefined)
+            ranking['sumaruchow'][this.uids[this.turn]]=0
+        ranking['sumaruchow'][this.uids[this.turn]]++
+        fs.writeFileSync('./data/ranking.json', JSON.stringify(ranking))
 
         var point=this.points[moves[index]]   
         this.ball.x=point.x

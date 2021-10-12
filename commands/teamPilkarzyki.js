@@ -200,7 +200,7 @@ module.exports={
                             boards[id].draw()
                             break
                         } catch(error) {
-                            console.log('Draw failed '+i+'. time(s)')
+                            console.log('Draw failed '+i+'. time(s) color: '+boards[id].lastColor+' '+boards[id].lastColor.toString(16))
                             if(i==10)
                                 console.log(error)
                         }
@@ -237,7 +237,7 @@ module.exports={
                             boards[boardID].draw()
                             break
                         } catch(error) {
-                            console.log('Draw failed '+i+'. time(s)')
+                            console.log('Draw failed '+i+'. time(s) color: '+boards[boardID].lastColor+' '+boards[boardID].lastColor.toString(16))
                             if(i==10)
                                 console.log(error)
                         }
@@ -302,7 +302,7 @@ module.exports={
                             boards[boardID].draw()
                             break
                         } catch(error) {
-                            console.log('Draw failed '+i+'. time(s)')
+                            console.log('Draw failed '+i+'. time(s) color: '+boards[boardID].lastColor+' '+boards[boardID].lastColor.toString(16))
                             if(i==10)
                                 console.log(error)
                         }
@@ -369,7 +369,7 @@ module.exports={
                     boards[boardID].draw()
                     break
                 } catch(error) {
-                    console.log('Draw failed '+i+'. time(s)')
+                    console.log('Draw failed '+i+'. time(s) color: '+boards[boardID].lastColor+' '+boards[boardID].lastColor.toString(16))
                     if(i==10)
                         console.log(error)
                 }

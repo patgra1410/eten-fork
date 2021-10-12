@@ -171,7 +171,7 @@ module.exports = {
                             boards[id].draw()
                             break
                         } catch(error) {
-                            console.log('Draw failed '+i+'. time(s)')
+                            console.log('Draw failed '+i+'. time(s) color: '+boards[id].lastColor+' '+boards[id].lastColor.toString(16))
                             if(i==10)
                                 console.log(error)
                         }
@@ -233,7 +233,7 @@ module.exports = {
                         boards[uids[interaction.user.id]].draw()
                         break
                     } catch(error) {
-                        console.log('Draw failed '+i+'. time(s)')
+                        console.log('Draw failed '+i+'. time(s) color: '+boards[uids[interaction.user.id]].lastColor+' '+boards[uids[interaction.user.id]].lastColor.toString(16))
                         if(i==10)
                             console.log(error)
                     }
@@ -264,7 +264,7 @@ module.exports = {
                             boards[uids[interaction.user.id]].draw()
                             break
                         } catch(error) {
-                            console.log('Draw failed '+i+'. time(s)')
+                            console.log('Draw failed '+i+'. time(s) color: '+boards[uids[interaction.user.id]].lastColor+' '+boards[uids[interaction.user.id]].lastColor.toString(16))
                             if(i==10)
                                 console.log(error)
                         }
@@ -329,7 +329,7 @@ module.exports = {
                     boards[uids[interaction.user.id]].draw()
                     break
                 } catch(error) {
-                    console.log('Draw failed '+i+'. time(s)')
+                    console.log('Draw failed '+i+'. time(s) color: '+boards[uids[interaction.user.id]].lastColor+' '+boards[uids[interaction.user.id]].lastColor.toString(16))
                     if(i==10)
                         console.log(error)
                 }
@@ -365,7 +365,6 @@ module.exports = {
             {
                 var ranking=JSON.parse(fs.readFileSync('./data/ranking.json'))
                 var gameuids=boards[uids[interaction.user.id]].uids
-                console.log(gameuids)
 
                 var tempuids=[...gameuids]
                 var uidsString=""
@@ -379,11 +378,6 @@ module.exports = {
                 
                 var player1=ranking['pilkarzyki'][gameuids[0]]['rating']
                 var player2=ranking['pilkarzyki'][gameuids[1]]['rating']
-
-                console.log(gameuids)
-                console.log(boards[uids[interaction.user.id]].win)
-                console.log(ranking['pilkarzyki'][gameuids[0]])
-                console.log(ranking['pilkarzyki'][gameuids[1]])
 
                 if(boards[uids[interaction.user.id]].win==0)
                 {
@@ -498,7 +492,6 @@ module.exports = {
 
         var msg="<@"+uid2+'>: '+usernames[0]+' chce z tobą zagrać'
         var message=await interaction.reply({content: msg, components: [row], fetchReply: true})
-        // console.log(message)
         newAccept['message']=message
         accepts.push(newAccept)
   }
