@@ -173,11 +173,15 @@ async function getSchoolNoticesJson () {
     // (see the catch block at the end)
     if (!changesResult.ok || !('Changes' in changesJson) || librusQueryErrorFlag) {
       // Log what's up.
-      console.log(changesResult.statusText)
+      console.log(`Request error code: ${changesResult.statusText}`)
       console.log('GET Request with Token failed. Bearer token probably expired.')
       if (!librusQueryErrorFlag) {
         console.log('Additionally, here\'s the parsed JSON of the result.')
         console.log(changesJson)
+        if (changesJson.Status === 'Maintenance') {
+          console.log('Seems like Librus is undergoing maintenance. Throwing error for function.')
+          throw new Error('Librus is under maintenance.')
+        }
       }
       console.log('Trying to update token.')
       // Try to get a new bearer, retry getSchoolNoticesJson on success.
@@ -231,7 +235,7 @@ async function getSchoolNoticesJson () {
           console.log(`\x1b[1m${noticeJson.SchoolNotice.Id}  --- Sent!\x1b[0m`)
         }
       } else {
-        console.log(`\x1b[2m${update.Resource.Url} --- Ignored. Not GETting.\x1b[0m`)
+        console.log(`\x1b[2m${update.Resource.Url} --- Not SchoolNotices. Ignored.\x1b[0m`)
       }
       // DELETE once handled
       console.log(`\x1b[33mDELETE https://api.librus.pl/2.0/PushChanges/${update.Id}?pushDevice=${config.pushDevice}\x1b[0m`)
@@ -251,7 +255,7 @@ async function getSchoolNoticesJson () {
   } catch (error) {
     console.log('\x1b[31mSomething in updating notices failed:\x1b[0m')
     console.error(error)
-    console.log('\x1b[31mRetrying getSchoolNoticesJson() in 2 mins.\x1b[0m')
+    console.log('\x1b[31mRetrying getSchoolNoticesJson() in 10 mins.\x1b[0m')
     setTimeout(getSchoolNoticesJson, (2 * 60000))
     return
   }
