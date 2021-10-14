@@ -18,6 +18,7 @@ module.exports = {
             .addChoice('Najdluższa gra w drużynowych piłkarzykach', 'najdluzszagrateampilkarzyki')
             .addChoice('Najdluższa gra w piłkarzykach', 'najdluzszagrapilkarzyki')
             .addChoice('Suma ruchów', 'sumaruchow')
+            .addChoice('Przegrania w jajco', 'jajco')
     ),
   async execute (interaction, args) {
         if(interaction.isCommand!==undefined && interaction.isCommand())
@@ -29,7 +30,7 @@ module.exports = {
                 interaction.reply('Nie wybrałeś gry')
                 return
             }
-            if(!['pilkarzyki', 'kwadraty', 'teampilkarzyki', 'najdluzszyruch', 'najdluzszagrateampilkarzyki', 'najdluzszagrapilkarzyki', 'sumaruchow'].includes(args[0]))
+            if(!['pilkarzyki', 'kwadraty', 'teampilkarzyki', 'najdluzszyruch', 'najdluzszagrateampilkarzyki', 'najdluzszagrapilkarzyki', 'sumaruchow', 'jajco'].includes(args[0]))
             {
                 interaction.reply('Zła gra')
                 return
@@ -41,7 +42,7 @@ module.exports = {
         var rank=[]
     
         
-        if(type=='najdluzszagrapilkarzyki' || type=='najdluzszagrateampilkarzyki' || type=='najdluzszyruch' || type=='sumaruchow')
+        if(type=='najdluzszagrapilkarzyki' || type=='najdluzszagrateampilkarzyki' || type=='najdluzszyruch' || type=='sumaruchow' || type=='jajco')
         {
             for([key, value] of Object.entries(ranking))
                 rank.push({uids: key, len: value})
@@ -51,7 +52,15 @@ module.exports = {
             })
 
             var desc=""
-            if(type=='najdluzszyruch' || type=='sumaruchow')
+            if(type=='jajco')
+            {
+                for(var i=0; i<rank.length; i++)
+                {
+                    var r=rank[i]
+                    desc+=String(i+1)+'. <@'+r['uids']+'>: '+r['len']+' przegranych\n'
+                }
+            }
+            else if(type=='najdluzszyruch' || type=='sumaruchow')
             {
                 for(var i=0; i<rank.length; i++)
                 {
@@ -112,6 +121,8 @@ module.exports = {
             var title='Ranking najdłuższych ruchów'
         else if(type=='sumaruchow')
             var title='Ranking ilości ruchów'
+        else if(type=='jajco')
+            var title='Ranking przegranych w jajco'
            
         embed=new Discord.MessageEmbed()
             .setColor('#'+Math.floor(Math.random()*16777215).toString(16))

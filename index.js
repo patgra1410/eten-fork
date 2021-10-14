@@ -1,3 +1,5 @@
+'use strict'
+
 const Discord = require('discord.js')
 const config = require('./config.json')
 const fs = require('fs')
@@ -13,6 +15,9 @@ client.textTriggers = new Discord.Collection()
 let librusCurrentBearer
 let dzwonekChannel
 const commandFiles = fs.readdirSync('./commands').filter(file => file.endsWith('.js'))
+
+let coChannel=undefined
+let coUsers
 
 // TODO: Regex triggers for free text? ("/ROZPIERDOL.+KOTA/gi")
 // Won't this overload the bot if there are too many?
@@ -72,6 +77,29 @@ const dailyJob = new cron.CronJob(
   'Europe/Warsaw'
 )
 dailyJob.start()
+
+function coCountdown()
+{
+  if(coUsers.count>0)
+  {
+    client.channels.cache.get(coChannel).send(String(coUsers.count))
+    coUsers.count--
+    return
+  }
+  let msg='0\n<@'+coUsers.jajco+'> skisłeś'
+
+  var ranking=JSON.parse(fs.readFileSync('./data/ranking.json'))
+  if(ranking['jajco'][coUsers.jajco]===undefined)
+    ranking['jajco'][coUsers.jajco]=0
+  ranking['jajco'][coUsers.jajco]++
+
+  fs.writeFileSync('./data/ranking.json', JSON.stringify(ranking))
+
+  client.channels.cache.get(coChannel).send(msg)
+  clearInterval(coUsers.interval)
+  coChannel=undefined
+  coUsers=undefined
+}
 
 async function updateBearer () {
   let setCookies = []
@@ -331,6 +359,23 @@ client.on('messageCreate', async message => {
       console.error(error)
       message.channel.send('There was an error trying to execute that command!')
     }
+  }
+
+  if(message.content=='co' && coChannel===undefined) {
+    coUsers={jajco: message.author.id, daszek: [], count: 10, interval: undefined}
+    coChannel=message.channel.id
+
+    coUsers.interval=setInterval(coCountdown, 1000)
+
+    message.channel.send('jajco')
+  }
+  if(message.content=='^' && coChannel!==undefined)
+  {
+    coUsers.daszek.push(message.author.id)
+  }
+  if(coChannel!==undefined && message.author.id===coUsers.jajco && message.mentions.users.size>0 && !coUsers.daszek.includes(message.mentions.users.keys().next().value))
+  {
+    coUsers.jajco=message.mentions.users.keys().next().value
   }
 })
 
