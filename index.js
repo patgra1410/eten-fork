@@ -316,6 +316,14 @@ client.once('ready', async () => {
 
   if (!fs.existsSync('./data/ranking.json'))
     fs.writeFileSync('./data/ranking.json', '{}')
+
+  var ranking=JSON.parse(fs.readFileSync('./data/ranking.json'))
+  var rankingOptions=['pilkarzyki', 'kwadraty', 'teampilkarzyki', 'najdluzszyruch', 'najdluzszagrateampilkarzyki', 'najdluzszagrapilkarzyki', 'sumaruchow', 'jajco']
+  for(let opt of rankingOptions)
+    if(ranking[opt]===undefined)
+      ranking[opt]={}
+  fs.writeFileSync('./data/ranking.json', JSON.stringify(ranking))
+  
   if(!fs.existsSync('./data/userSettings.json'))
     fs.writeFileSync('./data/userSettings.json', '{}')
 
@@ -361,7 +369,8 @@ client.on('messageCreate', async message => {
     }
   }
 
-  if(message.content=='co' && coChannel===undefined) {
+  let messageLower=message.content.toLowerCase()
+  if((messageLower.endsWith(' co') || messageLower.endsWith(' co?') || messageLower=='co' || messageLower=='co?') && coChannel===undefined) {
     coUsers={jajco: message.author.id, daszek: [], count: 10, interval: undefined}
     coChannel=message.channel.id
 
