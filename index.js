@@ -376,7 +376,7 @@ client.on('messageCreate', async message => {
 
     coUsers.interval=setInterval(coCountdown, 1000)
 
-    message.channel.send('jajco')
+    message.channel.send('https://cdn.discordapp.com/attachments/455236204477022208/899223760488497242/109.173.177.194-2021.10.05.16.37.49.jpg')
   }
   if(message.content=='^' && coChannel!==undefined)
   {
