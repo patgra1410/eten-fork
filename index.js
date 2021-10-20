@@ -86,35 +86,35 @@ function deleteCountdown(messages)
 
 async function coCountdown()
 {
-  if(coUsers.count==0)
-    clearInterval(coUsers.interval)
+  try { // i dont know why it crashes
+    if(coUsers.count==0)
+      clearInterval(coUsers.interval)
 
-  if(coUsers.count>=0)
-  {
-    try {
+    if(coUsers.count>=0)
+    {
       var msg=await client.channels.cache.get(coChannel).send(String(coUsers.count))
       coUsers.messages.push(msg)
-    } catch(error) {
-      console.log(error)
+
+      coUsers.count--
+      if(coUsers.count>=0)
+      return
     }
+    var msg='<@'+coUsers.jajco+'> skisłeś'
+    setTimeout(deleteCountdown.bind(null, coUsers.messages), 10000)
 
-    coUsers.count--
-    if(coUsers.count>=0)
-     return
+    var ranking=JSON.parse(fs.readFileSync('./data/ranking.json'))
+    if(ranking['jajco'][coUsers.jajco]===undefined)
+      ranking['jajco'][coUsers.jajco]=0
+    ranking['jajco'][coUsers.jajco]++
+
+    fs.writeFileSync('./data/ranking.json', JSON.stringify(ranking))
+
+    await client.channels.cache.get(coChannel).send(msg)
+    coChannel=undefined
+    coUsers=undefined
+  } catch(error) {
+    console.log(error)
   }
-  var msg='<@'+coUsers.jajco+'> skisłeś'
-  setTimeout(deleteCountdown.bind(null, coUsers.messages), 10000)
-
-  var ranking=JSON.parse(fs.readFileSync('./data/ranking.json'))
-  if(ranking['jajco'][coUsers.jajco]===undefined)
-    ranking['jajco'][coUsers.jajco]=0
-  ranking['jajco'][coUsers.jajco]++
-
-  fs.writeFileSync('./data/ranking.json', JSON.stringify(ranking))
-
-  await client.channels.cache.get(coChannel).send(msg)
-  coChannel=undefined
-  coUsers=undefined
 }
 
 async function updateBearer () {
