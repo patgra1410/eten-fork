@@ -78,15 +78,32 @@ const dailyJob = new cron.CronJob(
 )
 dailyJob.start()
 
-function coCountdown()
+function deleteCountdown(messages)
 {
-  if(coUsers.count>0)
+  for(var msg of messages)
+    msg.delete()
+}
+
+async function coCountdown()
+{
+  if(coUsers.count==0)
+    clearInterval(coUsers.interval)
+
+  if(coUsers.count>=0)
   {
-    client.channels.cache.get(coChannel).send(String(coUsers.count))
+    try {
+      var msg=await client.channels.cache.get(coChannel).send(String(coUsers.count))
+      coUsers.messages.push(msg)
+    } catch(error) {
+      console.log(error)
+    }
+
     coUsers.count--
-    return
+    if(coUsers.count>=0)
+     return
   }
-  let msg='0\n<@'+coUsers.jajco+'> skisłeś'
+  var msg='<@'+coUsers.jajco+'> skisłeś'
+  setTimeout(deleteCountdown.bind(null, coUsers.messages), 10000)
 
   var ranking=JSON.parse(fs.readFileSync('./data/ranking.json'))
   if(ranking['jajco'][coUsers.jajco]===undefined)
@@ -95,8 +112,7 @@ function coCountdown()
 
   fs.writeFileSync('./data/ranking.json', JSON.stringify(ranking))
 
-  client.channels.cache.get(coChannel).send(msg)
-  clearInterval(coUsers.interval)
+  await client.channels.cache.get(coChannel).send(msg)
   coChannel=undefined
   coUsers=undefined
 }
@@ -371,7 +387,7 @@ client.on('messageCreate', async message => {
 
   let messageLower=message.content.toLowerCase()
   if((messageLower.endsWith(' co') || messageLower.endsWith(' co?') || messageLower=='co' || messageLower=='co?') && coChannel===undefined) {
-    coUsers={jajco: message.author.id, daszek: [], count: 10, interval: undefined}
+    coUsers={jajco: message.author.id, daszek: [], count: 10, interval: undefined, messages: []}
     coChannel=message.channel.id
 
     coUsers.interval=setInterval(coCountdown, 1000)
@@ -384,7 +400,22 @@ client.on('messageCreate', async message => {
   }
   if(coChannel!==undefined && message.author.id===coUsers.jajco && message.mentions.users.size>0 && !coUsers.daszek.includes(message.mentions.users.keys().next().value))
   {
-    coUsers.jajco=message.mentions.users.keys().next().value
+    var uid=message.mentions.users.keys().next().value
+    if(uid==client.user.id)
+    {
+      if(Math.random()<=0.01 && !coUsers.daszek.includes('257119850026106880'))
+      {
+        message.channel.send('<@257119850026106880>')
+        coUsers.jajco='257119850026106880'
+        return
+      }
+      else
+      {
+        message.channel.send('Twoja stara')
+        return
+      }
+    }
+    coUsers.jajco=uid
   }
 })
 
