@@ -225,7 +225,7 @@ module.exports=class Board
         for(var i=0; i<=3; i++)
         {
             var uid=this.uids[i]
-            if(settings[uid]['gradient']===undefined)
+            if(settings[uid]===undefined || settings[uid]['gradient']===undefined)
                 return
 
             if(i==0)
