@@ -78,29 +78,29 @@ const dailyJob = new cron.CronJob(
 )
 dailyJob.start()
 
-function deleteCountdown(messages)
+function deleteMessage(message)
 {
-  for(var msg of messages)
-    msg.delete()
+  console.log(message.content)
+  message.delete()
 }
 
 async function coCountdown()
 {
-  try { // i dont know why it crashes
+  try {
     if(coUsers.count==0)
       clearInterval(coUsers.interval)
 
     if(coUsers.count>=0)
     {
-      var msg=await client.channels.cache.get(coChannel).send(String(coUsers.count))
-      coUsers.messages.push(msg)
+      client.channels.cache.get(coChannel).send(String(coUsers.count)).then(message => {
+        setTimeout(deleteMessage.bind(null, message), 10000+parseInt(message.content)*1000)
+      })
 
       coUsers.count--
       if(coUsers.count>=0)
       return
     }
     var msg='<@'+coUsers.jajco+'> skisłeś'
-    setTimeout(deleteCountdown.bind(null, coUsers.messages), 10000)
 
     var ranking=JSON.parse(fs.readFileSync('./data/ranking.json'))
     if(ranking['jajco'][coUsers.jajco]===undefined)
@@ -109,7 +109,7 @@ async function coCountdown()
 
     fs.writeFileSync('./data/ranking.json', JSON.stringify(ranking))
 
-    await client.channels.cache.get(coChannel).send(msg)
+    client.channels.cache.get(coChannel).send(msg)
     coChannel=undefined
     coUsers=undefined
   } catch(error) {
