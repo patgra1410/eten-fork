@@ -80,7 +80,6 @@ dailyJob.start()
 
 function deleteMessage(message)
 {
-  console.log(message.content)
   message.delete()
 }
 
