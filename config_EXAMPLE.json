@@ -3,5 +3,6 @@
 	"token": "YourBotTokenGoesHere",
 	"librusLogin": "user@domain.tld",
 	"librusPass": "password",
-	"pushDevice": "12345678"
+	"pushDevice": "12345678",
+	"guild": "guild id"
 }

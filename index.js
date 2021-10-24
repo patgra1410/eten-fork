@@ -1,6 +1,7 @@
 'use strict'
 
 const Discord = require('discord.js')
+const {  joinVoiceChannel, createAudioPlayer, createAudioResource }=require('@discordjs/voice');
 const config = require('./config.json')
 const fs = require('fs')
 const cron = require('cron')
@@ -8,13 +9,14 @@ const util = require('util')
 const fetch = require('node-fetch')
 const { joinImages } = require('join-images')
 const streamPipeline = util.promisify(require('stream').pipeline)
-const client = new Discord.Client({ intents: [Discord.Intents.FLAGS.GUILDS, Discord.Intents.FLAGS.GUILD_MESSAGES] })
+const client = new Discord.Client({ intents: [Discord.Intents.FLAGS.GUILDS, Discord.Intents.FLAGS.GUILD_MESSAGES, Discord.Intents.FLAGS.GUILD_MEMBERS, Discord.Intents.FLAGS.GUILD_VOICE_STATES] })
 client.commands = new Discord.Collection()
 client.textTriggers = new Discord.Collection()
 
 let librusCurrentBearer
 let dzwonekChannel
 const commandFiles = fs.readdirSync('./commands').filter(file => file.endsWith('.js'))
+var player=createAudioPlayer()
 
 let coChannel=undefined
 let coUsers
@@ -113,6 +115,38 @@ async function coCountdown()
     coUsers=undefined
   } catch(error) {
     console.log(error)
+  }
+}
+
+function sleep(ms) {
+  return new Promise((resolve) => {
+    setTimeout(resolve, ms);
+  });
+}
+
+async function randomSoundOnVoice()
+{
+  var channels=client.guilds.cache.get(config.guild).channels.cache.filter(c => c.type=='GUILD_VOICE')
+  
+  for(var [id, channel] of channels)
+  {
+    if(channel.members.size==0 || Math.random()>=0.01)
+      continue
+
+    var connection=joinVoiceChannel({
+      channelId: channel.id,
+      guildId: channel.guild.id,
+      adapterCreator: channel.guild.voiceAdapterCreator
+    })
+
+    var files = fs.readdirSync('./soundeffects')
+    
+    var resource=createAudioResource('./soundeffects/'+files[Math.floor(Math.random() * files.length)])
+    connection.subscribe(player)
+    player.play(resource)
+    while(player.state.status!='idle')
+      await sleep(100)
+    connection.disconnect()
   }
 }
 
@@ -344,6 +378,8 @@ client.once('ready', async () => {
 
   librusCurrentBearer = await updateBearer()
   setTimeout(getSchoolNoticesJson, 2000)
+
+  setInterval(randomSoundOnVoice, 1000*60)
 })
 
 client.on('messageCreate', async message => {
