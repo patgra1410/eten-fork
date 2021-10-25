@@ -130,7 +130,7 @@ async function randomSoundOnVoice()
   
   for(var [id, channel] of channels)
   {
-    if(channel.members.size==0 || Math.random()>=0.01)
+    if(channel.members.size==0 || Math.random()>=0.005)
       continue
 
     var connection=joinVoiceChannel({
