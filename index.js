@@ -130,7 +130,7 @@ async function randomSoundOnVoice()
   
   for(var [id, channel] of channels)
   {
-    if(channel.members.size==0 || Math.random()>=0.005)
+    if(channel.members.size==0 || Math.random()>=config.randomSoundeffectChance)
       continue
 
     var connection=joinVoiceChannel({
@@ -410,7 +410,8 @@ client.once('ready', async () => {
   librusCurrentBearer = await updateBearer()
   setTimeout(getSchoolNoticesJson, 2000)
 
-  setInterval(randomSoundOnVoice, 1000*60)
+  if(config.playRandomSoundeffects)
+    setInterval(randomSoundOnVoice, 1000*60)
 })
 
 client.on('messageCreate', async message => {
