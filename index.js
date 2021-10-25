@@ -213,6 +213,42 @@ async function updateBearer () {
   return finalJson.accounts[0].accessToken
 }
 
+function splitMessage(message)
+{
+  var res=[]
+  var lastEndl=-1
+  var lastSplit=0
+  var count=0
+  var temp
+  for(var i=0; i<message.length; i++)
+  {
+    count++
+    if(message[i]=='\n')
+      lastEndl=i
+
+    if(count>=1900)
+    {
+      temp=""
+      for(var j=lastSplit; j<=(lastEndl<lastSplit ? lastSplit+1900 : lastEndl) && j<message.length; j++)
+        temp+=message[j]
+      
+      if(/\S/.test(temp))
+        res.push(temp)
+      lastSplit=(lastEndl<lastSplit ? lastSplit+1900 : lastEndl)
+      i=lastSplit+1
+      count=0
+    }
+  }
+
+  temp=""
+  for(var i=lastSplit+1; i<message.length; i++)
+    temp+=message[i]
+  if(/\S/.test(temp))
+    res.push(temp)
+
+  return res
+}
+
 async function getSchoolNoticesJson () {
   try {
     // Get the initial JSON of announcements
@@ -301,14 +337,9 @@ async function getSchoolNoticesJson () {
           text = text.replace(/^.*(3[a-iA-i ]*[A]|3[A-Ia-i ]*[Aa][A-Ia-i ]*3).*$/gm, '<@&885211379408207962> $&')
           // 3C(3)
           text = text.replace(/^.*(3[a-iA-i ]*[C]|3[A-Ia-i ]*[Cc][A-Ia-i ]*3).*$/gm, '<@&885211432025731092> $&')
-          // Truncate if over discord's message limit after previous operations
-          if (text.length > 2000) {
-            console.log('string too long')
-            text = text.slice(0, 1996)
-            text += '...'
-          }
           // Finally, send.
-          await dzwonekChannel.send(text, {split: true})
+          for(var split of splitMessage(text))
+            await dzwonekChannel.send(split)
           console.log(`\x1b[1m${noticeJson.SchoolNotice.Id}  --- Sent!\x1b[0m`)
         }
       } else {
