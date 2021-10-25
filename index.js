@@ -308,7 +308,7 @@ async function getSchoolNoticesJson () {
             text += '...'
           }
           // Finally, send.
-          await dzwonekChannel.send(text)
+          await dzwonekChannel.send(text, {split: true})
           console.log(`\x1b[1m${noticeJson.SchoolNotice.Id}  --- Sent!\x1b[0m`)
         }
       } else {
