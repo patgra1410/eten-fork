@@ -241,7 +241,7 @@ function splitMessage(message)
   }
 
   temp=""
-  for(var i=lastSplit+1; i<message.length; i++)
+  for(var i=lastSplit; i<message.length; i++)
     temp+=message[i]
   if(/\S/.test(temp))
     res.push(temp)
