@@ -12,6 +12,8 @@ module.exports = {
     .setName('pogoda')
     .setDescription('Pogoda z meteo.pl'),
   async execute (interaction) {
+    if(interaction.isCommand!==undefined && interaction.isCommand())
+      await interaction.deferReply()
     const result = await fetch('https://m.meteo.pl/warszawa/60')
     if (!result.ok) throw new Error(`Unexpected response ${result.statusText}`)
     const resultText = await result.text()
@@ -35,6 +37,9 @@ module.exports = {
     const img = await joinImages(['data/leg60.png', 'data/weather.png'], { direction: 'horizontal' })
     await img.toFile('data/weatherFinal.png')
     const weatherAttachment = new Discord.MessageAttachment('./data/weatherFinal.png')
-    interaction.reply({ files: [weatherAttachment] })
+    if(interaction.isCommand!==undefined && interaction.isCommand())
+      await interaction.editReply({ files: [weatherAttachment] })
+    else
+      interaction.reply({ files: [weatherAttachment] })
   }
 }
