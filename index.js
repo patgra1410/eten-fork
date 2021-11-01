@@ -465,7 +465,7 @@ client.on('messageCreate', async message => {
   {
     coUsers.daszek.push(message.author.id)
   }
-  if(coChannel!==undefined && message.author.id===coUsers.jajco && message.mentions.users.size>0 && !coUsers.daszek.includes(message.mentions.users.keys().next().value))
+  if(coChannel!==undefined && message.author.id===coUsers.jajco && message.mentions.users.size>0 && !coUsers.daszek.includes(message.mentions.users.keys().next().value) && message.type!='REPLY')
   {
     var uid=message.mentions.users.keys().next().value
     if(uid==client.user.id)
