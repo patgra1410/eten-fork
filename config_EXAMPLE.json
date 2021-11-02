@@ -6,5 +6,11 @@
 	"pushDevice": "12345678",
 	"guild": "guild id",
 	"playRandomSoundeffects": true,
-	"randomSoundeffectChance": 0.005
+	"randomSoundeffectChance": 0.005,
+	"cronWeather": [
+		{
+			"title": "Warszawa",
+			"link": "https://m.meteo.pl/warszawa/60"
+		}
+	]
 }
