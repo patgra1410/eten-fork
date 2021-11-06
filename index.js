@@ -72,7 +72,7 @@ const dailyJob = new cron.CronJob(
         await img.toFile('data/weatherFinal.png')
         const weatherAttachment = new Discord.MessageAttachment('./data/weatherFinal.png')
 
-        if(config.cronWeather.length==0)
+        if(config.cronWeather.length==1)
           dzwonekChannel.send({ files: [weatherAttachment] })
         else
           dzwonekChannel.send({ content: city.title+':', files: [weatherAttachment] })
