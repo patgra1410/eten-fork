@@ -56,12 +56,12 @@ module.exports = {
     }
     else
     {
-      const result = await fetch('https://m.meteo.pl/warszawa/60')
+      var result = await fetch('https://m.meteo.pl/warszawa/60')
       if (!result.ok) throw new Error(`Unexpected response ${result.statusText}`)
-      const resultText = await result.text()
-      const imageRegex = /src="(https:\/\/www\.meteo\.pl\/um\/metco\/mgram_pict\.php\?ntype=0u&fdate=[0-9]+&row=406&col=250&lang=pl)"/g
-      const link = imageRegex.exec(resultText)[1]
-      const imgResult = await fetch(link, {
+      var resultText = await result.text()
+      var imageRegex = /src="(https:\/\/www\.meteo\.pl\/um\/metco\/mgram_pict\.php\?ntype=0u&fdate=[0-9]+&row=406&col=250&lang=pl)"/g
+      var link = imageRegex.exec(resultText)[1]
+      var imgResult = await fetch(link, {
         headers: {
           Accept: 'image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8',
           'Accept-Encoding': 'gzip, deflate, br',
