@@ -345,6 +345,45 @@ async function getSchoolNoticesJson () {
           text = text.replace(/^.*(3[a-iA-i ]*[A]|3[A-Ia-i ]*[Aa][A-Ia-i ]*3).*$/gm, '<@&885211379408207962> $&')
           // 3C(3)
           text = text.replace(/^.*(3[a-iA-i ]*[C]|3[A-Ia-i ]*[Cc][A-Ia-i ]*3).*$/gm, '<@&885211432025731092> $&')
+
+          // grupy
+          var res=''
+          for(var line of text.split('\n'))
+          {
+            if(!((line.search('<@&885211432025731092>')!=-1 || line.search('<@&885211379408207962>')!=-1) && line.search('gr. p. ')!=-1))
+            {
+              res+=line+'\n'
+              continue
+            }
+
+            for(var [id, role] of client.guilds.cache.get(config.guild).roles.cache.entries())
+            {
+              if(role.name.substring(0,2)=='3A' && line.search('<@&885211379408207962>')!=-1 && role.name.search('-')!=-1)
+              { 
+                var grupa=role.name.split('- ')[1]
+
+                if(line.search(grupa)!=-1)
+                {
+                  line=line.replace('<@&885211379408207962>', '<@&'+id+'>')
+                  res+=line+'\n'
+                  break
+                }
+              }
+              if(role.name.substring(0,2)=='3C' && line.search('<@&885211432025731092>')!=-1 && role.name.search('-')!=-1)
+              { 
+                var grupa=role.name.split('- ')[1]
+
+                if(line.search(grupa)!=-1)
+                {
+                  line=line.replace('<@&885211432025731092>', '<@&'+id+'>')
+                  res+=line+'\n'
+                  break
+                }
+              }
+            }
+          }
+          text=res
+
           // Finally, send.
           for(var split of splitMessage(text))
             await dzwonekChannel.send(split)
