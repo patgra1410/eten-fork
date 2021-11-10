@@ -356,31 +356,41 @@ async function getSchoolNoticesJson () {
               continue
             }
 
+            var replaceWith=''
             for(var [id, role] of client.guilds.cache.get(config.guild).roles.cache.entries())
             {
               if(role.name.substring(0,2)=='3A' && line.search('<@&885211379408207962>')!=-1 && role.name.search('-')!=-1)
               { 
                 var grupa=role.name.split('- ')[1]
 
-                if(line.search(grupa)!=-1)
+                if(line.search(grupa)!=-1 || line.search(role.name.split('gr. p. ')[1])!=-1)
                 {
-                  line=line.replace('<@&885211379408207962>', '<@&'+id+'>')
-                  res+=line+'\n'
-                  break
+                  if(replaceWith!='')
+                    replaceWith+=' '
+                  replaceWith+='<@&'+id+'>'
                 }
               }
               if(role.name.substring(0,2)=='3C' && line.search('<@&885211432025731092>')!=-1 && role.name.search('-')!=-1)
               { 
                 var grupa=role.name.split('- ')[1]
 
-                if(line.search(grupa)!=-1)
+                if(line.search(grupa)!=-1 || line.search(role.name.split('gr. p. ')[1])!=-1)
                 {
-                  line=line.replace('<@&885211432025731092>', '<@&'+id+'>')
-                  res+=line+'\n'
-                  break
+                  if(replaceWith!='')
+                    replaceWith+=' '
+                  replaceWith+='<@&'+id+'>'
                 }
               }
             }
+
+            if(replaceWith!='')
+            {
+              if(line.search('<@&885211432025731092>')!=-1)
+                line=line.replace('<@&885211432025731092>', replaceWith)
+              if(line.search('<@&885211379408207962>')!=-1)
+                line=line.replace('<@&885211379408207962>', replaceWith)
+            }
+            res+=line+'\n'
           }
           text=res
 
