@@ -167,8 +167,16 @@ module.exports={
                                     .setCustomId('teampilkarzyki#acceptNo#'+buttonsID)
                                     .setStyle('PRIMARY')
                             )
-                        // accepts[acceptID]['message'].edit({content: msg, components: [row]})
-                        interaction.update({content: msg, components: [row]})
+                        
+                        var error=false
+                        do {
+                            try {
+                                interaction.update({content: msg, components: [row]})
+                            } catch(err) {
+                                error=true
+                                console.log(err)
+                            }
+                        } while(error)
                         return
                     }
 
@@ -210,8 +218,16 @@ module.exports={
 
                     var msg='Tura: <@'+boards[id].turnUID()+'>\n'+img.attachments.first().url
 
-                    var message=await interaction.update({content: msg, files: [], components: buttons(id)})
-                    boards[id].message=message
+                    var error=false
+                    do {
+                        try {
+                            var message=await interaction.update({content: msg, files: [], components: buttons(id)})
+                            boards[id].message=message
+                        } catch(err) {
+                            error=true
+                            console.log(err)
+                        }
+                    } while(error)
                 }
             }
             if(uids[interaction.user.id]===undefined)
@@ -246,7 +262,16 @@ module.exports={
                     var img=await interaction.client.guilds.cache.get('856926964094337044').channels.cache.get('892842178143997982').send({files: [attachment]})
                     
                     var msg="<@"+boards[boardID].uids[losers]+'> i <@'+boards[boardID].uids[losers+2]+'> poddali się\n'+img.attachments.first().url
-                    await interaction.update({content: msg, components: []})
+
+                    var error=false
+                    do {
+                        try {
+                            await interaction.update({content: msg, components: []})
+                        } catch(err) {
+                            error=true
+                            console.log(err)
+                        }
+                    } while(error)
 
                     var wholeRanking=JSON.parse(fs.readFileSync('./data/ranking.json'))
                     var ranking=wholeRanking['teampilkarzyki']
@@ -310,7 +335,16 @@ module.exports={
                     const attachment = new Discord.MessageAttachment('./data/boardTeamPilkarzyki'+uids[interaction.user.id]+'.png')
                     var img=await interaction.client.guilds.cache.get('856926964094337044').channels.cache.get('892842178143997982').send({files: [attachment]})
                     var msg='Remis\n'+img.attachments.first().url
-                    await interaction.update({content: msg, components: []})
+
+                    var error=false
+                    do {
+                        try {
+                            await interaction.update({content: msg, components: []})
+                        } catch(err) {
+                            error=true
+                            console.log(err)
+                        }
+                    } while(error)
 
                     var wholeRanking=JSON.parse(fs.readFileSync('./data/ranking.json'))
                     var guids=boards[boardID].uids
@@ -396,8 +430,17 @@ module.exports={
             var img=await interaction.client.guilds.cache.get('856926964094337044').channels.cache.get('892842178143997982').send({files: [attachment]})
 
             msg+='\n'+img.attachments.first().url
-            var message=await interaction.update({content: msg, components: components})
-            boards[boardID].message=message
+            
+            var error=false
+            do {
+                try {
+                    var message=await interaction.update({content: msg, components: components})
+                    boards[boardID].message=message
+                } catch(err) {
+                    error=true
+                    console.log(err)
+                }
+            } while(error)
 
             if(boards[boardID].win!=-1)
             {
@@ -552,9 +595,17 @@ module.exports={
             )
         
         var msg='Drużynowe piłarzyki: <@'+guids[0]+'> i <@'+guids[2]+'> przeciwko <@'+guids[1]+'> i <@'+guids[3]+'>'    
-        var message=await interaction.reply({content: msg, components: [row], fetchReply: true})
+        var error=false
+        do {
+            try {
+                var message=await interaction.reply({content: msg, components: [row], fetchReply: true})
+                newAccept['message']=message
+            } catch(err) {
+                error=true
+                console.log(err)
+            }
+        } while(error)
 
-        newAccept['message']=message
         accepts[newAcceptID]=newAccept
         newAcceptID++
     }

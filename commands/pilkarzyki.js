@@ -181,9 +181,16 @@ module.exports = {
                     
                     var msg='Tura: <@'+boards[id].turnUID()+'>\n'+img.attachments.first().url
 
-                    var message=await interaction.update({content: msg, files: [], components: buttons(id)})
-                    // var message=await interaction.reply({content: msg, files: [attachment], components: buttons(id)})
-                    boards[id].message=message
+                    var error=false
+                    do {
+                        try {
+                            var message=await interaction.update({content: msg, files: [], components: buttons(id)})
+                            boards[id].message=message
+                        } catch(err) {
+                            error=true
+                            console.log(err)
+                        }
+                    } while(error)
                 }
             }
             if(uids[interaction.user.id]===undefined)
@@ -241,7 +248,16 @@ module.exports = {
                 const attachment = new Discord.MessageAttachment('./data/boardPilkarzyki'+uids[interaction.user.id]+'.png')
                 var img=await interaction.client.guilds.cache.get('856926964094337044').channels.cache.get('892842178143997982').send({files: [attachment]})
                 var msg='<@'+winner+'> wygrał przez poddanie się\n'+img.attachments.first().url 
-                var message=await interaction.update({content: msg, files: [], components: []}) 
+
+                var error=false
+                do {
+                    try {
+                        var message=await interaction.update({content: msg, files: [], components: []}) 
+                    } catch(err) {
+                        error=true
+                        console.log(err)
+                    }
+                } while(error)
                 
                 boards[uids[interaction.user.id]].removeBoard()
                 delete boards[uids[interaction.user.id]]
@@ -272,7 +288,16 @@ module.exports = {
                     const attachment = new Discord.MessageAttachment('./data/boardPilkarzyki'+uids[interaction.user.id]+'.png')
                     var img=await interaction.client.guilds.cache.get('856926964094337044').channels.cache.get('892842178143997982').send({files: [attachment]})
                     var msg='Remis\n'+img.attachments.first().url
-                    var message=await interaction.update({content: msg, files: [], components: []})
+
+                    var error=false
+                    do {
+                        try {
+                            var message=await interaction.update({content: msg, files: [], components: []})
+                        } catch(err) {
+                            error=true
+                            console.log(err)
+                        }
+                    } while(error)
                     
                     var gameuids=boards[uids[interaction.user.id]].uids
 
@@ -358,9 +383,18 @@ module.exports = {
 
             // var message=await boards[uids[interaction.user.id]].message.channel.send({content: msg, files: [attachment], components: components})
             msg+='\n'+img.attachments.first().url
-            var message=await interaction.update({content: msg, files: [], components: components})
-            boards[uids[interaction.user.id]].message=message
 
+            var error=false
+            do {
+                try {
+                    var message=await interaction.update({content: msg, files: [], components: components})
+                    boards[uids[interaction.user.id]].message=message
+                } catch(err) {
+                    error=true
+                    console.log(err)
+                }
+            } while(error)
+            
             if(boards[uids[interaction.user.id]].win!=-1)
             {
                 var ranking=JSON.parse(fs.readFileSync('./data/ranking.json'))
@@ -491,8 +525,17 @@ module.exports = {
             )
 
         var msg="<@"+uid2+'>: '+usernames[0]+' chce z tobą zagrać'
-        var message=await interaction.reply({content: msg, components: [row], fetchReply: true})
-        newAccept['message']=message
+
+        var error=false
+        do {
+            try {
+                var message=await interaction.reply({content: msg, components: [row], fetchReply: true})
+                newAccept['message']=message
+            } catch(err) {
+                error=true
+                console.log(err)
+            }
+        } while(error)
         accepts.push(newAccept)
   }
 }
