@@ -350,7 +350,7 @@ async function getSchoolNoticesJson () {
           var res=''
           for(var line of text.split('\n'))
           {
-            if(!((line.search('<@&885211432025731092>')!=-1 || line.search('<@&885211379408207962>')!=-1) && line.search('gr. p. ')!=-1))
+            if(!((line.search('<@&885211432025731092>')!=-1 || line.search('<@&885211379408207962>')!=-1) && line.toLowerCase().search('gr. p. ')!=-1))
             {
               res+=line+'\n'
               continue
@@ -361,9 +361,9 @@ async function getSchoolNoticesJson () {
             {
               if(role.name.substring(0,2)=='3A' && line.search('<@&885211379408207962>')!=-1 && role.name.search('-')!=-1)
               { 
-                var grupa=role.name.split('- ')[1]
+                var roleLower=role.name.toLowerCase()
 
-                if(line.search(grupa)!=-1 || line.search(role.name.split('gr. p. ')[1])!=-1)
+                if(line.toLowerCase().search(roleLower.split('- ')[1])!=-1 || line.toLowerCase().search(roleLower.split('gr. p. ')[1])!=-1)
                 {
                   if(replaceWith!='')
                     replaceWith+=' '
@@ -372,9 +372,9 @@ async function getSchoolNoticesJson () {
               }
               if(role.name.substring(0,2)=='3C' && line.search('<@&885211432025731092>')!=-1 && role.name.search('-')!=-1)
               { 
-                var grupa=role.name.split('- ')[1]
+                var roleLower=role.name.toLowerCase()
 
-                if(line.search(grupa)!=-1 || line.search(role.name.split('gr. p. ')[1])!=-1)
+                if(line.toLowerCase().search(roleLower.split('- ')[1])!=-1 || line.toLowerCase().search(roleLower.split('gr. p. ')[1])!=-1)
                 {
                   if(replaceWith!='')
                     replaceWith+=' '
