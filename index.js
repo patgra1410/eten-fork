@@ -541,6 +541,10 @@ client.on('messageCreate', async message => {
     }
     coUsers.jajco=uid
   }
+  if(message.content.toLowerCase().search('rozpierdol kota')!=-1)
+  {
+    client.commands.get('cursedkoteł').execute(message)
+  }
 })
 
 client.on('interactionCreate', async interaction => {
