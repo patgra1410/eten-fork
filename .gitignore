@@ -6,6 +6,7 @@ data/weather.png
 data/weatherFinal.png
 data/*
 test.js
+soundeffects/*
 
 # Logs
 logs
