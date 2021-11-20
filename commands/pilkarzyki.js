@@ -116,6 +116,11 @@ module.exports = {
             subcommand
                 .setName('bot')
                 .setDescription('Gra z botem')
+                .addIntegerOption(option => 
+                    option
+                        .setName('depth')
+                        .setDescription('Głębokość patrzenia (max. '+config.pilkarzykiBot.maxDepth+')')
+                        .setRequired(true))
             )
         ,
     async execute (interaction, args) {
@@ -481,10 +486,9 @@ module.exports = {
                 }
                 if(boards[gID].turnUID()==interaction.user.id)
                     return
-                    
                 
                 var start=performance.now()
-                var move=bots[bid].ext_board.search(config.pilkarzykiBot.depth, boards[gID].turn, -2000, 2000)[1]
+                var move=bots[bid].ext_board.search(bots[bid].depth, boards[gID].turn, -2000, 2000)[1]
                 var end=performance.now()
 
                 msg='Bot myślał '+(Math.round((end-start)*100)/100)+'ms\n'+img.attachments.first().url
@@ -704,6 +708,12 @@ module.exports = {
             }
             else if (interaction.options.getSubcommand() === 'bot')
             {
+                var depth=interaction.options.getInteger('depth')
+                if(depth<=0 || depth>config.pilkarzykiBot.maxDepth)
+                {
+                    interaction.editReply('Podałeś złą głębokość. Powinna być w przedziale [1, '+config.pilkarzykiBot.maxDepth+']')
+                    return
+                }
                 var uid=interaction.user.id
                 var bid=botID
                 var id=gameID
@@ -712,7 +722,7 @@ module.exports = {
 
                 uids[uid]=gameID
                 boards[gameID]=new Board(50, 50, 50, [uid, bid], usernames, gameID, true)
-                bots[bid]={gameID: gameID, ext_board: new ExtBoard(boards[gameID], 9, 13)}
+                bots[bid]={gameID: gameID, ext_board: new ExtBoard(boards[gameID], 9, 13), depth: depth}
                 gameID++
                 
                 for(var i=1; i<=10; i++)
