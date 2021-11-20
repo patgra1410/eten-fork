@@ -7,6 +7,7 @@ const Elo=require('elo-rating')
 const { performance }=require('perf_hooks')
 const { SlashCommandBuilder, SlashCommandUserOption } = require('@discordjs/builders')
 const ExtBoard=require('../bot.js')
+const config = require('../config.json')
 
 var uids={}
 var bots={}
@@ -120,6 +121,8 @@ module.exports = {
     async execute (interaction, args) {
         if(interaction.isButton!==undefined && interaction.isButton())
         {
+            var mainMessage=await interaction.update({content: interaction.message.content, components: interaction.message.components, fetchReply: true})
+
             interaction.customId=interaction.customId.slice(interaction.customId.indexOf('#')+1)
             if(interaction.customId.startsWith('accept'))
             {
@@ -205,11 +208,12 @@ module.exports = {
                     var error=false
                     do {
                         try {
-                            var message=await interaction.update({content: msg, files: [], components: buttons(id)})
+                            var message=await mainMessage.edit({content: msg, files: [], components: buttons(id)})
                             boards[id].message=message
                         } catch(err) {
                             error=true
                             console.log(err)
+                            await sleep(1000)
                         }
                     } while(error)
                 }
@@ -239,10 +243,11 @@ module.exports = {
                     var error=false
                     do {
                         try {
-                            var message=await interaction.update({content: msg, files: [], components: []}) 
+                            var message=await mainMessage.edit({content: msg, files: [], components: []}) 
                         } catch(err) {
                             error=true
                             console.log(err)
+                            await sleep(1000)
                         }
                     } while(error)
 
@@ -308,10 +313,11 @@ module.exports = {
                 var error=false
                 do {
                     try {
-                        var message=await interaction.update({content: msg, files: [], components: []}) 
+                        var message=await mainMessage.edit({content: msg, files: [], components: []}) 
                     } catch(err) {
                         error=true
                         console.log(err)
+                        await sleep(1000)
                     }
                 } while(error)
                 
@@ -351,10 +357,11 @@ module.exports = {
                     var error=false
                     do {
                         try {
-                            var message=await interaction.update({content: msg, files: [], components: []})
+                            var message=await mainMessage.edit({content: msg, files: [], components: []})
                         } catch(err) {
                             error=true
                             console.log(err)
+                            await sleep(1000)
                         }
                     } while(error)
                     
@@ -455,15 +462,14 @@ module.exports = {
                 var error=false
                 do {
                     try {
-                        var message=await interaction.update({content: msg, files: [], components: components, fetchReply: true})
-                        console.log(message)
+                        var message=await mainMessage.edit({content: msg, components: components})
                         boards[gID].message=message
                     } catch(err) {
                         error=true
                         console.log(err)
+                        await sleep(1000)
                     }
                 } while(error)
-  
 
                 if(boards[gID].win!=-1)
                 {
@@ -478,7 +484,7 @@ module.exports = {
                     
                 
                 var start=performance.now()
-                var move=bots[bid].ext_board.search(3, boards[gID].turn, -2000, 2000)[1]
+                var move=bots[bid].ext_board.search(config.pilkarzykiBot.depth, boards[gID].turn, -2000, 2000)[1]
                 var end=performance.now()
 
                 msg='Bot myślał '+(Math.round((end-start)*100)/100)+'ms\n'+img.attachments.first().url
@@ -486,11 +492,12 @@ module.exports = {
                 var error=false
                 do {
                     try {
-                        var message=await boards[gID].message.edit({content: msg, files: [], components: [], fetchReply: true})
+                        var message=await boards[gID].message.edit({content: msg, files: [], components: []})
                         boards[gID].message=message
                     } catch(err) {
                         error=true
                         console.log(err)
+                        await sleep(1000)
                     }
                 } while(error)
 
@@ -526,11 +533,12 @@ module.exports = {
                     var error=false
                     do {
                         try {
-                            var message=await boards[gID].message.edit({content: msg, files: [], components: [], fetchReply: true})
+                            var message=await boards[gID].message.edit({content: msg, files: [], components: []})
                             boards[gID].message=message
                         } catch(err) {
                             error=true
                             console.log(err)
+                            await sleep(1000)
                         }
                     } while(error)
                 }   
@@ -558,11 +566,12 @@ module.exports = {
                     var error=false
                     do {
                         try {
-                            var message=await boards[gID].message.edit({content: msg, files: [], components: [], fetchReply: true})
+                            var message=await boards[gID].message.edit({content: msg, files: [], components: []})
                             boards[gID].message=message
                         } catch(err) {
                             error=true
                             console.log(err)
+                            await sleep(1000)
                         }
                     } while(error)
 
@@ -578,11 +587,12 @@ module.exports = {
                 var error=false
                 do {
                     try {
-                        var message=await boards[gID].message.edit({content: msg, files: [], components: buttons(gID), fetchReply: true})
+                        var message=await boards[gID].message.edit({content: msg, files: [], components: buttons(gID)})
                         boards[gID].message=message
                     } catch(err) {
                         error=true
                         console.log(err)
+                        await sleep(1000)
                     }
                 } while(error)
 
@@ -628,11 +638,12 @@ module.exports = {
             var error=false
             do {
                 try {
-                    var message=await interaction.update({content: msg, files: [], components: components})
+                    var message=await mainMessage.edit({content: msg, files: [], components: components})
                     boards[uids[interaction.user.id]].message=message
                 } catch(err) {
                     error=true
                     console.log(err)
+                    await sleep(1000)
                 }
             } while(error)
             
@@ -682,6 +693,8 @@ module.exports = {
         }
         
         if (interaction.isCommand!==undefined && interaction.isCommand()) {
+            await interaction.deferReply()
+
             if (interaction.options.getSubcommand() === 'player')
             {
                 var secondUser=interaction.options.getUser('gracz')
@@ -722,56 +735,37 @@ module.exports = {
                 var error=false
                 do {
                     try {
-                        var message=await interaction.reply({content: msg, files: [], components: buttons(id)})
+                        var message=await interaction.editReply({content: msg, files: [], components: buttons(id)})
                         boards[id].message=message
                     } catch(err) {
                         error=true
                         console.log(err)
+                        await sleep(1000)
                     }
                 } while(error)
 
                 return
             }
         } else {
-            if(args===undefined)
-            {
-                return
-            }
-    
-            if(args.length>=1 && args[0]=='save')
-            {
-                for([key, value] of Object.entries(boards))
-                {
-                    value.dump(key)
-                }
-                return
-            }
-    
-            if(args.length<1 || interaction.mentions.users.length==0)
-            {
-                interaction.reply('Potrzebny jest drugi gracz')
-                return
-            }
-            var uid2=interaction.mentions.users.keys().next().value
-            var uid1=interaction.author.id
-            var usernames=[interaction.author.username, interaction.mentions.users.entries().next().value[1].username]
+            interaction.reply('Deprecated (zbyt dużo pisania przy nie slash komendach)')
+            return
         }
         
 
         if(uids[uid1]!==undefined)
         {
-            interaction.reply('Już grasz w grę')
+            interaction.editReply('Już grasz w grę')
             return
         }
         if(uids[uid2]!==undefined)
         {
-            interaction.reply('<@'+uid2+'> już gra w grę')
+            interaction.editReply('<@'+uid2+'> już gra w grę')
             return
         }
 
         if(uid1===uid2)
         {
-            interaction.reply('Nie możesz grać z samym sobą')
+            interaction.editReply('Nie możesz grać z samym sobą')
             return
         }
 
@@ -792,7 +786,7 @@ module.exports = {
         {
             if(accepts[i]['uidToAccept']==uid2 && accepts[i]['acceptFrom']==uid1)
             {
-                await interaction.reply({content: 'Już wyzwałeś tą osobę.'})
+                await interaction.editReply({content: 'Już wyzwałeś tą osobę.'})
                 return
             }
         }
@@ -816,11 +810,12 @@ module.exports = {
         var error=false
         do {
             try {
-                var message=await interaction.reply({content: msg, components: [row], fetchReply: true})
+                var message=await interaction.editReply({content: msg, components: [row], fetchReply: true})
                 newAccept['message']=message
             } catch(err) {
                 error=true
                 console.log(err)
+                await sleep(1000)
             }
         } while(error)
         accepts.push(newAccept)

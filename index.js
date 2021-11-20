@@ -1,7 +1,7 @@
 'use strict'
 
 const Discord = require('discord.js')
-const {  joinVoiceChannel, createAudioPlayer, createAudioResource }=require('@discordjs/voice');
+const {  joinVoiceChannel, createAudioPlayer, createAudioResource }=require('@discordjs/voice')
 const config = require('./config.json')
 const fs = require('fs')
 const cron = require('cron')

@@ -3,6 +3,9 @@ const Board=require('./pilkarzykiRenderer.js')
 const process = require('process')
 const { performance } = require('perf_hooks')
 const PriorityQueue = require('js-priority-queue')
+const config = require('./config.json')
+
+var evalFunction = require('./evaluation.js')
 
 var directions = [[-1, -1], [0, -1], [1, -1], [-1, 0], [1, 0], [-1, 1], [0, 1], [1, 1]]
 // var DEBUG = false
@@ -108,12 +111,12 @@ module.exports=class ExtBoard {
 
 	single(s, t, canGoFurther) {
 		if (s[0] == t[0] && s[1] == t[1])
-			return [[this.eval(), []]]
+			return [[evalFunction(this.ball), []]]
 
 		if (s[0] == 1 || s[0] == 11)
 		{
 			if (t[0] == 1 || t[0] == 11)
-				return [[this.eval(), []]]
+				return [[evalFunction(this.ball), []]]
 			return null
 		}
 
@@ -179,22 +182,6 @@ module.exports=class ExtBoard {
 		return this.single(s, t, true)
 	}
 
-	eval() {
-		// right goal
-		if (this.ball[0] == 11) {
-			return 1000
-		}
-		// left goal
-		if (this.ball[0] == 1) {
-			return -1000
-		}
-
-		// very poor evaluation...
-		// TODO: make it not poor
-
-		return (this.ball[0] - 6)*(this.ball[0] - 6)
-	}
-
 	BFS(start) {
 		var points = [start]
 		var vis = this.createArray(this.size_ver, this.size_hor, 1, false)
@@ -234,7 +221,7 @@ module.exports=class ExtBoard {
 	search(depth, player, alpha, beta) {
 		var best = [(player ? 2000 : -2000), []]
 
-		var evaluation = this.eval()
+		var evaluation = evalFunction(this.ball)
 		if ((depth == 0) || (Math.abs(evaluation) == 1000))
 			return [evaluation, []]
 
