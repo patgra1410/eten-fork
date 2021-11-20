@@ -505,9 +505,11 @@ module.exports = {
                     }
                 } while(error)
 
-                console.log(move)
+                console.log((Math.round((end-start)*100)/100)+'ms', move)
+                var num=0
                 for(var dir of move)
                 {
+                    num++
                     await sleep(500)
 
                     var ind=boards[gID].possibleMovesIndexes()
@@ -516,6 +518,9 @@ module.exports = {
                         console.log('AAAAAAAAAAAAaAAAAAaaa')
                         return
                     }
+                    
+                    if(num==move.length)
+                        continue
 
                     for(var i=1; i<=10; i++)
                     {
