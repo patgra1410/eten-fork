@@ -501,6 +501,10 @@ client.on('messageCreate', async message => {
     const command = args.shift().toLowerCase()
 
     if (!client.commands.has(command)) return
+
+    interaction.reply('Deprecated. Jebać (wszystkie) nie slashowe komendy')
+    return
+  
     try {
       await client.commands.get(command).execute(message, args)
     } catch (error) {
