@@ -1,12 +1,18 @@
+'use strict'
+
 const Board=require('../pilkarzykiRenderer.js')
 const Discord = require('discord.js')
 const fs=require('fs')
 const Elo=require('elo-rating')
+const { performance }=require('perf_hooks')
 const { SlashCommandBuilder, SlashCommandUserOption } = require('@discordjs/builders')
+const ExtBoard=require('../bot.js')
 
 var uids={}
+var bots={}
 var boards={}
 var gameID=1
+var botID=1
 var accepts=[]
 
 function buttons(id)
@@ -15,7 +21,8 @@ function buttons(id)
     if(boards[id].turn==0)
         var style='PRIMARY'
     else
-        var style='DANGER'
+        if(!boards[id].withBot)
+            var style='DANGER'
 
     var row1=new Discord.MessageActionRow()
             .addComponents(
@@ -86,16 +93,30 @@ function buttons(id)
     return [row1, row2, row3, row4]
 }
 
+function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('pilkarzyki')
         .setDescription('Pilkarzyki')
-        .addUserOption(
-            new SlashCommandUserOption()
-                .setName('gracz')
-                .setDescription('Drugi gracz')
-                .setRequired(true)
-            ),
+        .addSubcommand(subcommand => 
+            subcommand
+                .setName('player')
+                .setDescription('Gra z innym graczem')
+                .addUserOption(
+                    new SlashCommandUserOption()
+                        .setName('gracz')
+                        .setDescription('Drugi gracz')
+                        .setRequired(true)
+                    ))
+        .addSubcommand(subcommand => 
+            subcommand
+                .setName('bot')
+                .setDescription('Gra z botem')
+            )
+        ,
     async execute (interaction, args) {
         if(interaction.isButton!==undefined && interaction.isButton())
         {
@@ -176,7 +197,7 @@ module.exports = {
                                 console.log(error)
                         }
                     }
-                    const attachment = new Discord.MessageAttachment('./data/boardPilkarzyki'+id+'.png')
+                    var attachment = new Discord.MessageAttachment('./data/boardPilkarzyki'+id+'.png')
                     var img=await interaction.client.guilds.cache.get('856926964094337044').channels.cache.get('892842178143997982').send({files: [attachment]})
                     
                     var msg='Tura: <@'+boards[id].turnUID()+'>\n'+img.attachments.first().url
@@ -198,6 +219,41 @@ module.exports = {
 
             if(interaction.customId=='surrender')
             {
+                if(boards[uids[interaction.user.id]].withBot)
+                {
+                    for(var i=1; i<=10; i++)
+                    {
+                        try {
+                            boards[uids[interaction.user.id]].draw()
+                            break
+                        } catch(error) {
+                            console.log('Draw failed '+i+'. time(s) color: '+boards[uids[interaction.user.id]].lastColor+' '+boards[uids[interaction.user.id]].lastColor.toString(16))
+                            if(i==10)
+                                console.log(error)
+                        }
+                    }
+                    var attachment = new Discord.MessageAttachment('./data/boardPilkarzyki'+uids[interaction.user.id]+'.png')
+                    var img=await interaction.client.guilds.cache.get('856926964094337044').channels.cache.get('892842178143997982').send({files: [attachment]})
+                    var msg='<@'+interaction.user.id+'> poddał się\n'+img.attachments.first().url 
+    
+                    var error=false
+                    do {
+                        try {
+                            var message=await interaction.update({content: msg, files: [], components: []}) 
+                        } catch(err) {
+                            error=true
+                            console.log(err)
+                        }
+                    } while(error)
+
+                    var bid=boards[uids[interaction.user.id]].uids[1-boards[uids[interaction.user.id]].uids.indexOf(interaction.user.id)]
+                    boards[uids[interaction.user.id]].removeBoard()
+                    delete bots[bid]
+                    delete boards[uids[interaction.user.id]]
+                    delete uids[interaction.user.id]
+
+                    return
+                }
                 var ranking=JSON.parse(fs.readFileSync('./data/ranking.json'))
                 var gameuids=boards[uids[interaction.user.id]].uids
 
@@ -245,7 +301,7 @@ module.exports = {
                             console.log(error)
                     }
                 }
-                const attachment = new Discord.MessageAttachment('./data/boardPilkarzyki'+uids[interaction.user.id]+'.png')
+                var attachment = new Discord.MessageAttachment('./data/boardPilkarzyki'+uids[interaction.user.id]+'.png')
                 var img=await interaction.client.guilds.cache.get('856926964094337044').channels.cache.get('892842178143997982').send({files: [attachment]})
                 var msg='<@'+winner+'> wygrał przez poddanie się\n'+img.attachments.first().url 
 
@@ -268,6 +324,9 @@ module.exports = {
             }
             else if(interaction.customId=='remis')
             {
+                if(boards[uids[interaction.user.id]].withBot)
+                    return
+
                 if(boards[uids[interaction.user.id]].remis.includes(interaction.user.id))
                     return
                 
@@ -285,7 +344,7 @@ module.exports = {
                                 console.log(error)
                         }
                     }
-                    const attachment = new Discord.MessageAttachment('./data/boardPilkarzyki'+uids[interaction.user.id]+'.png')
+                    var attachment = new Discord.MessageAttachment('./data/boardPilkarzyki'+uids[interaction.user.id]+'.png')
                     var img=await interaction.client.guilds.cache.get('856926964094337044').channels.cache.get('892842178143997982').send({files: [attachment]})
                     var msg='Remis\n'+img.attachments.first().url
 
@@ -321,7 +380,7 @@ module.exports = {
                     return
                 }
             }
-            else
+            else if(!boards[uids[interaction.user.id]].withBot)
             {
                 if(interaction.user.id!=boards[uids[interaction.user.id]].turnUID())
                     return
@@ -347,6 +406,188 @@ module.exports = {
                     fs.writeFileSync('./data/ranking.json', JSON.stringify(ranking))
                 }
             }
+            else
+            {
+                var gID=uids[interaction.user.id]
+                var bid=boards[gID].uids[1-boards[gID].uids.indexOf(interaction.user.id)]  
+                var indexes=boards[gID].possibleMovesIndexes()
+                if(!indexes.includes(parseInt(interaction.customId)))
+                    return
+                if(!boards[gID].move(indexes.indexOf(parseInt(interaction.customId))))
+                    return
+                
+                bots[bid].ext_board.makeMove([interaction.customId])
+                
+                for(var i=1; i<=10; i++)
+                {
+                    try {
+                        boards[gID].draw()
+                        break
+                    } catch(error) {
+                        console.log('Draw failed '+i+'. time(s) color: '+boards[gID].lastColor+' '+boards[uids[interaction.user.id]].lastColor.toString(16))
+                        if(i==10)
+                            console.log(error)
+                    }
+                }
+                var attachment = new Discord.MessageAttachment('./data/boardPilkarzyki'+gID+'.png')
+                var img=await interaction.client.guilds.cache.get('856926964094337044').channels.cache.get('892842178143997982').send({files: [attachment]})
+
+                if(boards[gID].win!=-1)
+                {
+                    if(boards[gID].usernames[boards[gID].win]==interaction.user.username)
+                        var msg='<@'+interaction.user.id+'> wygrał!'
+                    else
+                        var msg='Bot wygrał!'
+                }
+                else if(boards[gID].turnUID()==interaction.user.id)
+                {
+                    var components=buttons(gID)
+                    var msg='Tura: <@'+interaction.user.id+'>'
+                }
+                else
+                {
+                    var components=[]
+                    var msg='Bot myśli...'
+                }
+                
+                msg+='\n'+img.attachments.first().url
+
+                var error=false
+                do {
+                    try {
+                        var message=await interaction.update({content: msg, files: [], components: components, fetchReply: true})
+                        console.log(message)
+                        boards[gID].message=message
+                    } catch(err) {
+                        error=true
+                        console.log(err)
+                    }
+                } while(error)
+  
+
+                if(boards[gID].win!=-1)
+                {
+                    boards[gID].removeBoard()
+                    delete bots[bid]
+                    delete boards[gID]
+                    delete uids[interaction.user.id]
+                    return
+                }
+                if(boards[gID].turnUID()==interaction.user.id)
+                    return
+                    
+                
+                var start=performance.now()
+                var move=bots[bid].ext_board.search(3, boards[gID].turn, -2000, 2000)[1]
+                var end=performance.now()
+
+                msg='Bot myślał '+(Math.round((end-start)*100)/100)+'ms\n'+img.attachments.first().url
+
+                var error=false
+                do {
+                    try {
+                        var message=await boards[gID].message.edit({content: msg, files: [], components: [], fetchReply: true})
+                        boards[gID].message=message
+                    } catch(err) {
+                        error=true
+                        console.log(err)
+                    }
+                } while(error)
+
+                console.log(move)
+                for(var dir of move)
+                {
+                    await sleep(500)
+
+                    var ind=boards[gID].possibleMovesIndexes()
+                    if(!boards[gID].move(ind.indexOf(dir)))
+                    {
+                        console.log('AAAAAAAAAAAAaAAAAAaaa')
+                        return
+                    }
+
+                    for(var i=1; i<=10; i++)
+                    {
+                        try {
+                            boards[gID].draw()
+                            break
+                        } catch(error) {
+                            console.log('Draw failed '+i+'. time(s) color: '+boards[gID].lastColor+' '+boards[uids[interaction.user.id]].lastColor.toString(16))
+                            if(i==10)
+                                console.log(error)
+                        }
+                    }
+
+                    var attachment = new Discord.MessageAttachment('./data/boardPilkarzyki'+gID+'.png')
+                    var img=await interaction.client.guilds.cache.get('856926964094337044').channels.cache.get('892842178143997982').send({files: [attachment]})
+
+                    msg='Bot myślał '+(Math.round((end-start)*100)/100)+'ms\n'+img.attachments.first().url
+
+                    var error=false
+                    do {
+                        try {
+                            var message=await boards[gID].message.edit({content: msg, files: [], components: [], fetchReply: true})
+                            boards[gID].message=message
+                        } catch(err) {
+                            error=true
+                            console.log(err)
+                        }
+                    } while(error)
+                }   
+
+                bots[bid].ext_board.makeMove(move)
+
+                for(var i=1; i<=10; i++)
+                {
+                    try {
+                        boards[gID].draw()
+                        break
+                    } catch(error) {
+                        console.log('Draw failed '+i+'. time(s) color: '+boards[gID].lastColor+' '+boards[uids[interaction.user.id]].lastColor.toString(16))
+                        if(i==10)
+                            console.log(error)
+                    }
+                }
+
+                var attachment = new Discord.MessageAttachment('./data/boardPilkarzyki'+gID+'.png')
+                var img=await interaction.client.guilds.cache.get('856926964094337044').channels.cache.get('892842178143997982').send({files: [attachment]})
+
+                if(boards[bid].win!=-1)
+                {
+                    msg='Bot wygrał!\n'+img.attachments.first().url
+                    var error=false
+                    do {
+                        try {
+                            var message=await boards[gID].message.edit({content: msg, files: [], components: [], fetchReply: true})
+                            boards[gID].message=message
+                        } catch(err) {
+                            error=true
+                            console.log(err)
+                        }
+                    } while(error)
+
+                    boards[gID].removeBoard()
+                    delete bots[bid]
+                    delete boards[gID]
+                    delete uids[interaction.user.id]
+                    return
+                }
+                
+                msg='Tura: <@'+interaction.user.id+'>\n'+img.attachments.first().url
+
+                var error=false
+                do {
+                    try {
+                        var message=await boards[gID].message.edit({content: msg, files: [], components: buttons(gID), fetchReply: true})
+                        boards[gID].message=message
+                    } catch(err) {
+                        error=true
+                        console.log(err)
+                    }
+                } while(error)
+
+                return
+            }
 
             for(var i=1; i<=10; i++)
             {
@@ -359,7 +600,7 @@ module.exports = {
                         console.log(error)
                 }
             }
-            const attachment = new Discord.MessageAttachment('./data/boardPilkarzyki'+uids[interaction.user.id]+'.png')
+            var attachment = new Discord.MessageAttachment('./data/boardPilkarzyki'+uids[interaction.user.id]+'.png')
             
             if(boards[uids[interaction.user.id]].win==-1)
             {
@@ -441,10 +682,56 @@ module.exports = {
         }
         
         if (interaction.isCommand!==undefined && interaction.isCommand()) {
-            var secondUser=interaction.options.getUser('gracz')
-            var uid2=secondUser.id
-            var uid1=interaction.user.id
-            var usernames=[interaction.user.username, secondUser.username]
+            if (interaction.options.getSubcommand() === 'player')
+            {
+                var secondUser=interaction.options.getUser('gracz')
+                var uid2=secondUser.id
+                var uid1=interaction.user.id
+                var usernames=[interaction.user.username, secondUser.username]
+            }
+            else if (interaction.options.getSubcommand() === 'bot')
+            {
+                var uid=interaction.user.id
+                var bid=botID
+                var id=gameID
+                botID++
+                var usernames=[interaction.user.username, 'Bot']
+
+                uids[uid]=gameID
+                boards[gameID]=new Board(50, 50, 50, [uid, bid], usernames, gameID, true)
+                bots[bid]={gameID: gameID, ext_board: new ExtBoard(boards[gameID], 9, 13)}
+                gameID++
+                
+                for(var i=1; i<=10; i++)
+                {
+                    try {
+                        boards[id].draw()
+                        break
+                    } catch(error) {
+                        console.log('Draw failed '+i+'. time(s) color: '+boards[id].lastColor+' '+boards[id].lastColor.toString(16))
+                        if(i==10)
+                            console.log(error)
+                    }
+                }
+
+                var attachment = new Discord.MessageAttachment('./data/boardPilkarzyki'+id+'.png')
+                var img=await interaction.client.guilds.cache.get('856926964094337044').channels.cache.get('892842178143997982').send({files: [attachment]})
+                
+                var msg='Tura: <@'+boards[id].turnUID()+'>\n'+img.attachments.first().url
+
+                var error=false
+                do {
+                    try {
+                        var message=await interaction.reply({content: msg, files: [], components: buttons(id)})
+                        boards[id].message=message
+                    } catch(err) {
+                        error=true
+                        console.log(err)
+                    }
+                } while(error)
+
+                return
+            }
         } else {
             if(args===undefined)
             {

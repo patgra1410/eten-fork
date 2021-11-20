@@ -441,7 +441,7 @@ async function updateSlashCommands () {
     }
   }
   const response = await client.application?.commands.set(slashCommands)
-  console.log(response)
+  // console.log(response)
 }
 
 client.once('ready', async () => {

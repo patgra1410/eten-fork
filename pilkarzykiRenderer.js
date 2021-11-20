@@ -27,7 +27,7 @@ class Edge
 
 module.exports=class Board
 {
-    constructor(spacing, offsetX, offsetY, uids, usernames, id=0)
+    constructor(spacing, offsetX, offsetY, uids, usernames, id=0, withBot=0)
     {
         this.remis=[]
         this.usernames=usernames
@@ -35,6 +35,7 @@ module.exports=class Board
         this.turn=0
         this.win=-1
         this.thickness=3
+        this.withBot=withBot
 
         var settings=JSON.parse(fs.readFileSync('./data/userSettings.json'))
         this.colors=['#5865f2', '#f04747']
@@ -140,7 +141,10 @@ module.exports=class Board
         this.points[pos[10][6]].edges.push(pos[11][5])
     }
 
-    draw() {
+    draw(fileInd = null) {
+        if (fileInd === null)
+            fileInd = this.id
+            
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height)
 
         var settings=JSON.parse(fs.readFileSync('./data/userSettings.json'))
@@ -274,7 +278,7 @@ module.exports=class Board
 
         var data=this.canvas.toDataURL().replace(/^data:image\/\w+;base64,/, "")
         var buf=Buffer.from(data, "base64")
-        fs.writeFileSync('data/boardPilkarzyki'+this.id+'.png', buf)
+        fs.writeFileSync('data/boardPilkarzyki'+fileInd+'.png', buf)
     }
 
     possibleMovesIndexes(x, y)
