@@ -340,11 +340,14 @@ module.exports=class Board
         this.edges.push(new Edge(-3+this.turn, this.points[moves[index]], this.points[this.pos[this.ball.x][this.ball.y]]))
 
         this.totalMoves++
-        var ranking=JSON.parse(fs.readFileSync('./data/ranking.json'))
-        if(ranking['sumaruchow'][this.uids[this.turn]]===undefined)
-            ranking['sumaruchow'][this.uids[this.turn]]=0
-        ranking['sumaruchow'][this.uids[this.turn]]++
-        fs.writeFileSync('./data/ranking.json', JSON.stringify(ranking))
+        if(!this.withBot)
+        {
+            var ranking=JSON.parse(fs.readFileSync('./data/ranking.json'))
+            if(ranking['sumaruchow'][this.uids[this.turn]]===undefined)
+                ranking['sumaruchow'][this.uids[this.turn]]=0
+            ranking['sumaruchow'][this.uids[this.turn]]++
+            fs.writeFileSync('./data/ranking.json', JSON.stringify(ranking))
+        }
 
         var point=this.points[moves[index]]
         this.ball.x=point.x
