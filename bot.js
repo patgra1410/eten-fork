@@ -5,13 +5,39 @@ const { performance } = require('perf_hooks')
 const PriorityQueue = require('js-priority-queue')
 const config = require('./config.json')
 
-var evalFunction = require('./evaluation.js')
+var evalFunctionDefault = require('./evaluation.js')
 
 var directions = [[-1, -1], [0, -1], [1, -1], [-1, 0], [1, 0], [-1, 1], [0, 1], [1, 1]]
 // var DEBUG = false
 
+function createArray(a, b = 1, c = 1, defaultVal = 0) {
+	var res = Array(a)
+	if (b > 1) {
+		for (var i = 0; i < a; ++i) {
+			res[i] = Array(b)
+			if (c > 1) {
+				for (var j = 0; j < b; ++j) {
+					res[i][j] = Array(c);
+					for (var k = 0; k < c; ++k) {
+						res[i][j][k] = defaultVal
+					}
+				}
+			} else {
+				for (var j = 0; j < b; ++j) {
+					res[i][j] = defaultVal
+				}
+			}
+		}
+	} else {
+		for (var i = 0; i < a; ++i) {
+			res[i] = defaultVal
+		}
+	}
+	return res
+}
+
 module.exports=class ExtBoard {
-	constructor(board, size_hor, size_ver) {
+	constructor(board, size_hor, size_ver, evalFunc = null) {
 		this.ball = [board.ball.x, board.ball.y]
 		this.graph = new Array(size_ver)
 		this.size_ver = size_ver
@@ -38,37 +64,14 @@ module.exports=class ExtBoard {
 		this.graph[11][4] = [true, true, true, true, true, true, true, true]
 		this.graph[11][5] = [true, true, true, true, true, true, true, true]
 
-		this.vis = new Array(size_ver)
-		for (var x = 0; x < size_ver; ++x)
-			this.vis[x] = new Array(size_hor)
+		// this.vis = new Array(size_ver)
+		// for (var x = 0; x < size_ver; ++x)
+		// 	this.vis[x] = new Array(size_hor)
 
 		this.turn = board.turn
-	}
-	
-	createArray(a, b = 1, c = 1, defaultVal = 0) {
-		var res = Array(a)
-		if (b > 1) {
-			for (var i = 0; i < a; ++i) {
-				res[i] = Array(b)
-				if (c > 1) {
-					for (var j = 0; j < b; ++j) {
-						res[i][j] = Array(c);
-						for (var k = 0; k < c; ++k) {
-							res[i][j][k] = defaultVal
-						}
-					}
-				} else {
-					for (var j = 0; j < b; ++j) {
-						res[i][j] = defaultVal
-					}
-				}
-			}
-		} else {
-			for (var i = 0; i < a; ++i) {
-				res[i] = defaultVal
-			}
-		}
-		return res
+		if (evalFunc === null)
+			evalFunc = evalFunctionDefault
+		this.evalFunc = evalFunc
 	}
 
 	moved(point, i) {
@@ -111,12 +114,12 @@ module.exports=class ExtBoard {
 
 	single(s, t, canGoFurther) {
 		if (s[0] == t[0] && s[1] == t[1])
-			return [[evalFunction(this.ball), []]]
+			return [[this.evalFunc(this), []]]
 
 		if (s[0] == 1 || s[0] == 11)
 		{
 			if (t[0] == 1 || t[0] == 11)
-				return [[evalFunction(this.ball), []]]
+				return [[this.evalFunc(this), []]]
 			return null
 		}
 
@@ -184,13 +187,13 @@ module.exports=class ExtBoard {
 
 	BFS(start) {
 		var points = [start]
-		var vis = this.createArray(this.size_ver, this.size_hor, 1, false)
+		var vis = createArray(this.size_ver, this.size_hor, 1, false)
 
 		var queue = []
 		queue.push(start)
 		vis[start[0]][start[1]] = true
 
-		while(queue.length)
+		while (queue.length)
 		{
 			var v = queue.shift()
 
@@ -221,7 +224,7 @@ module.exports=class ExtBoard {
 	search(depth, player, alpha, beta) {
 		var best = [(player ? 2000 : -2000), []]
 
-		var evaluation = evalFunction(this.ball)
+		var evaluation = this.evalFunc(this)
 		if ((depth == 0) || (Math.abs(evaluation) == 1000))
 			return [evaluation, []]
 
@@ -233,7 +236,7 @@ module.exports=class ExtBoard {
 			for (var y = 1; y < this.size_hor-1; ++y) {
 				if (this.ball[0] == x && this.ball[1] == y)
 					continue
-				if (losing.indexOf([x, y])!=-1)
+				if (losing.indexOf([x, y]) != -1)
 					continue
 
 				var end = true
