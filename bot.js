@@ -3,41 +3,12 @@ const Board=require('./pilkarzykiRenderer.js')
 const process = require('process')
 const { performance } = require('perf_hooks')
 const PriorityQueue = require('js-priority-queue')
-const config = require('./config.json')
-
-var evalFunctionDefault = require('./evaluation.js')
 
 var directions = [[-1, -1], [0, -1], [1, -1], [-1, 0], [1, 0], [-1, 1], [0, 1], [1, 1]]
 // var DEBUG = false
 
-function createArray(a, b = 1, c = 1, defaultVal = 0) {
-	var res = Array(a)
-	if (b > 1) {
-		for (var i = 0; i < a; ++i) {
-			res[i] = Array(b)
-			if (c > 1) {
-				for (var j = 0; j < b; ++j) {
-					res[i][j] = Array(c);
-					for (var k = 0; k < c; ++k) {
-						res[i][j][k] = defaultVal
-					}
-				}
-			} else {
-				for (var j = 0; j < b; ++j) {
-					res[i][j] = defaultVal
-				}
-			}
-		}
-	} else {
-		for (var i = 0; i < a; ++i) {
-			res[i] = defaultVal
-		}
-	}
-	return res
-}
-
 module.exports=class ExtBoard {
-	constructor(board, size_hor, size_ver, evalFunc = null) {
+	constructor(board, size_hor, size_ver, evalFunc) {
 		this.ball = [board.ball.x, board.ball.y]
 		this.graph = new Array(size_ver)
 		this.size_ver = size_ver
@@ -72,6 +43,32 @@ module.exports=class ExtBoard {
 		if (evalFunc === null)
 			evalFunc = evalFunctionDefault
 		this.evalFunc = evalFunc
+	}
+
+	createArray(a, b = 1, c = 1, defaultVal = 0) {
+		var res = Array(a)
+		if (b > 1) {
+			for (var i = 0; i < a; ++i) {
+				res[i] = Array(b)
+				if (c > 1) {
+					for (var j = 0; j < b; ++j) {
+						res[i][j] = Array(c);
+						for (var k = 0; k < c; ++k) {
+							res[i][j][k] = defaultVal
+						}
+					}
+				} else {
+					for (var j = 0; j < b; ++j) {
+						res[i][j] = defaultVal
+					}
+				}
+			}
+		} else {
+			for (var i = 0; i < a; ++i) {
+				res[i] = defaultVal
+			}
+		}
+		return res
 	}
 
 	moved(point, i) {
@@ -187,7 +184,7 @@ module.exports=class ExtBoard {
 
 	BFS(start) {
 		var points = [start]
-		var vis = createArray(this.size_ver, this.size_hor, 1, false)
+		var vis = this.createArray(this.size_ver, this.size_hor, 1, false)
 
 		var queue = []
 		queue.push(start)

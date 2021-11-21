@@ -1,6 +1,10 @@
+'use strict'
+
 const Board=require('./pilkarzykiRenderer.js')
 const ExtBoard=require('./bot.js')
 var fs = require('fs')
+
+const DRAW_BOARDS=true
 
 /**
  * 
@@ -81,7 +85,7 @@ let evalBFS = function(board) {
 	}
 
 	var points = [board.ball]
-	var vis = createArray(board.size_ver, board.size_hor, 1, false)
+	var vis = board.createArray(board.size_ver, board.size_hor, 1, false)
 
 	var queue = []
 	queue.push(board.ball)
@@ -130,7 +134,7 @@ let evalBFSCubic = function(board) {
 	}
 
 	var points = [board.ball]
-	var vis = createArray(board.size_ver, board.size_hor, 1, false)
+	var vis = board.createArray(board.size_ver, board.size_hor, 1, false)
 
 	var queue = []
 	queue.push(board.ball)
@@ -199,7 +203,8 @@ function play(eval1, eval2, depth, cleanFiles) {
 		}
 		ext_board[0].makeMove(move)
 		ext_board[1].makeMove(move)
-		b.draw(i)
+		if (DRAW_BOARDS)
+			b.draw(i)
 		i = i + 1
 	}
 	console.log("%s won! There were %d moves", (b.win == 0 ? eval1.name : eval2.name), i)
@@ -245,4 +250,5 @@ function testEval(evalArr, depth) {
 	console.log("\nTournament took %d seconds", Math.round((end - start)/1000))
 }
 
-testEval([evalLinear, evalQuad, evalQuadSign, evalCubic, evalBFS, evalBFSCubic], 4)
+// testEval([evalLinear, evalQuad, evalQuadSign, evalCubic, evalBFS, evalBFSCubic], 4)
+testEval([evalQuad, evalBFS, evalBFSCubic], 5)

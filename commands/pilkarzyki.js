@@ -725,9 +725,19 @@ module.exports = {
                 botID++
                 var usernames=[interaction.user.username, 'Bot']
 
+                var evalFunctionPath = ""
+                for(var func of config.pilkarzykiBot.evaluationFunctionConfig)
+                {
+                    if (eval('depth'+func.condition))
+                    {
+                        evalFunctionPath=func.path
+                        break
+                    }
+                }
+
                 uids[uid]=gameID
                 boards[gameID]=new Board(50, 50, 50, [uid, bid], usernames, gameID, true)
-                bots[bid]={gameID: gameID, ext_board: new ExtBoard(boards[gameID], 9, 13), depth: depth}
+                bots[bid]={gameID: gameID, ext_board: new ExtBoard(boards[gameID], 9, 13, require(evalFunctionPath)), depth: depth}
                 gameID++
                 
                 for(var i=1; i<=10; i++)
