@@ -7,6 +7,7 @@ data/weatherFinal.png
 data/*
 test.js
 soundeffects/*
+.vscode
 
 # Logs
 logs

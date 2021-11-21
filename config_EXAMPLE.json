@@ -17,12 +17,28 @@
 		"maxDepth": 5,
 		"evaluationFunctionConfig": [
 			{
-				"path": "../evaluationFunctions/evaluationCubic.js",
-				"condition": "depth<=3"
+				"condition": "depth==1",
+				"path": [
+					"../evaluationFunctions/evaluationBFS.js",
+					"../evaluationFunctions/evaluationBFSCubic.js",
+					"../evaluationFunctions/evaluationQuad.js"
+				]
 			},
 			{
-				"path": "../evaluationFunctions/evaluationBFSCubic.js",
-				"condition": "depth>3"
+				"condition": "depth==2",
+				"path": [
+					"../evaluationFunctions/evaluationBFS.js", "../evaluationFunctions/evaluationBFSReverse.js", 
+					"../evaluationFunctions/evaluationBFSCubic.js", "../evaluationFunctions/evaluationBFSCubicReverse.js",
+					"../evaluationFunctions/evaluationQuad.js"
+				]
+			},
+			{
+				"condition": "depth==3",
+				"path": ["../evaluationFunctions/evaluationQuad.js", "../evaluationFunction/evaluationQuadReverse.js"]
+			},
+			{
+				"condition": "depth>3",
+				"path": ["../evaluationFunctions/evaluationBFSCubic.js"]
 			}
 		]
 	}

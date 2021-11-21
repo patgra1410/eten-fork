@@ -725,7 +725,7 @@ module.exports = {
                 botID++
                 var usernames=[interaction.user.username, 'Bot']
 
-                var evalFunctionPath = ""
+                var evalFunctionPath = []
                 for(var func of config.pilkarzykiBot.evaluationFunctionConfig)
                 {
                     if (eval(func.condition))
@@ -734,11 +734,12 @@ module.exports = {
                         break
                     }
                 }
-                if(evalFunctionPath === "")
+                if(evalFunctionPath === [])
                 {
                     interaction.editReply('Nie znaleziono odpowiedniej funkcji evaluacyjnej (być może config jest źle skonfigurowany)')
                     return
                 }
+                evalFunctionPath = evalFunctionPath[Math.floor(Math.random()*evalFunctionPath.length)]
                 console.log('evalFunctionPath = '+evalFunctionPath)
 
                 uids[uid]=gameID

@@ -10,5 +10,5 @@ module.exports = function(board) {
 
 	// very poor evaluation...
 	// TODO: make it not poor
-	return (board.ball[0] - 6) * (board.ball[0] - 6) * (board.ball[0] - 6)
+	return -1 * (board.ball[0] - 6) * (board.ball[0] - 6)
 }

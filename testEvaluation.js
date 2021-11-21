@@ -12,6 +12,7 @@ const DRAW_BOARDS=true
  *
  */
 
+// quite bad
 let evalLinear = function(board) {
 	// right goal
 	if (board.ball[0] == 11) {
@@ -43,6 +44,21 @@ let evalQuad = function(board) {
 	return (board.ball[0] - 6) * (board.ball[0] - 6)
 }
 
+let evalQuadReverse = function(board) {
+	// right goal
+	if (board.ball[0] == 11) {
+		return 1000
+	}
+	// left goal
+	if (board.ball[0] == 1) {
+		return -1000
+	}
+
+	// very poor evaluation...
+	// TODO: make it not poor
+	return -1 * (board.ball[0] - 6) * (board.ball[0] - 6)
+}
+
 let evalQuadSign = function(board) {
 	// right goal
 	if (board.ball[0] == 11) {
@@ -56,6 +72,21 @@ let evalQuadSign = function(board) {
 	// very poor evaluation...
 	// TODO: make it not poor
 	return (board.ball[0] < 6 ? -1 : 1) * (board.ball[0] - 6) * (board.ball[0] - 6)
+}
+
+let evalQuadSignReverse = function(board) {
+	// right goal
+	if (board.ball[0] == 11) {
+		return 1000
+	}
+	// left goal
+	if (board.ball[0] == 1) {
+		return -1000
+	}
+
+	// very poor evaluation...
+	// TODO: make it not poor
+	return -1 * (board.ball[0] < 6 ? -1 : 1) * (board.ball[0] - 6) * (board.ball[0] - 6)
 }
 
 let evalCubic = function(board) {
@@ -122,6 +153,54 @@ let evalBFS = function(board) {
 	return (board.ball[0] - 6)
 }
 
+let evalBFSReverse = function(board) {
+	// right goal
+	if (board.ball[0] == 11) {
+		return 1000
+	}
+	// left goal
+	if (board.ball[0] == 1) {
+		return -1000
+	}
+
+	var points = [board.ball]
+	var vis = board.createArray(board.size_ver, board.size_hor, 1, false)
+
+	var queue = []
+	queue.push(board.ball)
+	vis[board.ball[0]][board.ball[1]] = true
+
+	while(queue.length)
+	{
+		var v = queue.shift()
+
+		for (var i of board.possibleDirections(v))
+		{
+			var u = board.moved(v, i)
+			
+			if (!vis[u[0]][u[1]])
+			{
+				vis[u[0]][u[1]] = true
+				points.push(u)
+				queue.push(u)
+			}
+		}
+	}
+
+	// impossible to goal left
+	if (points.indexOf([1, 4]) == -1) {
+		return 999
+	}
+	// impossible to goal right
+	if (points.indexOf([11, 4]) == -1) {
+		return -999
+	}
+
+	// very poor evaluation...
+	// TODO: make it not poor
+	return -1 * (board.ball[0] - 6)
+}
+
 // good with depth = 4, bad with depth < 4
 let evalBFSCubic = function(board) {
 	// right goal
@@ -169,6 +248,54 @@ let evalBFSCubic = function(board) {
 	// very poor evaluation...
 	// TODO: make it not poor
 	return (board.ball[0] - 6) * (board.ball[0] - 6) * (board.ball[0] - 6)
+}
+
+let evalBFSCubicReverse = function(board) {
+	// right goal
+	if (board.ball[0] == 11) {
+		return 1000
+	}
+	// left goal
+	if (board.ball[0] == 1) {
+		return -1000
+	}
+
+	var points = [board.ball]
+	var vis = board.createArray(board.size_ver, board.size_hor, 1, false)
+
+	var queue = []
+	queue.push(board.ball)
+	vis[board.ball[0]][board.ball[1]] = true
+
+	while(queue.length)
+	{
+		var v = queue.shift()
+
+		for (var i of board.possibleDirections(v))
+		{
+			var u = board.moved(v, i)
+			
+			if (!vis[u[0]][u[1]])
+			{
+				vis[u[0]][u[1]] = true
+				points.push(u)
+				queue.push(u)
+			}
+		}
+	}
+
+	// impossible to goal left
+	if (points.indexOf([1, 4]) == -1) {
+		return 999
+	}
+	// impossible to goal right
+	if (points.indexOf([11, 4]) == -1) {
+		return -999
+	}
+
+	// very poor evaluation...
+	// TODO: make it not poor
+	return -1 * (board.ball[0] - 6) * (board.ball[0] - 6) * (board.ball[0] - 6)
 }
 
 
@@ -251,4 +378,5 @@ function testEval(evalArr, depth) {
 }
 
 // testEval([evalLinear, evalQuad, evalQuadSign, evalCubic, evalBFS, evalBFSCubic], 4)
-testEval([evalQuad, evalBFS, evalBFSCubic], 5)
+// testEval([evalQuadSign, evalQuad, evalBFS, evalBFSCubic], 4)
+testEval([evalQuadReverse, evalBFSReverse, evalBFSCubicReverse, evalQuad, evalBFS, evalBFSCubic], 4)
