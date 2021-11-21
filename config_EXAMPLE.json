@@ -12,5 +12,18 @@
 			"title": "Warszawa",
 			"link": "https://m.meteo.pl/warszawa/60"
 		}
-	]
+	],
+	"pilkarzykiBot": {
+		"maxDepth": 5,
+		"evaluationFunctionConfig": [
+			{
+				"path": "../evaluationFunctions/evaluationCubic.js",
+				"condition": "depth<=3"
+			},
+			{
+				"path": "../evaluationFunctions/evaluationBFSCubic.js",
+				"condition": "depth>3"
+			}
+		]
+	}
 }
