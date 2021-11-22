@@ -225,7 +225,7 @@ module.exports=class ExtBoard {
 		if ((depth == 0) || (Math.abs(evaluation) == 1000))
 			return [evaluation, []]
 
-		var losing = this.BFS((player==0 ? [1, 4] : [11, 4]))
+		// var losing = this.BFS((player==0 ? [1, 4] : [11, 4]))
 		// var points = this.BFS(this.ball)
 
 		// maybe it's better to go through points with no edges here
@@ -233,8 +233,8 @@ module.exports=class ExtBoard {
 			for (var y = 1; y < this.size_hor-1; ++y) {
 				if (this.ball[0] == x && this.ball[1] == y)
 					continue
-				if (losing.indexOf([x, y]) != -1)
-					continue
+				// if (losing.indexOf([x, y]) != -1)
+				// 	continue
 
 				var end = true
 				for (var dir of this.graph[x][y]) {
