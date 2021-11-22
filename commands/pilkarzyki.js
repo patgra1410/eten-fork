@@ -126,7 +126,7 @@ module.exports = {
     async execute (interaction, args) {
         if(interaction.isButton!==undefined && interaction.isButton())
         {
-            var mainMessage=await interaction.update({content: interaction.message.content, components: interaction.message.components, fetchReply: true})
+            var mainMessage=await interaction.update({content: interaction.message.content, fetchReply: true})
 
             interaction.customId=interaction.customId.slice(interaction.customId.indexOf('#')+1)
             if(interaction.customId.startsWith('accept'))
