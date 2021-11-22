@@ -464,7 +464,7 @@ client.once('ready', async () => {
   console.log(`Ready! Logged in as ${client.user.tag}`)
   dzwonekChannel = client.channels.cache.get('884370476128944148')
   // TODO: Make it a part of config.json? Or post where the thread was watched?
-  autoMemesChannel = await client.channels.fetch('911813152570753054')
+  autoMemesChannel = await client.channels.fetch('912265771613290547')
 
   if (!fs.existsSync('./data/ranking.json'))
     fs.writeFileSync('./data/ranking.json', '{}')

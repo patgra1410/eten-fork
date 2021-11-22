@@ -7,12 +7,13 @@
 | token | token of the bot |
 | librusLogin | email to login to librus |
 | librusPass | password for librus |
-| pushDevice | idk @meten |
+| pushDevice | librus-provided pushDevice acquired manually from new app login |
 | guild | id of the guild |
 | playRandomSoundeffects | whether Eten should join voice channels and play sound effects |
 | randomSoundeffectChance | chance of Eten to join a voice channel every minute (doesn't matter if `playRandomSoundeffects = false`) |
 | cronWeather | array of cities which weather will be send every morning |
 | pilkarzykiBot | configuration for bot for pilkarzyki (explained below) |
+| allowedBoardsForTracking | | boards allowed for tracking - see format in config_EXAMPLE.json |
 
 ### pilkarzykiBot config
 | Config | Description |
