@@ -8,6 +8,7 @@ const cron = require('cron')
 const util = require('util')
 const fetch = require('node-fetch')
 const { joinImages } = require('join-images')
+const threadwatcher = require('./lib/threadwatcher')
 const streamPipeline = util.promisify(require('stream').pipeline)
 const client = new Discord.Client({ intents: [Discord.Intents.FLAGS.GUILDS, Discord.Intents.FLAGS.GUILD_MESSAGES, Discord.Intents.FLAGS.GUILD_MEMBERS, Discord.Intents.FLAGS.GUILD_VOICE_STATES] })
 client.commands = new Discord.Collection()
@@ -15,6 +16,7 @@ client.textTriggers = new Discord.Collection()
 
 let librusCurrentBearer
 let dzwonekChannel
+let autoMemesChannel
 const commandFiles = fs.readdirSync('./commands').filter(file => file.endsWith('.js'))
 var player=createAudioPlayer()
 
@@ -444,12 +446,25 @@ async function updateSlashCommands () {
   // console.log(response)
 }
 
+threadwatcher.newPostEvent.on('newPost', async (board, threadID, postID, text, attachmentUrl) => {
+  // console.log(`${board}/${threadID}/p${postID}`)
+  // console.log(text)
+  console.log(attachmentUrl)
+  await autoMemesChannel.send({
+    content: `${board}/thread/${threadID} No. ${postID}`,
+    files: [attachmentUrl]
+  })
+  threadwatcher.changePostTimeoutEvent.emit('subtractTimeout')
+})
+
 client.once('ready', async () => {
   client.user.setStatus('online')
   client.user.setActivity('twoja stara')
   updateSlashCommands()
   console.log(`Ready! Logged in as ${client.user.tag}`)
   dzwonekChannel = client.channels.cache.get('884370476128944148')
+  // TODO: Make it a part of config.json? Or post where the thread was watched?
+  autoMemesChannel = await client.channels.fetch('911813152570753054')
 
   if (!fs.existsSync('./data/ranking.json'))
     fs.writeFileSync('./data/ranking.json', '{}')
