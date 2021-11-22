@@ -7,6 +7,12 @@
 	"guild": "guild id",
 	"playRandomSoundeffects": true,
 	"randomSoundeffectChance": 0.005,
+	"allowedBoardsForTracking": {
+		"wsg": "/wsg/ - Worksafe Gif",
+		"g": "/g/ - Technology",
+		"v": "/v/ - Video Games",
+		"int": "/int/ - International"
+	},
 	"cronWeather": [
 		{
 			"title": "Warszawa",
