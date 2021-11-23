@@ -4,7 +4,7 @@ placeholder.jpg
 data/librusBearer.txt
 data/weather.png
 data/weatherFinal.png
-# data/*
+data/*
 test.js
 soundeffects/*
 .vscode
