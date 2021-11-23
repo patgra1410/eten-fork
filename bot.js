@@ -10,8 +10,8 @@ var directions = [[-1, -1], [0, -1], [1, -1], [-1, 0], [1, 0], [-1, 1], [0, 1], 
 
 const SAVE_PATH = "data/"
 
-// module.exports=class ExtBoard {
-class ExtBoard {
+module.exports=class ExtBoard {
+// class ExtBoard {
 	constructor(board, size_hor, size_ver, evalFunc) {
 		this.ball = [board.ball.x, board.ball.y]
 		this.graph = new Array(size_ver)
@@ -53,8 +53,6 @@ class ExtBoard {
 		this.evalFunc = evalFunc
 
 		this.nodes = 0
-
-		console.log(this.graph[1][1])
 	}
 
 	save(filename) {
@@ -298,7 +296,7 @@ class ExtBoard {
 			// 	continue
 
 			var paths = this.findPath(this.ball, [x, y], player)
-			if (this.xd > 100000) {
+			if (this.xd > 1000000) {
 				console.log("FindPath %d from [%d, %d] to [%d, %d]", this.xd, this.ball[0], this.ball[1], x, y)
 				this.save("lol.json")
 			}
@@ -342,13 +340,13 @@ class ExtBoard {
 	}
 }
 
-var b = new Board(50, 50, 50, [1, 1], ['a', 'b'], 0)
-b.loadFromGraph(JSON.parse(fs.readFileSync('data/lol.json', {encoding: 'utf8'}).split('#')[0]))
-b.draw()
+// var b = new Board(50, 50, 50, [1, 1], ['a', 'b'], 0)
+// b.loadFromGraph(JSON.parse(fs.readFileSync('data/lol.json', {encoding: 'utf8'}).split('#')[0]))
+// b.draw()
 
-var ext_board = new ExtBoard(b, 9, 13, require('./evaluationFunctions/evaluationQuadReverse.js'))
-ext_board.load('lol.json')
-console.log(ext_board.generateMoves())
+// var ext_board = new ExtBoard(b, 9, 13, require('./evaluationFunctions/evaluationQuadReverse.js'))
+// ext_board.load('lol.json')
+// console.log(ext_board.generateMoves())
 
 // var sr=0
 // var n=0
