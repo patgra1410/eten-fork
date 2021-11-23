@@ -323,9 +323,48 @@ module.exports=class Board
         return moves
     }
 
-    dump(i)
+    save(file) {
+        var data = 
+            JSON.stringify(this.points) + '\n#\n' +
+            JSON.stringify(this.pos) + '\n#\n' +
+            JSON.stringify(this.edges)+ '\n#\n' +
+            JSON.stringify(this.ball) + '\n#\n' +
+            JSON.stringify(this.turn) + '\n#\n'
+
+        fs.writeFileSync(file, data)
+    }
+
+    load(file) {
+        var data = fs.readFileSync(file, {encoding: 'utf8'}).split('#')
+
+        this.points = JSON.parse(data[0])
+        this.pos = JSON.parse(data[1])
+        this.edges = JSON.parse(data[2])
+        this.ball = JSON.parse(data[3])
+        this.turn = JSON.parse(data[4])
+    }
+
+    loadFromGraph(graph)
     {
-        fs.writeFileSync('./data/boardPilkarzyki'+i+'.dump', inspect(this, {depth: 10}))
+        var directions=[[-1, -1], [0, -1], [1, -1], [-1, 0], [1, 0], [-1, 1], [0, 1], [1, 1]]
+
+        for (var x = 1; x <= 11; x++) {
+            for (var y = 1; y <= 7; y++) {
+                for (var i in directions) {
+                    if (graph[x][y][i]===null)
+                        break
+                    if (!graph[x][y][i])
+                        continue
+
+                    var dir = directions[i]
+                    var nX = x+dir[0]
+                    var nY = y+dir[1]
+
+                    this.points[ this.pos[x][y] ].edges.push( this.pos[nX][nY] )
+                    this.edges.push(new Edge(-3, this.points[ this.pos[x][y] ], this.points[ this.pos[nX][nY] ]))
+                }
+            }
+        }
     }
 
     move(index)

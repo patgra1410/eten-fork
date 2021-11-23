@@ -1,4 +1,4 @@
-module.exports = function(board) {
+module.exports = function evaluationQuadReverse(board) {
 	// right goal
 	if (board.ball[0] == 11) {
 		return 1000

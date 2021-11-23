@@ -206,7 +206,7 @@ module.exports = {
                         }
                     }
                     var attachment = new Discord.MessageAttachment('./data/boardPilkarzyki'+id+'.png')
-                    var img=await interaction.client.guilds.cache.get('856926964094337044').channels.cache.get('892842178143997982').send({files: [attachment]})
+                    var img=await interaction.client.guilds.cache.get('794556517604917259').channels.cache.get('898645577498230857').send({files: [attachment]})
                     
                     var msg='Tura: <@'+boards[id].turnUID()+'>\n'+img.attachments.first().url
 
@@ -242,7 +242,7 @@ module.exports = {
                         }
                     }
                     var attachment = new Discord.MessageAttachment('./data/boardPilkarzyki'+uids[interaction.user.id]+'.png')
-                    var img=await interaction.client.guilds.cache.get('856926964094337044').channels.cache.get('892842178143997982').send({files: [attachment]})
+                    var img=await interaction.client.guilds.cache.get('794556517604917259').channels.cache.get('898645577498230857').send({files: [attachment]})
                     var msg='<@'+interaction.user.id+'> poddał się\n'+img.attachments.first().url 
     
                     var error=false
@@ -312,7 +312,7 @@ module.exports = {
                     }
                 }
                 var attachment = new Discord.MessageAttachment('./data/boardPilkarzyki'+uids[interaction.user.id]+'.png')
-                var img=await interaction.client.guilds.cache.get('856926964094337044').channels.cache.get('892842178143997982').send({files: [attachment]})
+                var img=await interaction.client.guilds.cache.get('794556517604917259').channels.cache.get('898645577498230857').send({files: [attachment]})
                 var msg='<@'+winner+'> wygrał przez poddanie się\n'+img.attachments.first().url 
 
                 var error=false
@@ -356,7 +356,7 @@ module.exports = {
                         }
                     }
                     var attachment = new Discord.MessageAttachment('./data/boardPilkarzyki'+uids[interaction.user.id]+'.png')
-                    var img=await interaction.client.guilds.cache.get('856926964094337044').channels.cache.get('892842178143997982').send({files: [attachment]})
+                    var img=await interaction.client.guilds.cache.get('794556517604917259').channels.cache.get('898645577498230857').send({files: [attachment]})
                     var msg='Remis\n'+img.attachments.first().url
 
                     var error=false
@@ -442,7 +442,7 @@ module.exports = {
                     }
                 }
                 var attachment = new Discord.MessageAttachment('./data/boardPilkarzyki'+gID+'.png')
-                var img=await interaction.client.guilds.cache.get('856926964094337044').channels.cache.get('892842178143997982').send({files: [attachment]})
+                var img=await interaction.client.guilds.cache.get('794556517604917259').channels.cache.get('898645577498230857').send({files: [attachment]})
 
                 if(boards[gID].win!=-1)
                 {
@@ -535,7 +535,7 @@ module.exports = {
                     }
 
                     var attachment = new Discord.MessageAttachment('./data/boardPilkarzyki'+gID+'.png')
-                    var img=await interaction.client.guilds.cache.get('856926964094337044').channels.cache.get('892842178143997982').send({files: [attachment]})
+                    var img=await interaction.client.guilds.cache.get('794556517604917259').channels.cache.get('898645577498230857').send({files: [attachment]})
 
                     msg='Bot myślał '+(Math.round((end-start)*100)/100)+'ms\n'+img.attachments.first().url
 
@@ -567,7 +567,7 @@ module.exports = {
                 }
 
                 var attachment = new Discord.MessageAttachment('./data/boardPilkarzyki'+gID+'.png')
-                var img=await interaction.client.guilds.cache.get('856926964094337044').channels.cache.get('892842178143997982').send({files: [attachment]})
+                var img=await interaction.client.guilds.cache.get('794556517604917259').channels.cache.get('898645577498230857').send({files: [attachment]})
 
                 if(boards[bid].win!=-1)
                 {
@@ -639,7 +639,7 @@ module.exports = {
                 var components=[]
             
             // boards[uids[interaction.user.id]].message.edit({components: []})
-            var img=await interaction.client.guilds.cache.get('856926964094337044').channels.cache.get('892842178143997982').send({files: [attachment]})
+            var img=await interaction.client.guilds.cache.get('794556517604917259').channels.cache.get('898645577498230857').send({files: [attachment]})
 
             // var message=await boards[uids[interaction.user.id]].message.channel.send({content: msg, files: [attachment], components: components})
             msg+='\n'+img.attachments.first().url
@@ -760,7 +760,7 @@ module.exports = {
                 }
 
                 var attachment = new Discord.MessageAttachment('./data/boardPilkarzyki'+id+'.png')
-                var img=await interaction.client.guilds.cache.get('856926964094337044').channels.cache.get('892842178143997982').send({files: [attachment]})
+                var img=await interaction.client.guilds.cache.get('794556517604917259').channels.cache.get('898645577498230857').send({files: [attachment]})
                 
                 var msg='Tura: <@'+boards[id].turnUID()+'>\n'+img.attachments.first().url
 

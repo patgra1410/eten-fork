@@ -464,7 +464,7 @@ client.once('ready', async () => {
   console.log(`Ready! Logged in as ${client.user.tag}`)
   dzwonekChannel = client.channels.cache.get('884370476128944148')
   // TODO: Make it a part of config.json? Or post where the thread was watched?
-  autoMemesChannel = await client.channels.fetch('912265771613290547')
+  // autoMemesChannel = await client.channels.fetch('912265771613290547')
 
   if (!fs.existsSync('./data/ranking.json'))
     fs.writeFileSync('./data/ranking.json', '{}')
@@ -479,8 +479,8 @@ client.once('ready', async () => {
   if(!fs.existsSync('./data/userSettings.json'))
     fs.writeFileSync('./data/userSettings.json', '{}')
 
-  librusCurrentBearer = await updateBearer()
-  setTimeout(getSchoolNoticesJson, 2000)
+  // librusCurrentBearer = await updateBearer()
+  // setTimeout(getSchoolNoticesJson, 2000)
 
   if(config.playRandomSoundeffects)
     setInterval(randomSoundOnVoice, 1000*60)
@@ -517,7 +517,7 @@ client.on('messageCreate', async message => {
 
     if (!client.commands.has(command)) return
 
-    interaction.reply('Deprecated. Jebać (wszystkie) nie slashowe komendy')
+    message.reply('Deprecated. Jebać (wszystkie) nie slashowe komendy')
     return
   
     try {

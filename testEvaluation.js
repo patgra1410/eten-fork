@@ -12,291 +12,12 @@ const DRAW_BOARDS=true
  *
  */
 
-// quite bad
-let evalLinear = function(board) {
-	// right goal
-	if (board.ball[0] == 11) {
-		return 1000
-	}
-	// left goal
-	if (board.ball[0] == 1) {
-		return -1000
-	}
-
-	// very poor evaluation...
-	// TODO: make it not poor
-	return (board.ball[0] - 6)
-}
-
-// good
-let evalQuad = function(board) {
-	// right goal
-	if (board.ball[0] == 11) {
-		return 1000
-	}
-	// left goal
-	if (board.ball[0] == 1) {
-		return -1000
-	}
-
-	// very poor evaluation...
-	// TODO: make it not poor
-	return (board.ball[0] - 6) * (board.ball[0] - 6)
-}
-
-let evalQuadReverse = function(board) {
-	// right goal
-	if (board.ball[0] == 11) {
-		return 1000
-	}
-	// left goal
-	if (board.ball[0] == 1) {
-		return -1000
-	}
-
-	// very poor evaluation...
-	// TODO: make it not poor
-	return -1 * (board.ball[0] - 6) * (board.ball[0] - 6)
-}
-
-let evalQuadSign = function(board) {
-	// right goal
-	if (board.ball[0] == 11) {
-		return 1000
-	}
-	// left goal
-	if (board.ball[0] == 1) {
-		return -1000
-	}
-
-	// very poor evaluation...
-	// TODO: make it not poor
-	return (board.ball[0] < 6 ? -1 : 1) * (board.ball[0] - 6) * (board.ball[0] - 6)
-}
-
-let evalQuadSignReverse = function(board) {
-	// right goal
-	if (board.ball[0] == 11) {
-		return 1000
-	}
-	// left goal
-	if (board.ball[0] == 1) {
-		return -1000
-	}
-
-	// very poor evaluation...
-	// TODO: make it not poor
-	return -1 * (board.ball[0] < 6 ? -1 : 1) * (board.ball[0] - 6) * (board.ball[0] - 6)
-}
-
-let evalCubic = function(board) {
-	// right goal
-	if (board.ball[0] == 11) {
-		return 1000
-	}
-	// left goal
-	if (board.ball[0] == 1) {
-		return -1000
-	}
-
-	// very poor evaluation...
-	// TODO: make it not poor
-	return (board.ball[0] - 6) * (board.ball[0] - 6) * (board.ball[0] - 6)
-}
-
-// good with depth = 4, bad with depth < 4
-let evalBFS = function(board) {
-	// right goal
-	if (board.ball[0] == 11) {
-		return 1000
-	}
-	// left goal
-	if (board.ball[0] == 1) {
-		return -1000
-	}
-
-	var points = [board.ball]
-	var vis = board.createArray(board.size_ver, board.size_hor, 1, false)
-
-	var queue = []
-	queue.push(board.ball)
-	vis[board.ball[0]][board.ball[1]] = true
-
-	while(queue.length)
-	{
-		var v = queue.shift()
-
-		for (var i of board.possibleDirections(v))
-		{
-			var u = board.moved(v, i)
-			
-			if (!vis[u[0]][u[1]])
-			{
-				vis[u[0]][u[1]] = true
-				points.push(u)
-				queue.push(u)
-			}
-		}
-	}
-
-	// impossible to goal left
-	if (points.indexOf([1, 4]) == -1) {
-		return 999
-	}
-	// impossible to goal right
-	if (points.indexOf([11, 4]) == -1) {
-		return -999
-	}
-
-	// very poor evaluation...
-	// TODO: make it not poor
-	return (board.ball[0] - 6)
-}
-
-let evalBFSReverse = function(board) {
-	// right goal
-	if (board.ball[0] == 11) {
-		return 1000
-	}
-	// left goal
-	if (board.ball[0] == 1) {
-		return -1000
-	}
-
-	var points = [board.ball]
-	var vis = board.createArray(board.size_ver, board.size_hor, 1, false)
-
-	var queue = []
-	queue.push(board.ball)
-	vis[board.ball[0]][board.ball[1]] = true
-
-	while(queue.length)
-	{
-		var v = queue.shift()
-
-		for (var i of board.possibleDirections(v))
-		{
-			var u = board.moved(v, i)
-			
-			if (!vis[u[0]][u[1]])
-			{
-				vis[u[0]][u[1]] = true
-				points.push(u)
-				queue.push(u)
-			}
-		}
-	}
-
-	// impossible to goal left
-	if (points.indexOf([1, 4]) == -1) {
-		return 999
-	}
-	// impossible to goal right
-	if (points.indexOf([11, 4]) == -1) {
-		return -999
-	}
-
-	// very poor evaluation...
-	// TODO: make it not poor
-	return -1 * (board.ball[0] - 6)
-}
-
-// good with depth = 4, bad with depth < 4
-let evalBFSCubic = function(board) {
-	// right goal
-	if (board.ball[0] == 11) {
-		return 1000
-	}
-	// left goal
-	if (board.ball[0] == 1) {
-		return -1000
-	}
-
-	var points = [board.ball]
-	var vis = board.createArray(board.size_ver, board.size_hor, 1, false)
-
-	var queue = []
-	queue.push(board.ball)
-	vis[board.ball[0]][board.ball[1]] = true
-
-	while(queue.length)
-	{
-		var v = queue.shift()
-
-		for (var i of board.possibleDirections(v))
-		{
-			var u = board.moved(v, i)
-			
-			if (!vis[u[0]][u[1]])
-			{
-				vis[u[0]][u[1]] = true
-				points.push(u)
-				queue.push(u)
-			}
-		}
-	}
-
-	// impossible to goal left
-	if (points.indexOf([1, 4]) == -1) {
-		return 999
-	}
-	// impossible to goal right
-	if (points.indexOf([11, 4]) == -1) {
-		return -999
-	}
-
-	// very poor evaluation...
-	// TODO: make it not poor
-	return (board.ball[0] - 6) * (board.ball[0] - 6) * (board.ball[0] - 6)
-}
-
-let evalBFSCubicReverse = function(board) {
-	// right goal
-	if (board.ball[0] == 11) {
-		return 1000
-	}
-	// left goal
-	if (board.ball[0] == 1) {
-		return -1000
-	}
-
-	var points = [board.ball]
-	var vis = board.createArray(board.size_ver, board.size_hor, 1, false)
-
-	var queue = []
-	queue.push(board.ball)
-	vis[board.ball[0]][board.ball[1]] = true
-
-	while(queue.length)
-	{
-		var v = queue.shift()
-
-		for (var i of board.possibleDirections(v))
-		{
-			var u = board.moved(v, i)
-			
-			if (!vis[u[0]][u[1]])
-			{
-				vis[u[0]][u[1]] = true
-				points.push(u)
-				queue.push(u)
-			}
-		}
-	}
-
-	// impossible to goal left
-	if (points.indexOf([1, 4]) == -1) {
-		return 999
-	}
-	// impossible to goal right
-	if (points.indexOf([11, 4]) == -1) {
-		return -999
-	}
-
-	// very poor evaluation...
-	// TODO: make it not poor
-	return -1 * (board.ball[0] - 6) * (board.ball[0] - 6) * (board.ball[0] - 6)
-}
+const evalQuad=require('./evaluationFunctions/evaluationQuad.js')
+const evalQuadReverse=require('./evaluationFunctions/evaluationQuadReverse.js')
+const evalBFS=require('./evaluationFunctions/evaluationBFS.js')
+const evalBFSReverse=require('./evaluationFunctions/evaluationBFSReverse.js')
+const evalBFSCubic=require('./evaluationFunctions/evaluationBFSCubic.js')
+const evalBFSCubicReverse=require('./evaluationFunctions/evaluationBFSCubicReverse.js')
 
 
 function play(eval1, eval2, depth, cleanFiles) {
@@ -309,8 +30,10 @@ function play(eval1, eval2, depth, cleanFiles) {
 	var i = 0
 	while (b.win == -1) {
 		var start=performance.now()
+		ext_board[b.turn].nodes = 0
 		var move = ext_board[b.turn].search(depth, b.turn, -2000, 2000)[1]
 		var end=performance.now()
+		console.log("%s searched %d nodes for %f ms (%f node/s)", (b.turn == 0 ? eval1.name : eval2.name), ext_board[b.turn].nodes, Math.round((end-start)*100)/100, Math.round(ext_board[b.turn].nodes/((end-start)/1000)*100)/100)
 		n++
 		avg[b.turn] = (avg[b.turn]*(n-1) + end-start) / n
 		// console.log("Time: ", Math.round((end-start)*100)/100, 'ms', 
@@ -330,6 +53,10 @@ function play(eval1, eval2, depth, cleanFiles) {
 		}
 		ext_board[0].makeMove(move)
 		ext_board[1].makeMove(move)
+
+		// ext_board[0].save("testGraph.json")
+		// b.save("board.json")
+
 		if (DRAW_BOARDS)
 			b.draw(i)
 		i = i + 1

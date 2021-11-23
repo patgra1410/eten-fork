@@ -1,4 +1,4 @@
-module.exports = function(board) {
+module.exports = function evaluationBFSReverse(board) {
 	// right goal
 	if (board.ball[0] == 11) {
 		return 1000
@@ -12,7 +12,6 @@ module.exports = function(board) {
 	var vis = board.createArray(board.size_ver, board.size_hor, 1, false)
 
 	var queue = []
-	queue.push(board.ball)
 	vis[board.ball[0]][board.ball[1]] = true
 
 	while(queue.length)
@@ -26,18 +25,17 @@ module.exports = function(board) {
 			if (!vis[u[0]][u[1]])
 			{
 				vis[u[0]][u[1]] = true
-				points.push(u)
 				queue.push(u)
 			}
 		}
 	}
 
 	// impossible to goal left
-	if (points.indexOf([1, 4]) == -1) {
+	if (!vis[1][4]) {
 		return 999
 	}
 	// impossible to goal right
-	if (points.indexOf([11, 4]) == -1) {
+	if (!vis[11][4]) {
 		return -999
 	}
 
