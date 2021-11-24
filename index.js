@@ -466,6 +466,9 @@ client.once('ready', async () => {
   // TODO: Make it a part of config.json? Or post where the thread was watched?
   // autoMemesChannel = await client.channels.fetch('912265771613290547')
 
+  if (!fs.existsSync('./data'))
+    fs.mkdirSync('./data')
+
   if (!fs.existsSync('./data/ranking.json'))
     fs.writeFileSync('./data/ranking.json', '{}')
 
