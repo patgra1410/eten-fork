@@ -585,7 +585,7 @@ client.on('interactionCreate', async interaction => {
 
   try {
     try {
-      await client.commands.get(interaction.commandName).execute(interaction)
+      client.commands.get(interaction.commandName).execute(interaction)
     } catch(error) {
       console.log(error)
     }
