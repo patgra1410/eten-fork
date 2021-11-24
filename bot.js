@@ -4,6 +4,7 @@ const process = require('process')
 const { performance } = require('perf_hooks')
 const PriorityQueue = require('js-priority-queue')
 const fs = require('fs')
+const { platform } = require('os')
 
 var directions = [[-1, -1], [0, -1], [1, -1], [-1, 0], [1, 0], [-1, 1], [0, 1], [1, 1]]
 // var DEBUG = false
@@ -146,7 +147,7 @@ module.exports=class ExtBoard {
 		// if (DEBUG) console.log(s)
 
 		var queue = new PriorityQueue({ comparator: function(a,b) {
-			return (player ? -1 : 1) * (a[0] - b[0])
+			return (player === 0 ? 1 : -1) * (a[0] - b[0])
 		} })
 
 		if (canGoFurther) {
@@ -257,6 +258,19 @@ module.exports=class ExtBoard {
 		return points
 	}
 
+	// quite good optimalization
+	orderMoves(moves, player) {
+		var forcing = []
+		var res = []
+		for (var point of moves) {
+			if (point[0] == (player === 0 ? 11 : 1))
+				forcing.push(point)
+			else
+				res.push(point)
+		}
+		return forcing.concat(res)
+	}
+
 	search(depth, player, alpha, beta) {
 		++this.nodes
 		
@@ -273,8 +287,7 @@ module.exports=class ExtBoard {
 		// for (var x = 1; x < this.size_ver-1; ++x) {
 		// 	for (var y = 1; y < this.size_hor-1; ++y) {
 
-		for (var [x, y] of this.generateMoves()) {
-		
+		for (var [x, y] of this.orderMoves(this.generateMoves(), player)) {
 			// if (this.ball[0] == x && this.ball[1] == y)
 			// 	continue
 			// if (losing.indexOf([x, y]) != -1)
@@ -297,7 +310,7 @@ module.exports=class ExtBoard {
 
 			var paths = this.findPath(this.ball, [x, y], player)
 			if (this.xd > 1000000) {
-				console.log("FindPath %d from [%d, %d] to [%d, %d]", this.xd, this.ball[0], this.ball[1], x, y)
+				console.log("FindPath %d (player %d) from [%d, %d] to [%d, %d]", this.xd, player, this.ball[0], this.ball[1], x, y)
 				this.save("lol.json")
 			}
 			for (var [_, path] of paths.reverse()) {
@@ -344,9 +357,11 @@ module.exports=class ExtBoard {
 // b.loadFromGraph(JSON.parse(fs.readFileSync('data/lol.json', {encoding: 'utf8'}).split('#')[0]))
 // b.draw()
 
-// var ext_board = new ExtBoard(b, 9, 13, require('./evaluationFunctions/evaluationQuadReverse.js'))
+// var ext_board = new ExtBoard(b, 9, 13, require('./evaluationFunctions/evaluationBFSReverse.js'))
 // ext_board.load('lol.json')
-// console.log(ext_board.generateMoves())
+// ext_board.makeMove([7, 1, 0, 4])
+// console.log(require('./evaluationFunctions/evaluationBFSReverse.js')(ext_board))
+//console.log(ext_board.findPath([3, 4], [4, 3], 0))
 
 // var sr=0
 // var n=0

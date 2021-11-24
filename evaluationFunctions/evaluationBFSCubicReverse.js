@@ -8,22 +8,19 @@ module.exports = function evaluationBFSCubicReverse(board) {
 		return -1000
 	}
 
-	var points = [board.ball]
 	var vis = board.createArray(board.size_ver, board.size_hor, 1, false)
 
 	var queue = []
+	queue.push(board.ball)
 	vis[board.ball[0]][board.ball[1]] = true
 
-	while(queue.length)
-	{
+	while (queue.length) {
 		var v = queue.shift()
 
-		for (var i of board.possibleDirections(v))
-		{
+		for (var i of board.possibleDirections(v)) {
 			var u = board.moved(v, i)
 			
-			if (!vis[u[0]][u[1]])
-			{
+			if (!vis[u[0]][u[1]]) {
 				vis[u[0]][u[1]] = true
 				queue.push(u)
 			}

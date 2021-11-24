@@ -14,16 +14,13 @@ module.exports = function evaluationBFSCubic(board) {
 	queue.push(board.ball)
 	vis[board.ball[0]][board.ball[1]] = true
 
-	while(queue.length)
-	{
+	while (queue.length) {
 		var v = queue.shift()
 
-		for (var i of board.possibleDirections(v))
-		{
+		for (var i of board.possibleDirections(v)) {
 			var u = board.moved(v, i)
 			
-			if (!vis[u[0]][u[1]])
-			{
+			if (!vis[u[0]][u[1]]) {
 				vis[u[0]][u[1]] = true
 				queue.push(u)
 			}

@@ -26,19 +26,20 @@ function play(eval1, eval2, depth, cleanFiles) {
 	var ext_board = [new ExtBoard(b, 9, 13, eval1), new ExtBoard(b, 9, 13, eval2)]
 
 	var avg = [0, 0]
+	var avgNodes = [0, 0]
 	var n = 0
-	var i = 0
 	while (b.win == -1) {
-		var start=performance.now()
+		var start = performance.now()
 		ext_board[b.turn].nodes = 0
 		var move = ext_board[b.turn].search(depth, b.turn, -2000, 2000)[1]
-		var end=performance.now()
+		var end = performance.now()
 		console.log("%s searched %d nodes for %f ms (%f node/s)", (b.turn == 0 ? eval1.name : eval2.name), ext_board[b.turn].nodes, Math.round((end-start)*100)/100, Math.round(ext_board[b.turn].nodes/((end-start)/1000)*100)/100)
 		n++
-		avg[b.turn] = (avg[b.turn]*(n-1) + end-start) / n
-		// console.log("Time: ", Math.round((end-start)*100)/100, 'ms', 
-		// 			'Avg: ', Math.round(sr*100)/100+'ms')
-		// console.log(b.turn, move)
+
+		// each player played only half of all turns
+		var m = (n + 1) / 2
+		avgNodes[b.turn] = (avgNodes[b.turn]*(m - 1) + ext_board[b.turn].nodes) / m
+		avg[b.turn] = (avg[b.turn]*(m - 1) + end-start) / m
 
 		if (move.length == 0) {
 			console.log("Fuck")
@@ -58,13 +59,14 @@ function play(eval1, eval2, depth, cleanFiles) {
 		// b.save("board.json")
 
 		if (DRAW_BOARDS)
-			b.draw(i)
-		i = i + 1
+			b.draw(n)
 	}
-	console.log("%s won! There were %d moves", (b.win == 0 ? eval1.name : eval2.name), i)
-	console.log("Average time for %s was %f ms, for %s was %f ms\n",
+	console.log("%s won! There were %d moves", (b.win == 0 ? eval1.name : eval2.name), n)
+	console.log("Average time for %s was %f ms, for %s was %f ms",
 				eval1.name, Math.round(avg[0]*100)/100, eval2.name, Math.round(avg[1]*100)/100)
-	
+	console.log("Average performance for %s was %f nodes/s, for %s was %f nodes/s\n",
+				eval1.name, Math.round(avgNodes[0]*100)/100, eval2.name, Math.round(avgNodes[1]*100)/100)
+
 	// clean files
 	if (cleanFiles) {
 		const path = 'data/'
@@ -106,4 +108,4 @@ function testEval(evalArr, depth) {
 
 // testEval([evalLinear, evalQuad, evalQuadSign, evalCubic, evalBFS, evalBFSCubic], 4)
 // testEval([evalQuadSign, evalQuad, evalBFS, evalBFSCubic], 4)
-testEval([evalQuadReverse, evalBFSReverse, evalBFSCubicReverse, evalQuad, evalBFS, evalBFSCubic], 4)
+testEval([evalBFS, evalQuadReverse, evalBFSReverse, evalBFSCubicReverse, evalQuad, evalBFSCubic], 4)
