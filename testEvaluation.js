@@ -18,7 +18,8 @@ const evalBFS=require('./evaluationFunctions/evaluationBFS.js')
 const evalBFSReverse=require('./evaluationFunctions/evaluationBFSReverse.js')
 const evalBFSCubic=require('./evaluationFunctions/evaluationBFSCubic.js')
 const evalBFSCubicReverse=require('./evaluationFunctions/evaluationBFSCubicReverse.js')
-
+const evalBFSfunny=require('./evaluationFunctions/evaluationBFSfunny.js')
+const evalBFSfunnyReverse=require('./evaluationFunctions/evaluationBFSfunnyReverse.js')
 
 function play(eval1, eval2, depth, cleanFiles) {
 	console.log("Playing %s vs %s...", eval1.name, eval2.name)
@@ -42,7 +43,8 @@ function play(eval1, eval2, depth, cleanFiles) {
 		avg[b.turn] = (avg[b.turn]*(m - 1) + end-start) / m
 
 		if (move.length == 0) {
-			console.log("Fuck")
+			b.win = 1 - b.win
+			continue
 		}
 
 		for (var dir of move) {
@@ -108,4 +110,4 @@ function testEval(evalArr, depth) {
 
 // testEval([evalLinear, evalQuad, evalQuadSign, evalCubic, evalBFS, evalBFSCubic], 4)
 // testEval([evalQuadSign, evalQuad, evalBFS, evalBFSCubic], 4)
-testEval([evalBFS, evalQuadReverse, evalBFSReverse, evalBFSCubicReverse, evalQuad, evalBFSCubic], 4)
+testEval([evalQuad, evalQuadReverse, evalBFSfunny, evalBFSfunnyReverse, evalBFSCubic, evalBFSCubicReverse], 2	)

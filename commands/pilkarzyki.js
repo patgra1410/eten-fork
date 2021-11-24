@@ -492,6 +492,27 @@ module.exports = {
                 var move=bots[bid].ext_board.search(bots[bid].depth, boards[gID].turn, -2000, 2000)[1]
                 var end=performance.now()
 
+                if (move.length == 0) {
+                    var error=false
+                    do {
+                        try {
+                            var message=await boards[gID].message.edit({content: '<@'+interaction.user.id+'> wygrał!\n'+ img.attachments.first().url, files: [], components: []})
+                            boards[gID].message=message
+                        } catch(err) {
+                            error=true
+                            console.log(err)
+                            await sleep(1000)
+                        }
+                    } while(error)
+
+                    boards[gID].removeBoard()
+                    delete bots[bid]
+                    delete boards[gID]
+                    delete uids[interaction.user.id]
+
+                    return
+                }
+
                 var nodes=bots[bid].ext_board.nodes
                 msg='Bot myślał '+(Math.round((end-start)*100)/100)+'ms i policzył '+nodes+' nodów ('+ Math.round((nodes/((end-start)/1000))*100)/100 +' nodes/s)'+'\n'+img.attachments.first().url
 
@@ -573,7 +594,11 @@ module.exports = {
 
                 if(boards[bid].win!=-1)
                 {
-                    msg='Bot wygrał!\n'+img.attachments.first().url
+                    if(boards[bid].uids[boards[bid].win] == interaction.user.id)
+                        msg='<@'+interaction.user.id+'> wygrał!'
+                    else
+                        msg='Bot wygrał!'
+                    msg+='\n'+img.attachments.first().url
                     var error=false
                     do {
                         try {
