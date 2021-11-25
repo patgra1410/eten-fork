@@ -1,10 +1,8 @@
 # Custom
 config.json
 placeholder.jpg
-data/librusBearer.txt
-data/weather.png
-data/weatherFinal.png
 data/*
+!data/leg60.png
 soundeffects/*
 .vscode
 
