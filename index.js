@@ -446,12 +446,12 @@ async function updateSlashCommands () {
   // console.log(response)
 }
 
-threadwatcher.newPostEvent.on('newPost', async (board, threadID, postID, text, attachmentUrl) => {
+threadwatcher.newReply.on('newPost', async (board, threadID, postID, text, attachmentUrl) => {
   // console.log(`${board}/${threadID}/p${postID}`)
   // console.log(text)
   console.log(attachmentUrl)
   await autoMemesChannel.send({
-    content: `${board}/thread/${threadID} No. ${postID}`,
+    content: `https://boards.4channel.org/${board}/thread/${threadID}#p${postID}`,
     files: [attachmentUrl]
   })
   threadwatcher.changePostTimeoutEvent.emit('subtractTimeout')
