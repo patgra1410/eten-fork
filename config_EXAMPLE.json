@@ -19,6 +19,12 @@
 			"link": "https://m.meteo.pl/warszawa/60"
 		}
 	],
+	"cronImageSend": {
+		"eneabled": false,
+		"images": "cronImageSend.json",
+		"guild": "guild id",
+		"channel": "channel id"
+	},
 	"pilkarzykiBot": {
 		"maxDepth": 5,
 		"evaluationFunctionConfig": [

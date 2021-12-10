@@ -7,6 +7,7 @@ const fs = require('fs')
 const cron = require('cron')
 const util = require('util')
 const fetch = require('node-fetch')
+const path = require('path')
 const { joinImages } = require('join-images')
 const threadwatcher = require('./lib/threadwatcher')
 const streamPipeline = util.promisify(require('stream').pipeline)
@@ -22,6 +23,7 @@ var player=createAudioPlayer()
 
 let coChannel=undefined
 let coUsers
+let imgConfig
 
 // TODO: Regex triggers for free text? ("/ROZPIERDOL.+KOTA/gi")
 // Won't this overload the bot if there are too many?
@@ -89,6 +91,32 @@ const dailyJob = new cron.CronJob(
   'Europe/Warsaw'
 )
 dailyJob.start()
+
+if (config.cronImageSend.eneabled)
+{
+  imgConfig = require('./'+config.cronImageSend.images)
+
+  for (var image of imgConfig)
+  {
+    const cronJob = new cron.CronJob(
+      image.cron,
+      async function () {
+        for (var img of imgConfig)
+        {
+          if (img.cron == this.cronTime.source)
+          {
+            await client.guilds.cache.get(config.cronImageSend.guild).channels.cache.get(config.cronImageSend.channel).send({files: [img.imageURL]})
+            return
+          }
+        }
+      },
+      null,
+      true,
+      'Europe/Warsaw'
+    )
+    cronJob.start()
+  }
+}
 
 function deleteMessage(message)
 {
