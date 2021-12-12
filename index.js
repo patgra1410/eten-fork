@@ -560,7 +560,7 @@ client.on('messageCreate', async message => {
   }
 
   let messageLower=message.content.toLowerCase()
-  if((messageLower.endsWith(' co') || messageLower.endsWith(' co?') || messageLower=='co' || messageLower=='co?') && coChannel===undefined) {
+  if((messageLower.endsWith(' co') || messageLower.endsWith(' co?') || messageLower=='co' || messageLower=='co?') && coChannel===undefined && !config.noJajcoGuilds.includes(message.guild.id)) {
     coUsers={jajco: message.author.id, daszek: [], count: 10, interval: undefined, messages: []}
     coChannel=message.channel.id
 

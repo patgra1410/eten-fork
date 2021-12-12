@@ -7,6 +7,9 @@
 	"guild": "guild id",
 	"playRandomSoundeffects": true,
 	"randomSoundeffectChance": 0.005,
+	"noJajcoGuilds": [
+		"guild id"
+	],
 	"allowedBoardsForTracking": {
 		"wsg": "/wsg/ - Worksafe Gif",
 		"g": "/g/ - Technology",
