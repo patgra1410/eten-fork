@@ -1,33 +1,41 @@
 {
 	"prefix": "!",
 	"token": "YourBotTokenGoesHere",
+
 	"librusLogin": "user@domain.tld",
 	"librusPass": "password",
 	"pushDevice": "12345678",
+
 	"guild": "guild id",
+
 	"playRandomSoundeffects": true,
 	"randomSoundeffectChance": 0.005,
+
 	"noJajcoGuilds": [
 		"guild id"
 	],
+
 	"allowedBoardsForTracking": {
 		"wsg": "/wsg/ - Worksafe Gif",
 		"g": "/g/ - Technology",
 		"v": "/v/ - Video Games",
 		"int": "/int/ - International"
 	},
+
 	"cronWeather": [
 		{
 			"title": "Warszawa",
 			"link": "https://m.meteo.pl/warszawa/60"
 		}
 	],
+
 	"cronImageSend": {
 		"eneabled": false,
-		"images": "cronImageSend.json",
+		"images": "cronImageSend_EXAMPLE.json",
 		"guild": "guild id",
 		"channel": "channel id"
 	},
+	
 	"pilkarzykiBot": {
 		"maxDepth": 5,
 		"evaluationFunctionConfig": [

@@ -1,5 +1,6 @@
 # Custom
 config.json
+cronImageSend.json
 placeholder.jpg
 data/*
 !data/leg60.png
