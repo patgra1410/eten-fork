@@ -13,12 +13,14 @@
 		"discord.js": "^13.2.0",
 		"elo-rating": "^1.0.1",
 		"ffmpeg-static": "^4.4.0",
+		"form-data": "^2.3.3",
 		"join-images": "^1.0.0",
 		"js-priority-queue": "^0.1.5",
 		"libsodium-wrappers": "^0.7.9",
 		"merge-images": "^2.0.0",
 		"node-cache": "^5.1.2",
 		"node-fetch": "^2.6.2",
+		"request": "^2.88.2",
 		"sharp": "^0.29.1"
 	},
 	"devDependencies": {

@@ -7,8 +7,10 @@ const fs = require('fs')
 const cron = require('cron')
 const util = require('util')
 const fetch = require('node-fetch')
+const formData = require('form-data')
 const path = require('path')
 const { joinImages } = require('join-images')
+const request = require('request')
 const threadwatcher = require('./lib/threadwatcher')
 const streamPipeline = util.promisify(require('stream').pipeline)
 const client = new Discord.Client({ intents: [Discord.Intents.FLAGS.GUILDS, Discord.Intents.FLAGS.GUILD_MESSAGES, Discord.Intents.FLAGS.GUILD_MEMBERS, Discord.Intents.FLAGS.GUILD_VOICE_STATES] })
@@ -594,6 +596,42 @@ client.on('messageCreate', async message => {
   if(message.content.toLowerCase().search('rozpierdol kota')!=-1)
   {
     client.commands.get('cursedkoteł').execute(message)
+  }
+
+  if (config.archiwum.eneabled && message.channel.id == config.archiwum.channel && message.attachments.size)
+  {
+    if (message.content.length == 0)
+    {
+      await message.reply('Tagi są wymagane (zobacz opis kanału)')
+      return
+    }
+
+    const url = message.attachments.first().url
+    const ext = path.extname(url)
+    const res = await fetch(url)
+    await streamPipeline(res.body, fs.createWriteStream('data/tmp' + ext))
+
+    const form = formData()
+    const stats = fs.statSync('data/tmp' + ext)
+    const size = stats.size
+    form.append('image', fs.createReadStream('data/tmp' + ext), { knownLength: size })
+    form.append('password', config.archiwum.uploadPassword)
+    form.append('tags', message.content)
+    form.append('author', message.author.username + '#' + message.author.discriminator)
+
+    const send = await fetch(config.archiwum.uploadURL, {
+      method: 'POST',
+      body: form
+    })
+
+    if (!send.ok) {
+      await message.reply(send.statusText + ' ' + send.status)
+      return
+    }
+
+    const text = await send.text()
+    if (text != 'ok')
+      await message.reply(text)
   }
 })
 

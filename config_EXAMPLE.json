@@ -35,6 +35,14 @@
 		"guild": "guild id",
 		"channel": "channel id"
 	},
+
+	"archiwum": {
+		"eneabled": false,
+		"channel": "channel id",
+		"guild": "guild id",
+		"uploadURL": "http://your.website.com/upload",
+		"uploadPassword": "password"
+	},
 	
 	"pilkarzykiBot": {
 		"maxDepth": 5,
