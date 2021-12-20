@@ -632,6 +632,8 @@ client.on('messageCreate', async message => {
     const text = await send.text()
     if (text != 'ok')
       await message.reply(text)
+    else
+      await message.reply('Dodano!')
   }
 })
 
