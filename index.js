@@ -619,6 +619,8 @@ client.on('messageCreate', async message => {
     form.append('tags', message.content)
     form.append('author', message.author.username + '#' + message.author.discriminator)
 
+    console.log(config.archiwum.upload)
+
     const send = await fetch(config.archiwum.uploadURL, {
       method: 'POST',
       body: form
@@ -632,6 +634,8 @@ client.on('messageCreate', async message => {
     const text = await send.text()
     if (text != 'ok')
       await message.reply(text)
+    else
+      await message.reply('Dodano!')
   }
 })
 
