@@ -371,6 +371,8 @@ async function getSchoolNoticesJson () {
             **__${noticeJson.SchoolNotice.Subject}__**
             ${noticeJson.SchoolNotice.Content}`.replace(/  +/g, '')
           )
+
+          let textWithoutRoles = text
           // Put all relevant classes in Bold
           text = text.replace(/3[a-iA-i ]*[AC]|3[A-Ia-i ]*[AaCc][A-Ia-i ]*3/g, '**$&**')
           // 3A(3)
@@ -425,10 +427,17 @@ async function getSchoolNoticesJson () {
             res+=line+'\n'
           }
           text=res
-
+          
+          for(var info of config.librusNoticeChannels)
+          {
+            var channel = client.guilds.cache.get(info.guild).channels.cache.get(info.channel)
+            
+            for (var split of splitMessage( (info.roles ? text : textWithoutRoles) ))  
+              await channel.send(split)
+          }
           // Finally, send.
-          for(var split of splitMessage(text))
-            await dzwonekChannel.send(split)
+          // for(var split of splitMessage(text))
+          //   await dzwonekChannel.send(split)
           console.log(`\x1b[1m${noticeJson.SchoolNotice.Id}  --- Sent!\x1b[0m`)
         }
       } else {
