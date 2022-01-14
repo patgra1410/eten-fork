@@ -27,6 +27,9 @@ let coChannel=undefined
 let coUsers
 let imgConfig
 
+if (!fs.existsSync('data/settings.json'))
+  fs.writeFileSync('data/settings.json', '{}')
+
 // TODO: Regex triggers for free text? ("/ROZPIERDOL.+KOTA/gi")
 // Won't this overload the bot if there are too many?
 // TODO: Handling for editReply in interactions? and stuff
@@ -571,7 +574,12 @@ client.on('messageCreate', async message => {
   }
 
   let messageLower=message.content.toLowerCase()
-  if((messageLower.endsWith(' co') || messageLower.endsWith(' co?') || messageLower=='co' || messageLower=='co?') && coChannel===undefined && !config.noJajcoGuilds.includes(message.guild.id)) {
+
+  let settings = require('./data/settings.json')
+  let isBanned = false
+  if (settings.jajco && ( settings.jajco.bannedGuilds.includes(message.guild.id) || settings.jajco.bannedUsers.includes(message.author.id) ))
+    isBanned = true
+  if((messageLower.endsWith(' co') || messageLower.endsWith(' co?') || messageLower=='co' || messageLower=='co?') && coChannel===undefined && !isBanned) {
     coUsers={jajco: message.author.id, daszek: [], count: 10, interval: undefined, messages: []}
     coChannel=message.channel.id
 
