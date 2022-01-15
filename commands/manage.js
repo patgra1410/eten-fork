@@ -96,7 +96,7 @@ module.exports = {
                 )
         ),
     async execute(interaction) {
-        if (config.adminID != interaction.user.id)
+        if (!config.adminID.includes(interaction.user.id))
             return
 
         const settings = require('../data/settings.json')

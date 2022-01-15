@@ -5,20 +5,8 @@
 	"librusLogin": "user@domain.tld",
 	"librusPass": "password",
 	"pushDevice": "12345678",
-	"librusNoticeChannels": [
-		{
-			"guild": "guidl1",
-			"channel": "channel1",
-			"roles": true
-		},
-		{
-			"guild": "guild2",
-			"channel": "channel2",
-			"roles": false
-		}
-	],
 
-	"adminID": "admin user id",
+	"adminID": ["admin1 user id", "admin2 user id"],
 
 	"guild": "guild id",
 
