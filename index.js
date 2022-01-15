@@ -39,6 +39,8 @@ const dailyJob = new cron.CronJob(
   '0 0 6 * * *',
   async function () {
     // Get inspirational image and send. Or at least, try to.
+    let settings = require('./data/settings.json')
+
     try {
       const res = await fetch('https://inspirobot.me/api?generate=true')
       if (!res.ok) throw new Error(`Unexpected response ${res.statusText}`)
@@ -46,8 +48,11 @@ const dailyJob = new cron.CronJob(
       if (!response.ok) throw new Error(`Unexpected response ${response.statusText}`)
       await streamPipeline(response.body, fs.createWriteStream('./data/placeholder.jpg'))
       const attachment = new Discord.MessageAttachment('./data/placeholder.jpg')
-      const inspireChannel = client.channels.cache.get('719825061552455760')
-      inspireChannel.send({ content: '**Inspiracja na dziś:', files: [attachment] })
+
+      for (let info of settings.inspiracja.where) {
+        let inspireChannel = client.guilds.cache.get(info.guild).channels.cache.get(info.channel)
+        await inspireChannel.send({ content: '**Inspiracja na dziś:**', files: [attachment] })
+      }
     } catch (error) {
       console.error(`Daily inspire failed... ${error}`)
       dzwonekChannel.send({ content: 'Dzienna inspiracja się wyjebała <@567054306688106496> :(' })
@@ -80,11 +85,14 @@ const dailyJob = new cron.CronJob(
         const img = await joinImages(['data/leg60.png', 'data/weather.png'], { direction: 'horizontal' })
         await img.toFile('data/weatherFinal.png')
         const weatherAttachment = new Discord.MessageAttachment('./data/weatherFinal.png')
-
-        if(config.cronWeather.length==1)
-          dzwonekChannel.send({ files: [weatherAttachment] })
-        else
-          dzwonekChannel.send({ content: city.title+':', files: [weatherAttachment] })
+        
+        for(let info of settings.pogoda.where) {
+          let channel = client.guilds.cache.get(info.guild).channels.cache.get(info.channel)
+          if(config.cronWeather.length==1)
+            await channel.send({ files: [weatherAttachment] })
+          else
+            await channel.send({ content: city.title+':', files: [weatherAttachment] })
+        }
       } catch (error) {
         console.error(`Daily weather failed... ${error}`)
         dzwonekChannel.send({ content: 'Dzienna pogoda się wyjebała <@567054306688106496> :(' })
@@ -431,16 +439,16 @@ async function getSchoolNoticesJson () {
           }
           text=res
           
-          for(var info of config.librusNoticeChannels)
+          // Finally, send.
+          let settings = require('./data/settings.json')
+          for(var info of settings.notices.where)
           {
             var channel = client.guilds.cache.get(info.guild).channels.cache.get(info.channel)
             
             for (var split of splitMessage( (info.roles ? text : textWithoutRoles) ))  
               await channel.send(split)
           }
-          // Finally, send.
-          // for(var split of splitMessage(text))
-          //   await dzwonekChannel.send(split)
+          
           console.log(`\x1b[1m${noticeJson.SchoolNotice.Id}  --- Sent!\x1b[0m`)
         }
       } else {

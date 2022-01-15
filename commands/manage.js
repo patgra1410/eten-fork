@@ -1,10 +1,17 @@
 'use strict'
 
 const Discord = require('discord.js')
-const { SlashCommandBuilder, SlashCommandStringOption, SlashCommandUserOption } = require('@discordjs/builders')
+const { SlashCommandBuilder, SlashCommandStringOption, SlashCommandUserOption, SlashCommandBooleanOption } = require('@discordjs/builders')
 const fs = require('fs')
-const settings = require('../data/settings.json')
 const config = require('../config.json')
+const { exit } = require('process')
+
+function includesDict(array, dict) {
+    for (var a of array)
+        if (JSON.stringify(dict) === JSON.stringify(a))
+            return true
+    return false
+}
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -47,10 +54,52 @@ module.exports = {
                         .addChoice('ban jajco', 'banjajco')
                         .addChoice('unban jajco', 'unbanjajco')
                 )
+        )
+        .addSubcommand(subcommand =>
+            subcommand
+                .setName('channel')
+                .setDescription('Ustawienia kanałów')
+                .addStringOption(
+                    new SlashCommandStringOption()
+                        .setName('option')
+                        .setDescription('Opcja')
+                        .setRequired(true)
+                        .addChoice('dodaj', 'add')
+                        .addChoice('usuń', 'remove')
+                )
+                .addStringOption(
+                    new SlashCommandStringOption()
+                        .setName('what')
+                        .setDescription('co zmienić')
+                        .setRequired(true)
+                        .addChoice('pogoda', 'pogoda')
+                        .addChoice('inspiracja', 'inspiracja')
+                        .addChoice('ogłoszenia z librusa', 'notices')
+                )
+                .addStringOption(
+                    new SlashCommandStringOption()
+                        .setName('guild')
+                        .setDescription('ID Gildii')
+                        .setRequired(false)
+                )
+                .addStringOption(
+                    new SlashCommandStringOption()
+                        .setName('channel')
+                        .setDescription('ID kanału')
+                        .setRequired(false)
+                )
+                .addBooleanOption(
+                    new SlashCommandBooleanOption()
+                        .setName('roles')
+                        .setDescription('czy oznaczać role (wymagane tylko przy ogłoszeniach) default=false')
+                        .setRequired(false)
+                )
         ),
     async execute(interaction) {
         if (config.adminID != interaction.user.id)
             return
+
+        const settings = require('../data/settings.json')
 
         if (!settings.jajco)
             settings.jajco = {}
@@ -108,6 +157,68 @@ module.exports = {
                 }
                 interaction.reply('ok')
             }
+        }
+
+        if (interaction.options.getSubcommand() === 'channel') {
+            if (!settings.inspiracja)
+                settings.inspiracja = {}
+            if (!settings.inspiracja.where)
+                settings.inspiracja.where = []
+            
+            if (!settings.pogoda)
+                settings.pogoda = {}
+            if (!settings.pogoda.where)
+                settings.pogoda.where = []
+            
+            if (!settings.notices)
+                settings.notices = {}
+            if (!settings.notices.where)
+                settings.notices.where = []
+            
+
+            let option = interaction.options.getString('option')
+            let what = interaction.options.getString('what')
+            let guild = interaction.options.getString('guild')
+            let channel = interaction.options.getString('channel')
+            let roles = interaction.options.getBoolean('roles')
+
+            if (!guild) {
+                guild = interaction.guildId
+                channel = interaction.channelId
+            }
+            if (roles == null)
+                roles = false
+            console.log(guild, channel)
+            console.log(roles)
+
+            if (what == 'pogoda') {
+                if (option == 'add') {
+                    if (!includesDict(settings.pogoda.where, {guild: guild, channel: channel}))
+                        settings.pogoda.where.push({guild: guild, channel: channel})
+                } else {
+                    if (includesDict(settings.pogoda.where, {guild: guild, channel: channel}))
+                        settings.pogoda.where.splice(settings.pogoda.where.indexOf({guild: guild, channel: channel}), 1)
+                }
+            } else if (what == 'inspiracja') {
+                if (option == 'add') {
+                    if (!includesDict(settings.inspiracja.where, {guild: guild, channel: channel}))
+                        settings.inspiracja.where.push({guild: guild, channel: channel})
+                } else {
+                    if (includesDict(settings.inspiracja.where, {guild: guild, channel: channel}))
+                        settings.inspiracja.where.splice(settings.inspiracja.where.indexOf({guild: guild, channel: channel}), 1)
+                }
+            } else if (what == 'notices') {
+                if (option == 'add') {
+                    if (!includesDict(settings.notices.where, {guild: guild, channel: channel, roles: roles}))
+                        settings.notices.where.push({guild: guild, channel: channel, roles: roles})
+                } else {
+                    if (includesDict(settings.notices.where, {guild: guild, channel: channel, roles: roles}))
+                        settings.notices.where.splice(settings.notices.where.indexOf({guild: guild, channel: channel, roles: roles}), 1)
+                }
+            }
+
+            fs.writeFileSync('./data/settings.json', JSON.stringify(settings, null, 2))
+            interaction.reply('ok')
         }
     }
 }
