@@ -153,7 +153,7 @@ async function coCountdown()
       if(coUsers.count>=0)
       return
     }
-    var msg='<@'+coUsers.jajco+'> skisłeś'
+    var msg='<@'+coUsers.jajco+'> skisł*ś'
 
     var ranking=JSON.parse(fs.readFileSync('./data/ranking.json'))
     if(ranking['jajco'][coUsers.jajco]===undefined)
