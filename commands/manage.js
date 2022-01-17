@@ -188,8 +188,6 @@ module.exports = {
             }
             if (roles == null)
                 roles = false
-            console.log(guild, channel)
-            console.log(roles)
 
             if (what == 'pogoda') {
                 if (option == 'add') {

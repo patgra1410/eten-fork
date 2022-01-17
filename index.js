@@ -12,6 +12,7 @@ const path = require('path')
 const { joinImages } = require('join-images')
 const request = require('request')
 const threadwatcher = require('./lib/threadwatcher')
+const { exit } = require('process')
 const streamPipeline = util.promisify(require('stream').pipeline)
 const client = new Discord.Client({ intents: [Discord.Intents.FLAGS.GUILDS, Discord.Intents.FLAGS.GUILD_MESSAGES, Discord.Intents.FLAGS.GUILD_MEMBERS, Discord.Intents.FLAGS.GUILD_VOICE_STATES] })
 client.commands = new Discord.Collection()
@@ -385,11 +386,14 @@ async function getSchoolNoticesJson () {
 
           let textWithoutRoles = text
           // Put all relevant classes in Bold
-          text = text.replace(/3[a-iA-i ]*[AC]|3[A-Ia-i ]*[AaCc][A-Ia-i ]*3/g, '**$&**')
+          text = text.replace(/3[a-iA-i ]*[AC]|3[A-Ia-i ]*[AaCc][A-Ia-i ]*3|1[a-iA-i ]*[fF]/g, '**$&**')
           // 3A(3)
           text = text.replace(/^.*(3[a-iA-i ]*[A]|3[A-Ia-i ]*[Aa][A-Ia-i ]*3).*$/gm, '<@&885211379408207962> $&')
           // 3C(3)
           text = text.replace(/^.*(3[a-iA-i ]*[C]|3[A-Ia-i ]*[Cc][A-Ia-i ]*3).*$/gm, '<@&885211432025731092> $&')
+          // 1f
+          text = text.replace(/^.*(1[a-iA-i ]*[fF]).*$/gm, '<@&932523538601111584> $&')
+
 
           // grupy
           var res=''
