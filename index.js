@@ -14,7 +14,7 @@ const request = require('request')
 const threadwatcher = require('./lib/threadwatcher')
 const { exit } = require('process')
 const streamPipeline = util.promisify(require('stream').pipeline)
-const client = new Discord.Client({ intents: [Discord.Intents.FLAGS.GUILDS, Discord.Intents.FLAGS.GUILD_MESSAGES, Discord.Intents.FLAGS.GUILD_MEMBERS, Discord.Intents.FLAGS.GUILD_VOICE_STATES] })
+const client = new Discord.Client({ intents: [Discord.Intents.FLAGS.GUILDS, Discord.Intents.FLAGS.GUILD_MESSAGES, Discord.Intents.FLAGS.GUILD_MEMBERS, Discord.Intents.FLAGS.GUILD_VOICE_STATES, Discord.Intents.FLAGS.GUILD_MESSAGE_REACTIONS], partials: ['MESSAGE', 'CHANNEL', 'REACTION'] })
 client.commands = new Discord.Collection()
 client.textTriggers = new Discord.Collection()
 
@@ -393,7 +393,38 @@ async function getSchoolNoticesJson () {
           text = text.replace(/^.*(3[a-iA-i ]*[C]|3[A-Ia-i ]*[Cc][A-Ia-i ]*3).*$/gm, '<@&885211432025731092> $&')
           // 1f
           text = text.replace(/^.*(1[a-iA-i ]*[fF]).*$/gm, '<@&932523538601111584> $&')
-
+          
+          let textWithAllClasses = textWithoutRoles
+          // Bold
+          textWithAllClasses = textWithAllClasses.replace(/3[a-iA-i ]*[ABCDEFG]|3[A-Ia-i ]*[AaBbCcDdEeFfGg][A-Ia-i ]*3|3[a-iA-i ]*[abcdefghi]|3[A-Ia-i ]*[AaBbCcDdEeFfGgHhIi][A-Ia-i ]*4|2[a-iA-i ]*[aABbCcDdEeFfGg]|1[a-iA-i ]*[aABbCcDdEeFfGgHh]/g, '**$&**')
+          // roles for 1. class
+          for(let l = 'a'.charCodeAt(); l <= 'h'.charCodeAt(); l++)
+          {
+            var roleID = '<@&' + user.guild.roles.cache.find(role => role.name == `1${letter}`).id + '> $&'
+            let regex = new RegExp( `^.*(1[a-iA-i ]*[${String.fromCharCode(l)}${String.fromCharCode(l).toUpperCase()}]).*$`, 'gm' )
+            textWithAllClasses = textWithAllClasses.replace(regex, roleID)
+          }
+          // roles for 2. class
+          for(let l = 'a'.charCodeAt(); l <= 'g'.charCodeAt(); l++)
+          {
+            var roleID = '<@&' + user.guild.roles.cache.find(role => role.name == `2${letter}`).id + '> $&'
+            let regex = new RegExp( `^.*(2[a-iA-i ]*[${String.fromCharCode(l)}${String.fromCharCode(l).toUpperCase()}]).*$`, 'gm' )
+            textWithAllClasses = textWithAllClasses.replace(regex, roleID)
+          }
+          // roles for 3. class gim
+          for(let l = 'a'.charCodeAt(); l <= 'g'.charCodeAt(); l++)
+          {
+            var roleID = '<@&' + user.guild.roles.cache.find(role => role.name == `3${letter.toUpperCase()}3`).id + '> $&'
+            let regex = new RegExp( `^.*(3[a-iA-i ]*[${String.fromCharCode(l).toUpperCase()}]|3[A-Ia-i ]*[${String.fromCharCode(l)}${String.fromCharCode(l).toUpperCase()}][A-Ia-i ]*3).*$`, 'gm' )
+            textWithAllClasses = textWithAllClasses.replace(regex, roleID)
+          }
+          // roles for 3. class podst
+          for(let l = 'a'.charCodeAt(); l <= 'i'.charCodeAt(); l++)
+          {
+            var roleID = '<@&' + user.guild.roles.cache.find(role => role.name == `3${letter}4`).id + '> $&'
+            let regex = new RegExp( `^.*(3[a-iA-i ]*[${String.fromCharCode(l)}]|3[A-Ia-i ]*[${String.fromCharCode(l)}${String.fromCharCode(l).toUpperCase()}][A-Ia-i ]*4).*$`, 'gm' )
+            textWithAllClasses = textWithAllClasses.replace(regex, roleID)
+          }
 
           // grupy
           var res=''
@@ -448,7 +479,12 @@ async function getSchoolNoticesJson () {
           for(var info of settings.notices.where)
           {
             var channel = client.guilds.cache.get(info.guild).channels.cache.get(info.channel)
-            
+            if (info.guild == '930512190220435516') {
+              for (var split of splitMessage(textWithAllClasses))
+                await channel.send(split)
+              continue
+            }   
+
             for (var split of splitMessage( (info.roles ? text : textWithoutRoles) ))  
               await channel.send(split)
           }
@@ -541,6 +577,46 @@ client.once('ready', async () => {
 
   if(config.playRandomSoundeffects)
     setInterval(randomSoundOnVoice, 1000*60)
+})
+
+client.on('messageReactionAdd', async (reaction, reactedUser) => {
+  try {
+    let letters = ['🇦', '🇧', '🇨', '🇩', '🇪', '🇫', '🇬', '🇭', '🇮']
+    let letter = String.fromCharCode(letters.indexOf(reaction._emoji.name)+'a'.charCodeAt())
+    let user = reaction.message.guild.members.cache.find(member => member.id == reactedUser.id)
+  
+    if (reaction.message.id == '932695585465704448') // 1. klasa
+      var role = user.guild.roles.cache.find(role => role.name === `1${letter}`)
+    else if (reaction.message.id == '932695586426196060') // 2. klasa
+      var role = user.guild.roles.cache.find(role => role.name === `2${letter}`)
+    else if (reaction.message.id == '932695588540141598') // 3. klasa podstawowka
+      var role = user.guild.roles.cache.find(role => role.name === `3${letter}4`)
+    else if (reaction.message.id == '932695587424444466') // 3. klasa gimnazjum
+      var role = user.guild.roles.cache.find(role => role.name === `3${letter.toUpperCase()}3`)
+
+    user.roles.add(role)
+  } catch(except) {
+    console.log(except)
+  }
+})
+
+client.on('messageReactionRemove', async (reaction, reactedUser) => {
+  try {
+    let letters = ['🇦', '🇧', '🇨', '🇩', '🇪', '🇫', '🇬', '🇭', '🇮']
+    let letter = String.fromCharCode(letters.indexOf(reaction._emoji.name)+'a'.charCodeAt())
+    let user = reaction.message.guild.members.cache.find(member => member.id == reactedUser.id)
+
+    if (reaction.message.id == '932695585465704448') // 1. klasa
+      user.roles.remove( user.guild.roles.cache.find(role => role.name == `1${letter}`) )
+    else if (reaction.message.id == '932695586426196060') // 2. klasa
+      user.roles.remove( user.guild.roles.cache.find(role => role.name == `2${letter}`) )
+    else if (reaction.message.id == '932695588540141598') // 3. klasa podstawowka
+      user.roles.remove( user.guild.roles.cache.find(role => role.name == `3${letter}4`) )
+    else if (reaction.message.id == '932695587424444466') // 3. klasa gimnazjum
+      user.roles.remove( user.guild.roles.cache.find(role => role.name == `3${letter.toUpperCase()}3`) )  
+  } catch(except) {
+    console.log(except)
+  }
 })
 
 client.on('messageCreate', async message => {
