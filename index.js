@@ -12,6 +12,7 @@ const path = require('path')
 const { joinImages } = require('join-images')
 const request = require('request')
 const threadwatcher = require('./lib/threadwatcher')
+const jajco = require('./lib/jajco')
 const { exit } = require('process')
 const streamPipeline = util.promisify(require('stream').pipeline)
 const client = new Discord.Client({ intents: [Discord.Intents.FLAGS.GUILDS, Discord.Intents.FLAGS.GUILD_MESSAGES, Discord.Intents.FLAGS.GUILD_MEMBERS, Discord.Intents.FLAGS.GUILD_VOICE_STATES, Discord.Intents.FLAGS.GUILD_MESSAGE_REACTIONS], partials: ['MESSAGE', 'CHANNEL', 'REACTION'] })
@@ -129,44 +130,6 @@ if (config.cronImageSend.eneabled)
       'Europe/Warsaw'
     )
     cronJob.start()
-  }
-}
-
-function deleteMessage(message)
-{
-  message.delete()
-}
-
-async function coCountdown()
-{
-  try {
-    if(coUsers.count==0)
-      clearInterval(coUsers.interval)
-
-    if(coUsers.count>=0)
-    {
-      client.channels.cache.get(coChannel).send(String(coUsers.count)).then(message => {
-        setTimeout(deleteMessage.bind(null, message), 10000+parseInt(message.content)*1000)
-      })
-
-      coUsers.count--
-      if(coUsers.count>=0)
-      return
-    }
-    var msg='<@'+coUsers.jajco+'> skisł*ś'
-
-    var ranking=JSON.parse(fs.readFileSync('./data/ranking.json'))
-    if(ranking['jajco'][coUsers.jajco]===undefined)
-      ranking['jajco'][coUsers.jajco]=0
-    ranking['jajco'][coUsers.jajco]++
-
-    fs.writeFileSync('./data/ranking.json', JSON.stringify(ranking))
-
-    client.channels.cache.get(coChannel).send(msg)
-    coChannel=undefined
-    coUsers=undefined
-  } catch(error) {
-    console.log(error)
   }
 }
 
@@ -415,14 +378,14 @@ async function getSchoolNoticesJson () {
           for(let letter = 'a'.charCodeAt(); letter <= 'g'.charCodeAt(); letter++)
           {
             var roleID = '<@&' + client.guilds.cache.get('930512190220435516').roles.cache.find(role => role.name == `3${String.fromCharCode(letter).toUpperCase()}3`).id + '> $&'
-            let regex = new RegExp( `^.*(3[a-iA-i ]*[${String.fromCharCode(l).toUpperCase()}]|3[A-Ia-i ]*[${String.fromCharCode(l)}${String.fromCharCode(letter).toUpperCase()}][A-Ia-i ]*3).*$`, 'gm' )
+            let regex = new RegExp( `^.*(3[a-iA-i ]*[${String.fromCharCode(letter).toUpperCase()}]|3[A-Ia-i ]*[${String.fromCharCode(letter)}${String.fromCharCode(letter).toUpperCase()}][A-Ia-i ]*3).*$`, 'gm' )
             textWithAllClasses = textWithAllClasses.replace(regex, roleID)
           }
           // roles for 3. class podst
           for(let letter = 'a'.charCodeAt(); letter <= 'i'.charCodeAt(); letter++)
           {
             var roleID = '<@&' + client.guilds.cache.get('930512190220435516').roles.cache.find(role => role.name == `3${String.fromCharCode(letter)}4`).id + '> $&'
-            let regex = new RegExp( `^.*(3[a-iA-i ]*[${String.fromCharCode(l)}]|3[A-Ia-i ]*[${String.fromCharCode(l)}${String.fromCharCode(letter).toUpperCase()}][A-Ia-i ]*4).*$`, 'gm' )
+            let regex = new RegExp( `^.*(3[a-iA-i ]*[${String.fromCharCode(letter)}]|3[A-Ia-i ]*[${String.fromCharCode(letter)}${String.fromCharCode(letter).toUpperCase()}][A-Ia-i ]*4).*$`, 'gm' )
             textWithAllClasses = textWithAllClasses.replace(regex, roleID)
           }
 
@@ -671,43 +634,8 @@ client.on('messageCreate', async message => {
     }
   }
 
-  let messageLower=message.content.toLowerCase()
+  jajco.run(message)
 
-  let settings = require('./data/settings.json')
-  let isBanned = false
-  if (settings.jajco && ( settings.jajco.bannedGuilds.includes(message.guild.id) || settings.jajco.bannedUsers.includes(message.author.id) ))
-    isBanned = true
-  if((messageLower.endsWith(' co') || messageLower.endsWith(' co?') || messageLower=='co' || messageLower=='co?') && coChannel===undefined && !isBanned) {
-    coUsers={jajco: message.author.id, daszek: [], count: 10, interval: undefined, messages: []}
-    coChannel=message.channel.id
-
-    coUsers.interval=setInterval(coCountdown, 1000)
-
-    message.channel.send('https://cdn.discordapp.com/attachments/455236204477022208/899223760488497242/109.173.177.194-2021.10.05.16.37.49.jpg')
-  }
-  if(message.content=='^' && coChannel!==undefined)
-  {
-    coUsers.daszek.push(message.author.id)
-  }
-  if(coChannel!==undefined && message.author.id===coUsers.jajco && message.mentions.users.size>0 && !coUsers.daszek.includes(message.mentions.users.keys().next().value) && message.type!='REPLY')
-  {
-    var uid=message.mentions.users.keys().next().value
-    if(uid==client.user.id)
-    {
-      if(Math.random()<=0.01 && !coUsers.daszek.includes('257119850026106880'))
-      {
-        message.channel.send('<@257119850026106880>')
-        coUsers.jajco='257119850026106880'
-        return
-      }
-      else
-      {
-        message.channel.send('Twoja stara')
-        return
-      }
-    }
-    coUsers.jajco=uid
-  }
   if(message.content.toLowerCase().search('rozpierdol kota')!=-1)
   {
     client.commands.get('cursedkoteł').execute(message)
