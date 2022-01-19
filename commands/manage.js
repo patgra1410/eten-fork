@@ -100,14 +100,6 @@ module.exports = {
             return
 
         const settings = require('../data/settings.json')
-
-        if (!settings.jajco)
-            settings.jajco = {}
-        if (!settings.jajco.bannedGuilds)
-            settings.jajco.bannedGuilds = []
-        if (!settings.jajco.bannedUsers)
-            settings.jajco.bannedUsers = []
-
         
         if (interaction.options.getSubcommand() === 'guild')
         {
@@ -160,22 +152,6 @@ module.exports = {
         }
 
         if (interaction.options.getSubcommand() === 'channel') {
-            if (!settings.inspiracja)
-                settings.inspiracja = {}
-            if (!settings.inspiracja.where)
-                settings.inspiracja.where = []
-            
-            if (!settings.pogoda)
-                settings.pogoda = {}
-            if (!settings.pogoda.where)
-                settings.pogoda.where = []
-            
-            if (!settings.notices)
-                settings.notices = {}
-            if (!settings.notices.where)
-                settings.notices.where = []
-            
-
             let option = interaction.options.getString('option')
             let what = interaction.options.getString('what')
             let guild = interaction.options.getString('guild')

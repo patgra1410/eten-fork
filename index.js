@@ -13,6 +13,8 @@ const { joinImages } = require('join-images')
 const request = require('request')
 const threadwatcher = require('./lib/threadwatcher')
 const jajco = require('./lib/jajco')
+const createRequiredFiles = require('./lib/createRequiredFiles')
+const discordEvents = require('./lib/discordEvents.js')
 const { exit } = require('process')
 const streamPipeline = util.promisify(require('stream').pipeline)
 const client = new Discord.Client({ intents: [Discord.Intents.FLAGS.GUILDS, Discord.Intents.FLAGS.GUILD_MESSAGES, Discord.Intents.FLAGS.GUILD_MEMBERS, Discord.Intents.FLAGS.GUILD_VOICE_STATES, Discord.Intents.FLAGS.GUILD_MESSAGE_REACTIONS], partials: ['MESSAGE', 'CHANNEL', 'REACTION'] })
@@ -28,9 +30,6 @@ var player=createAudioPlayer()
 let coChannel=undefined
 let coUsers
 let imgConfig
-
-if (!fs.existsSync('data/settings.json'))
-  fs.writeFileSync('data/settings.json', '{}')
 
 // TODO: Regex triggers for free text? ("/ROZPIERDOL.+KOTA/gi")
 // Won't this overload the bot if there are too many?
@@ -502,7 +501,7 @@ async function updateSlashCommands () {
 threadwatcher.newReply.on('newPost', async (board, threadID, postID, text, attachmentUrl) => {
   // console.log(`${board}/${threadID}/p${postID}`)
   // console.log(text)
-  console.log(attachmentUrl)
+  // console.log(attachmentUrl)
   await autoMemesChannel.send({
     content: `<https://boards.4channel.org/${board}/thread/${threadID}#p${postID}>`,
     files: [attachmentUrl]
@@ -511,6 +510,8 @@ threadwatcher.newReply.on('newPost', async (board, threadID, postID, text, attac
 })
 
 client.once('ready', async () => {
+  createRequiredFiles()
+
   client.user.setStatus('online')
   client.user.setActivity('twoja stara')
   updateSlashCommands()
@@ -519,22 +520,6 @@ client.once('ready', async () => {
   // TODO: Make it a part of config.json? Or post where the thread was watched?
   autoMemesChannel = await client.channels.fetch('912265771613290547')
 
-  if (!fs.existsSync('./data'))
-    fs.mkdirSync('./data')
-
-  if (!fs.existsSync('./data/ranking.json'))
-    fs.writeFileSync('./data/ranking.json', '{}')
-
-  var ranking=JSON.parse(fs.readFileSync('./data/ranking.json'))
-  var rankingOptions=['pilkarzyki', 'kwadraty', 'teampilkarzyki', 'najdluzszyruch', 'najdluzszagrateampilkarzyki', 'najdluzszagrapilkarzyki', 'sumaruchow', 'jajco']
-  for(let opt of rankingOptions)
-    if(ranking[opt]===undefined)
-      ranking[opt]={}
-  fs.writeFileSync('./data/ranking.json', JSON.stringify(ranking))
-  
-  if(!fs.existsSync('./data/userSettings.json'))
-    fs.writeFileSync('./data/userSettings.json', '{}')
-
   librusCurrentBearer = await updateBearer()
   setTimeout(getSchoolNoticesJson, 2000)
 
@@ -542,176 +527,12 @@ client.once('ready', async () => {
     setInterval(randomSoundOnVoice, 1000*60)
 })
 
-client.on('messageReactionAdd', async (reaction, reactedUser) => {
-  try {
-    let letters = ['🇦', '🇧', '🇨', '🇩', '🇪', '🇫', '🇬', '🇭', '🇮']
-    let letter = String.fromCharCode(letters.indexOf(reaction._emoji.name)+'a'.charCodeAt())
-    let user = reaction.message.guild.members.cache.find(member => member.id == reactedUser.id)
-    let role = undefined
-  
-    if (reaction.message.id == '932695585465704448') // 1. klasa
-      role = user.guild.roles.cache.find(role => role.name === `1${letter}`)
-    else if (reaction.message.id == '932695586426196060') // 2. klasa
-      role = user.guild.roles.cache.find(role => role.name === `2${letter}`)
-    else if (reaction.message.id == '932695588540141598') // 3. klasa podstawowka
-      role = user.guild.roles.cache.find(role => role.name === `3${letter}4`)
-    else if (reaction.message.id == '932695587424444466') // 3. klasa gimnazjum
-      role = user.guild.roles.cache.find(role => role.name === `3${letter.toUpperCase()}3`)
+client.on('messageReactionAdd', discordEvents.messageReactionAdd)
 
-    if (role) {
-      console.log(reaction)
-      await user.roles.add(role)
-    }
-  } catch(except) {
-    console.log(except)
-    let user = reaction.message.guild.members.cache.find(member => member.id == reactedUser.id)
-    user.send('Był problem z dodaniem twojej roli, spróbuj jeszcze raz.')
-  }
-})
+client.on('messageReactionRemove', discordEvents.messageReactionRemove)
 
-client.on('messageReactionRemove', async (reaction, reactedUser) => {
-  try {
-    let letters = ['🇦', '🇧', '🇨', '🇩', '🇪', '🇫', '🇬', '🇭', '🇮']
-    let letter = String.fromCharCode(letters.indexOf(reaction._emoji.name)+'a'.charCodeAt())
-    let user = reaction.message.guild.members.cache.find(member => member.id == reactedUser.id)
+client.on('messageCreate',discordEvents.messageCreate)
 
-    console.log(reaction)
-    if (reaction.message.id == '932695585465704448') // 1. klasa
-      await user.roles.remove( user.guild.roles.cache.find(role => role.name == `1${letter}`) )
-    else if (reaction.message.id == '932695586426196060') // 2. klasa
-      await user.roles.remove( user.guild.roles.cache.find(role => role.name == `2${letter}`) )
-    else if (reaction.message.id == '932695588540141598') // 3. klasa podstawowka
-      await user.roles.remove( user.guild.roles.cache.find(role => role.name == `3${letter}4`) )
-    else if (reaction.message.id == '932695587424444466') // 3. klasa gimnazjum
-      await  user.roles.remove( user.guild.roles.cache.find(role => role.name == `3${letter.toUpperCase()}3`) )  
-      
-  } catch(except) {
-    console.log(except)
-    let user = reaction.message.guild.members.cache.find(member => member.id == reactedUser.id)
-    user.send('Był problem z usunięciem twojej roli, spróbuj jeszcze raz.')
-  }
-})
-
-client.on('messageCreate', async message => {
-  if (message.author.bot) return
-  if (!client.application?.owner) await client.application?.fetch()
-
-  if (message.channel.id === '813703962838564865') {
-    try {
-      await message.react('<:among_us:754362953104359747>')
-    } catch (error) {
-      console.error('Failed to react in #amogus channel')
-    }
-  }
-
-  if (message.channel.id === '854294979849748510') {
-    try {
-      await message.react('❤')
-    } catch (error) {
-      console.error('Failed to react in #bardzo-wazny-kanal')
-    }
-  }
-
-  // TODO: ===
-  if (message.content.length == 4) {
-    await client.commands.get('kwadraty').onMessage(message)
-  }
-
-  if (message.content.startsWith(config.prefix)) {
-    const args = message.content.slice(config.prefix.length).trim().split(/ +/)
-    const command = args.shift().toLowerCase()
-
-    if (!client.commands.has(command)) return
-
-    message.reply('Deprecated. Jebać (wszystkie) nie slashowe komendy')
-    return
-  
-    try {
-      await client.commands.get(command).execute(message, args)
-    } catch (error) {
-      console.error(error)
-      message.channel.send('There was an error trying to execute that command!')
-    }
-  }
-
-  jajco.run(message)
-
-  if(message.content.toLowerCase().search('rozpierdol kota')!=-1)
-  {
-    client.commands.get('cursedkoteł').execute(message)
-  }
-
-  if (config.archiwum.eneabled && message.channel.id == config.archiwum.channel && message.attachments.size)
-  {
-    if (message.content.length == 0)
-    {
-      await message.reply('Tagi są wymagane (zobacz opis kanału)')
-      return
-    }
-
-    const url = message.attachments.first().url
-    const ext = path.extname(url)
-    const res = await fetch(url)
-    await streamPipeline(res.body, fs.createWriteStream('data/tmp' + ext))
-
-    const form = formData()
-    const stats = fs.statSync('data/tmp' + ext)
-    const size = stats.size
-    form.append('image', fs.createReadStream('data/tmp' + ext), { knownLength: size })
-    form.append('password', config.archiwum.uploadPassword)
-    form.append('tags', message.content)
-    form.append('author', message.author.username + '#' + message.author.discriminator)
-
-    console.log(config.archiwum.upload)
-
-    const send = await fetch(config.archiwum.uploadURL, {
-      method: 'POST',
-      body: form
-    })
-
-    if (!send.ok) {
-      await message.reply(send.statusText + ' ' + send.status)
-      return
-    }
-
-    const text = await send.text()
-    if (text != 'ok')
-      await message.reply(text)
-    else
-      await message.reply('Dodano!')
-  }
-})
-
-client.on('interactionCreate', async interaction => {
-  if (interaction.isButton()) {
-    try {
-      await client.commands.get(interaction.customId.split('#')[0]).execute(interaction)
-    } catch(error) {
-      console.log(error)
-    }
-    return
-  }
-
-  if (!interaction.isCommand()) return
-
-  if (!client.commands.has(interaction.commandName)) return
-
-  try {
-    try {
-      client.commands.get(interaction.commandName).execute(interaction)
-    } catch(error) {
-      console.log(error)
-    }
-  } catch (error) {
-    console.error(error)
-    try {
-      await interaction.reply({ content: 'There was an error while executing this command!', ephemeral: true })
-    } catch (error) {
-      console.log('Error: Couldn\'t reply, probably already replied, trying to edit')
-      console.log(error)
-      await interaction.editReply({ content: 'There was an error while executing this command!', ephemeral: true })
-    }
-  }
-})
+client.on('interactionCreate', discordEvents.interactionCreate)
 
 client.login(config.token)
