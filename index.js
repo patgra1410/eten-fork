@@ -1,168 +1,25 @@
 'use strict'
 
 const Discord = require('discord.js')
-const {  joinVoiceChannel, createAudioPlayer, createAudioResource }=require('@discordjs/voice')
 const config = require('./config.json')
 const fs = require('fs')
-const cron = require('cron')
-const util = require('util')
 const fetch = require('node-fetch')
-const formData = require('form-data')
-const path = require('path')
-const { joinImages } = require('join-images')
-const request = require('request')
 const threadwatcher = require('./lib/threadwatcher')
-const jajco = require('./lib/jajco')
 const createRequiredFiles = require('./lib/createRequiredFiles')
-const discordEvents = require('./lib/discordEvents.js')
-const { exit } = require('process')
-const streamPipeline = util.promisify(require('stream').pipeline)
+const cronJobs = require('./lib/cronJobs')
+const randomSounds = require('./lib/randomSoundOnVC')
+const discordEvents = require('./lib/discordEvents')
 const client = new Discord.Client({ intents: [Discord.Intents.FLAGS.GUILDS, Discord.Intents.FLAGS.GUILD_MESSAGES, Discord.Intents.FLAGS.GUILD_MEMBERS, Discord.Intents.FLAGS.GUILD_VOICE_STATES, Discord.Intents.FLAGS.GUILD_MESSAGE_REACTIONS], partials: ['MESSAGE', 'CHANNEL', 'REACTION'] })
 client.commands = new Discord.Collection()
 client.textTriggers = new Discord.Collection()
 
 let librusCurrentBearer
-let dzwonekChannel
 let autoMemesChannel
 const commandFiles = fs.readdirSync('./commands').filter(file => file.endsWith('.js'))
-var player=createAudioPlayer()
-
-let coChannel=undefined
-let coUsers
-let imgConfig
 
 // TODO: Regex triggers for free text? ("/ROZPIERDOL.+KOTA/gi")
 // Won't this overload the bot if there are too many?
 // TODO: Handling for editReply in interactions? and stuff
-
-// Daily Inspiration cron
-const dailyJob = new cron.CronJob(
-  '0 0 6 * * *',
-  async function () {
-    // Get inspirational image and send. Or at least, try to.
-    let settings = require('./data/settings.json')
-
-    try {
-      const res = await fetch('https://inspirobot.me/api?generate=true')
-      if (!res.ok) throw new Error(`Unexpected response ${res.statusText}`)
-      const response = await fetch(await res.text())
-      if (!response.ok) throw new Error(`Unexpected response ${response.statusText}`)
-      await streamPipeline(response.body, fs.createWriteStream('./data/placeholder.jpg'))
-      const attachment = new Discord.MessageAttachment('./data/placeholder.jpg')
-
-      for (let info of settings.inspiracja.where) {
-        let inspireChannel = client.guilds.cache.get(info.guild).channels.cache.get(info.channel)
-        await inspireChannel.send({ content: '**Inspiracja na dziś:**', files: [attachment] })
-      }
-    } catch (error) {
-      console.error(`Daily inspire failed... ${error}`)
-      dzwonekChannel.send({ content: 'Dzienna inspiracja się wyjebała <@567054306688106496> :(' })
-    }
-    // Get weather report image and send. Or at least, try to.
-    for(var city of config.cronWeather)
-    {
-      try {
-        const result = await fetch(city.link)
-        if (!result.ok) throw new Error(`Unexpected response ${result.statusText}`)
-        const resultText = await result.text()
-        // const imageRegex = /src="(https:\/\/www\.meteo\.pl\/um\/metco\/mgram_pict\.php\?ntype=0u&fdate=[0-9]+&row=406&col=250&lang=pl)"/g
-        const imageRegex = /src="(https:\/\/www\.meteo\.pl\/um\/metco\/mgram_pict\.php\?ntype=0u&fdate=[0-9]+&row=[0-9]+&col=[0-9]+&lang=pl)"/g
-        const link = imageRegex.exec(resultText)[1]
-        const imgResult = await fetch(link, {
-          headers: {
-            Accept: 'image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8',
-            'Accept-Encoding': 'gzip, deflate, br',
-            'Accept-Language': 'en-GB,en;q=0.9',
-            Host: 'www.meteo.pl',
-            Referer: 'https://m.meteo.pl/',
-            'Sec-Fetch-Dest': 'image',
-            'Sec-Fetch-Mode': 'no-cors',
-            'Sec-Fetch-Site': 'same-site',
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.114 Safari/537.36'
-          }
-        })
-        if (!imgResult.ok) throw new Error(`Unexpected response ${result.statusText}`)
-        await streamPipeline(imgResult.body, fs.createWriteStream('./data/weather.png'))
-        const img = await joinImages(['data/leg60.png', 'data/weather.png'], { direction: 'horizontal' })
-        await img.toFile('data/weatherFinal.png')
-        const weatherAttachment = new Discord.MessageAttachment('./data/weatherFinal.png')
-        
-        for(let info of settings.pogoda.where) {
-          let channel = client.guilds.cache.get(info.guild).channels.cache.get(info.channel)
-          if(config.cronWeather.length==1)
-            await channel.send({ files: [weatherAttachment] })
-          else
-            await channel.send({ content: city.title+':', files: [weatherAttachment] })
-        }
-      } catch (error) {
-        console.error(`Daily weather failed... ${error}`)
-        dzwonekChannel.send({ content: 'Dzienna pogoda się wyjebała <@567054306688106496> :(' })
-      }
-    }
-  },
-  null,
-  true,
-  'Europe/Warsaw'
-)
-dailyJob.start()
-
-if (config.cronImageSend.eneabled)
-{
-  imgConfig = require('./'+config.cronImageSend.images)
-
-  for (var image of imgConfig)
-  {
-    const cronJob = new cron.CronJob(
-      image.cron,
-      async function () {
-        for (var img of imgConfig)
-        {
-          if (img.cron == this.cronTime.source)
-          {
-            await client.guilds.cache.get(config.cronImageSend.guild).channels.cache.get(config.cronImageSend.channel).send({files: [img.imageURL]})
-            return
-          }
-        }
-      },
-      null,
-      true,
-      'Europe/Warsaw'
-    )
-    cronJob.start()
-  }
-}
-
-function sleep(ms) {
-  return new Promise((resolve) => {
-    setTimeout(resolve, ms);
-  });
-}
-
-async function randomSoundOnVoice()
-{
-  var channels=client.guilds.cache.get(config.guild).channels.cache.filter(c => c.type=='GUILD_VOICE')
-  
-  for(var [id, channel] of channels)
-  {
-    if(channel.members.size==0 || Math.random()>=config.randomSoundeffectChance)
-      continue
-
-    var connection=joinVoiceChannel({
-      channelId: channel.id,
-      guildId: channel.guild.id,
-      adapterCreator: channel.guild.voiceAdapterCreator
-    })
-
-    var files = fs.readdirSync('./soundeffects')
-    
-    var resource=createAudioResource('./soundeffects/'+files[Math.floor(Math.random() * files.length)])
-    connection.subscribe(player)
-    player.play(resource)
-    while(player.state.status!='idle')
-      await sleep(100)
-    connection.disconnect()
-  }
-}
 
 async function updateBearer () {
   let setCookies = []
@@ -170,7 +27,6 @@ async function updateBearer () {
   let sendableCookies = []
   let csrfToken = ''
   const csrfRegex = /<meta name="csrf-token" content="(.*)">/g
-  // dzwonekChannel.send('lol')
   // const someFuckingClientIdConstant = 'AyNzeNoSup7IkySMhBdUhSH4ucqc97Jn6DzVcqd5'
   console.log('\x1b[45mGET https://portal.librus.pl/\x1b[0m')
   const portalResult = await fetch('https://portal.librus.pl/')
@@ -514,17 +370,18 @@ client.once('ready', async () => {
 
   client.user.setStatus('online')
   client.user.setActivity('twoja stara')
+
   updateSlashCommands()
+  cronJobs(client)
+
   console.log(`Ready! Logged in as ${client.user.tag}`)
-  dzwonekChannel = client.channels.cache.get('884370476128944148')
   // TODO: Make it a part of config.json? Or post where the thread was watched?
   autoMemesChannel = await client.channels.fetch('912265771613290547')
 
   librusCurrentBearer = await updateBearer()
   setTimeout(getSchoolNoticesJson, 2000)
 
-  if(config.playRandomSoundeffects)
-    setInterval(randomSoundOnVoice, 1000*60)
+  randomSounds(client)
 })
 
 client.on('messageReactionAdd', discordEvents.messageReactionAdd)
