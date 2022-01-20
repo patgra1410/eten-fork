@@ -1,5 +1,5 @@
 "use strict"
-const Board=require('./pilkarzykiRenderer.js')
+const Board = require('./pilkarzykiRenderer.js')
 const process = require('process')
 const { performance } = require('perf_hooks')
 const PriorityQueue = require('js-priority-queue')
@@ -11,8 +11,8 @@ var directions = [[-1, -1], [0, -1], [1, -1], [-1, 0], [1, 0], [-1, 1], [0, 1], 
 
 const SAVE_PATH = "data/"
 
-module.exports=class ExtBoard {
-// class ExtBoard {
+module.exports = class ExtBoard {
+	// class ExtBoard {
 	constructor(board, size_hor, size_ver, evalFunc) {
 		this.ball = [board.ball.x, board.ball.y]
 		this.graph = new Array(size_ver)
@@ -23,8 +23,8 @@ module.exports=class ExtBoard {
 			for (var y = 0; y < size_hor; ++y)
 				this.graph[x][y] = new Array(8)
 		}
-		for (var x = 1; x < size_ver-1; ++x) {
-			for (var y = 1; y < size_hor-1; ++y) {
+		for (var x = 1; x < size_ver - 1; ++x) {
+			for (var y = 1; y < size_hor - 1; ++y) {
 				if (x == 1 && !this.isGoal([x, y]))
 					continue
 				if (x == 11 && !this.isGoal([x, y]))
@@ -62,7 +62,7 @@ module.exports=class ExtBoard {
 	}
 
 	load(filename) {
-		var data = fs.readFileSync(SAVE_PATH + filename, {encoding: 'utf8'}).split('#')
+		var data = fs.readFileSync(SAVE_PATH + filename, { encoding: 'utf8' }).split('#')
 		this.graph = JSON.parse(data[0])
 		this.ball = JSON.parse(data[1])
 	}
@@ -136,8 +136,7 @@ module.exports=class ExtBoard {
 		if (s[0] == t[0] && s[1] == t[1])
 			return [[this.evalFunc(this), []]]
 
-		if (s[0] == 1 || s[0] == 11)
-		{
+		if (s[0] == 1 || s[0] == 11) {
 			if (t[0] == 1 || t[0] == 11)
 				return [[this.evalFunc(this), []]]
 			return null
@@ -146,9 +145,11 @@ module.exports=class ExtBoard {
 		// this.vis[s[0]][s[1]] = true
 		// if (DEBUG) console.log(s)
 
-		var queue = new PriorityQueue({ comparator: function(a,b) {
-			return (player === 0 ? 1 : -1) * (a[0] - b[0])
-		} })
+		var queue = new PriorityQueue({
+			comparator: function (a, b) {
+				return (player === 0 ? 1 : -1) * (a[0] - b[0])
+			}
+		})
 
 		if (canGoFurther) {
 			// if (DEBUG) console.log(s + ": " + this.possibleDirections(s))
@@ -178,11 +179,11 @@ module.exports=class ExtBoard {
 					if (t[0] == 1 || t[0] == 11) {
 						return [[path[0][0], [i].concat(path[0][1])]]
 					}
-					
+
 					for (var tmp_path of path) {
 						if (tmp_path === null)
 							continue
-						
+
 						queue.queue([tmp_path[0], [i].concat(tmp_path[1])])
 						if (queue.length > 50)
 							queue.dequeue()
@@ -190,7 +191,7 @@ module.exports=class ExtBoard {
 				}
 			}
 		}
-		
+
 		// this.vis[s[0]][s[1]] = false
 		var res = []
 		while (queue.length)
@@ -204,7 +205,7 @@ module.exports=class ExtBoard {
 		// for (var x = 0; x < this.size_ver; ++x) {
 		// 	for (var y = 0; y < this.size_hor; ++y) {
 		// 		this.vis[x][y] = false
-				
+
 		// 	}
 		// }
 		return this.single(s, t, true, player)
@@ -232,7 +233,7 @@ module.exports=class ExtBoard {
 				}
 				if (this.isGoal(w))
 					canGoFurther = false
-				
+
 				if (!vis[w[0]][w[1]]) {
 					vis[w[0]][w[1]] = true
 					points.push(w)
@@ -273,7 +274,7 @@ module.exports=class ExtBoard {
 
 	search(depth, player, alpha, beta) {
 		++this.nodes
-		
+
 		var best = [(player ? 2000 : -2000), []]
 
 		var evaluation = this.evalFunc(this)
@@ -295,8 +296,7 @@ module.exports=class ExtBoard {
 
 			var end = true
 			for (var dir of this.graph[x][y]) {
-				if (dir == true || dir == null)
-				{
+				if (dir == true || dir == null) {
 					end = false
 					break
 				}
@@ -316,7 +316,7 @@ module.exports=class ExtBoard {
 			for (var [_, path] of paths.reverse()) {
 				if (path !== null && path.length > 0) {
 					this.makeMove(path)
-					
+
 					if (player == 0) {
 						var val = this.search(depth - 1, 1 - player, alpha, beta)
 						if (val[0] > best[0]) {
@@ -324,8 +324,7 @@ module.exports=class ExtBoard {
 						}
 						// else if (val[0] == best[0] && val[1][0]+1>best[0][1])
 						// 	best = [val[0], [val[1][0]+1, path]]
-						if (best[0] >= beta)
-						{
+						if (best[0] >= beta) {
 							this.unmakeMove(path)
 							return best
 						}
@@ -372,7 +371,7 @@ module.exports=class ExtBoard {
 // 	var end=performance.now()
 // 	n++
 // 	sr=(sr*(n-1)+Math.round((end-start)*100)/100)/n
-// 	console.log("Time: ", Math.round((end-start)*100)/100, 'ms', 
+// 	console.log("Time: ", Math.round((end-start)*100)/100, 'ms',
 // 				'Avg: ', Math.round(sr*100)/100+'ms')
 // 	console.log(b.turn, move)
 
