@@ -61,8 +61,7 @@ client.once('ready', async () => {
   // TODO: Make it a part of config.json? Or post where the thread was watched?
   autoMemesChannel = await client.channels.fetch('912265771613290547')
 
-  librus()
-
+  librus(client)
   randomSounds(client)
 })
 
