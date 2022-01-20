@@ -5,6 +5,7 @@
 |:------:| :--------- |
 | prefix | prefix of the bot |
 | token | token of the bot |
+| librus | whether to check liburs |
 | librusLogin | email to login to librus |
 | librusPass | password for librus |
 | pushDevice | librus-provided pushDevice acquired manually from new app login |

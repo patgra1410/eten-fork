@@ -2,6 +2,7 @@
 	"prefix": "!",
 	"token": "YourBotTokenGoesHere",
 
+	"librus": true,
 	"librusLogin": "user@domain.tld",
 	"librusPass": "password",
 	"pushDevice": "12345678",
