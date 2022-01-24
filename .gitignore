@@ -6,6 +6,7 @@ data/*
 !data/leg60.png
 soundeffects/*
 .vscode
+start.sh
 
 # Logs
 logs
