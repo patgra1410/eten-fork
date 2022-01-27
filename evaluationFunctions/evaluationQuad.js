@@ -1,12 +1,12 @@
 module.exports = function evaluationQuad(board) {
 	// right goal
-	if (board.ball[0] == 11) {
+	if (board.ball[0] == 11)
 		return 1000
-	}
+
 	// left goal
-	if (board.ball[0] == 1) {
+	if (board.ball[0] == 1)
 		return -1000
-	}
+
 
 	// very poor evaluation...
 	// TODO: make it not poor
