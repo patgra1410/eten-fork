@@ -13,7 +13,8 @@
 
 	"playRandomSoundeffects": true,
 	"randomSoundeffectChance": 0.005,
-
+	
+	"autoMemesChannel": "channel id",
 	"allowedBoardsForTracking": {
 		"wsg": "/wsg/ - Worksafe Gif",
 		"g": "/g/ - Technology",

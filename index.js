@@ -57,8 +57,8 @@ client.once('ready', async () => {
 	cronJobs(client)
 
 	console.log(`Ready! Logged in as ${client.user.tag}`)
-	// TODO: Make it a part of config.json? Or post where the thread was watched?
-	autoMemesChannel = await client.channels.fetch('912265771613290547')
+	
+	autoMemesChannel = await client.channels.fetch(config.autoMemesChannel)
 
 	librus(client)
 	randomSounds(client)
