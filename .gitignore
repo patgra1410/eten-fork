@@ -6,7 +6,7 @@ data/*
 !data/leg60.png
 soundeffects/*
 .vscode
-start.sh
+webhook-link
 
 # Logs
 logs

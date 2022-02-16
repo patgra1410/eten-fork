@@ -1,5 +1,8 @@
 # Eten
 
+### Notification on channel when bot fails
+to setup add your webhook link to file `webhook-link` and run bot with `./start.sh`
+
 ### Config file
 | Config | Description |
 |:------:| :--------- |

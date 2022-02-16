@@ -8,6 +8,7 @@ const createRequiredFiles = require('./lib/createRequiredFiles')
 const cronJobs = require('./lib/cronJobs')
 const randomSounds = require('./lib/randomSoundOnVC')
 const librus = require('./lib/librus')
+const incrementDays = require('./lib/incrementDays')
 const discordEvents = require('./lib/discordEvents')
 const client = new Discord.Client({ intents: [Discord.Intents.FLAGS.GUILDS, Discord.Intents.FLAGS.GUILD_MESSAGES, Discord.Intents.FLAGS.GUILD_MEMBERS, Discord.Intents.FLAGS.GUILD_VOICE_STATES, Discord.Intents.FLAGS.GUILD_MESSAGE_REACTIONS], partials: ['MESSAGE', 'CHANNEL', 'REACTION'] })
 client.commands = new Discord.Collection()
@@ -28,9 +29,8 @@ async function updateSlashCommands() {
 
 		slashCommands.push(command.data.toJSON())
 
-		for (const alias in command.aliases) {
+		for (const alias in command.aliases)
 			client.commands.set(command.aliases[alias], command)
-		}
 	}
 	// const response = await client.application?.commands.set(slashCommands)
 	// console.log(response)
@@ -57,9 +57,10 @@ client.once('ready', async () => {
 	cronJobs(client)
 
 	console.log(`Ready! Logged in as ${client.user.tag}`)
-	
+
 	autoMemesChannel = await client.channels.fetch(config.autoMemesChannel)
 
+	incrementDays()
 	librus(client)
 	randomSounds(client)
 })
