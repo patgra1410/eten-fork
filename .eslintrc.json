@@ -11,7 +11,7 @@
     "rules": {
         "arrow-spacing": ["warn", { "before": true, "after": true }],
         "brace-style": ["error", "stroustrup", { "allowSingleLine": true }],
-        "comma-dangle": ["error", "always-multiline"],
+        "comma-dangle": ["error", "never"],
         "comma-spacing": "error",
         "comma-style": "error",
         "curly": ["error", "multi-or-nest", "consistent"],
