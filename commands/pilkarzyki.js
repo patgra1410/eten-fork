@@ -395,7 +395,7 @@ module.exports = {
 					boards[uids[interaction.user.id]].longestMove[interaction.user.id] = Math.max(boards[uids[interaction.user.id]].currentMoveLength, boards[uids[interaction.user.id]].longestMove[interaction.user.id])
 					boards[uids[interaction.user.id]].currentMoveLength = 0
 
-					ranking = JSON.parse(fs.readFileSync('./data/ranking.json'))
+					const ranking = JSON.parse(fs.readFileSync('./data/ranking.json'))
 					if (ranking['najdluzszyruch'][interaction.user.id] === undefined)
 						ranking['najdluzszyruch'][interaction.user.id] = 0
 					ranking['najdluzszyruch'][interaction.user.id] = Math.max(ranking['najdluzszyruch'][interaction.user.id], boards[uids[interaction.user.id]].longestMove[interaction.user.id])
