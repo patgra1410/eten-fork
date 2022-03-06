@@ -16,6 +16,10 @@ to setup add your webhook link to file `webhook-link` and run bot with `./start.
 | guild | id of the guild |
 | playRandomSoundeffects | whether Eten should join voice channels and play sound effects |
 | randomSoundeffectChance | chance of Eten to join a voice channel every minute (doesn't matter if `playRandomSoundeffects = false`) |
+| bets | settings releted to bets |
+| bets.eneabled | whether bets are eneabled |
+| bets.guild | guild ID on which bets will work |
+| bets.channel | channel ID on which bets should be sent and on which ranking will be sent |
 | allowedBoardsForTracking | boards allowed for tracking - see format in config_EXAMPLE.json |
 | cronWeather | array of cities which weather will be send every morning |
 | cronImageSend | config for sending images at given times |

@@ -18,7 +18,8 @@ module.exports = {
 				.addChoice('Najdluższa gra w drużynowych piłkarzykach', 'najdluzszagrateampilkarzyki')
 				.addChoice('Najdluższa gra w piłkarzykach', 'najdluzszagrapilkarzyki')
 				.addChoice('Suma ruchów', 'sumaruchow')
-				.addChoice('Przegrania w jajco', 'jajco'),
+				.addChoice('Przegrania w jajco', 'jajco')
+				.addChoice('Wygrane zakłady', 'bets')
 		),
 	async execute(interaction, args) {
 		let type
@@ -41,7 +42,7 @@ module.exports = {
 
 
 		let desc = ''
-		if (type == 'najdluzszagrapilkarzyki' || type == 'najdluzszagrateampilkarzyki' || type == 'najdluzszyruch' || type == 'sumaruchow' || type == 'jajco') {
+		if (type == 'najdluzszagrapilkarzyki' || type == 'najdluzszagrateampilkarzyki' || type == 'najdluzszyruch' || type == 'sumaruchow' || type == 'jajco' || type == 'bets') {
 			for (const [key, value] of Object.entries(ranking))
 				rank.push({ uids: key, len: value })
 
@@ -53,6 +54,12 @@ module.exports = {
 				for (let i = 0; i < rank.length; i++) {
 					const r = rank[i]
 					desc += String(i + 1) + '. <@' + r['uids'] + '>: ' + r['len'] + ' przegranych\n'
+				}
+			}
+			else if (type == 'bets') {
+				for (let i = 0; i < rank.length; i++) {
+					const r = rank[i]
+					desc += String(i + 1) + '. <@' + r['uids'] + '>: ' + r['len'] + ' wygranych\n'
 				}
 			}
 			else if (type == 'najdluzszyruch' || type == 'sumaruchow') {
@@ -112,6 +119,8 @@ module.exports = {
 			title = 'Ranking ilości ruchów'
 		else if (type == 'jajco')
 			title = 'Ranking przegranych w jajco'
+		else if (type == 'bets')
+			title = 'Ranking wygranych zakładów o godzine postowania ogłoszeń'
 
 		const embed = new Discord.MessageEmbed()
 			.setColor('#' + Math.floor(Math.random() * 16777215).toString(16))

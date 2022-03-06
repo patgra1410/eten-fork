@@ -13,6 +13,12 @@
 
 	"playRandomSoundeffects": true,
 	"randomSoundeffectChance": 0.005,
+
+	"bets": {
+		"eneabled": "true",
+		"guild": "guild id",
+		"channel": "channel id"
+	},
 	
 	"autoMemesChannel": "channel id",
 	"allowedBoardsForTracking": {
