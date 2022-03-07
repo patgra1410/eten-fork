@@ -55,9 +55,21 @@ module.exports = {
 		} else if (interaction.options.getSubcommand() == 'list') {
 			const bets = JSON.parse(fs.readFileSync('./data/bets.json'))
 
+			const users = []
+			for (const [user, time] of Object.entries(bets)) {
+				users.push({
+					user: user,
+					time: time.time,
+					message: time.message
+				})
+			}
+			users.sort((a, b) => {
+				return a.time - b.time
+			})
+
 			let desc = ''
-			for (const [user, time] of Object.entries(bets))
-				desc += `<@${user}>: ${time.message}\n`
+			for (const time of users)
+				desc += `<@${time.user}>: ${time.message}\n`
 
 			if (desc == '')
 				desc = 'Jeszcze nikt się nie założył <:widenatchuz:706934562961358888>'
