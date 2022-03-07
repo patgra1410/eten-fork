@@ -56,7 +56,7 @@ module.exports = {
 				desc += `<@${user}>: ${time.message}\n`
 
 			if (desc == '')
-				desc = 'Jeszcze nikt się nie założył...'
+				desc = 'Jeszcze nikt się nie założył <:widenatchuz:706934562961358888>'
 
 			const embed = new Discord.MessageEmbed()
 				.setColor('#' + Math.floor(Math.random() * 16777215).toString(16))
