@@ -21,11 +21,22 @@ module.exports = {
 		)
 		.addSubcommand(subcommand =>
 			subcommand
+				.setName('zmień')
+				.setDescription('Zmień swój zakład')
+				.addStringOption(
+					new SlashCommandStringOption()
+						.setName('czas')
+						.setDescription('Godzina')
+						.setRequired(true)
+				)
+		)
+		.addSubcommand(subcommand =>
+			subcommand
 				.setName('list')
 				.setDescription('Lista zakładów')
 		),
 	async execute(interaction) {
-		if (interaction.options.getSubcommand() == 'bet') {
+		if (interaction.options.getSubcommand() == 'bet' || interaction.options.getSubcommand() == 'zmień') {
 			const content = interaction.options.getString('czas')
 			if (!/[0-2]{1}[0-9]{1}:[0-6]{1}[0-9]{1}:[0-6]{1}[0-9]{1}.[0-9]{3}$|[0-2]{1}[0-9]{1}:[0-6]{1}[0-9]{1}:[0-6]{1}[0-9]{1}$|[0-2]{1}[0-9]{1}:[0-6]{1}[0-9]{1}$/.test(content)) {
 				interaction.reply('Zły format (dozwolone formaty: godzina:minuta, godzina:minuta:sekunda, godzina:minuta:sekunda.milisekunda)')
@@ -34,7 +45,7 @@ module.exports = {
 
 			const bets = JSON.parse(fs.readFileSync('./data/bets.json'))
 
-			if (interaction.user.id in bets) {
+			if (interaction.user.id in bets && interaction.options.getSubcommand() != 'zmień') {
 				interaction.reply('Już się założyłeś. <:qiqifallen:936561167709646860>')
 				return
 			}
@@ -51,7 +62,10 @@ module.exports = {
 			}
 			fs.writeFileSync('./data/bets.json', JSON.stringify(bets))
 
-			interaction.reply('gaming')
+			if (interaction.options.getSubcommand() == 'bet')
+				interaction.reply('Dodano!')
+			else
+				interaction.reply('Zmieniono!')
 		} else if (interaction.options.getSubcommand() == 'list') {
 			const bets = JSON.parse(fs.readFileSync('./data/bets.json'))
 
