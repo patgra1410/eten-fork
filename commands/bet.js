@@ -3,6 +3,8 @@
 const { SlashCommandBuilder, SlashCommandStringOption } = require('@discordjs/builders')
 const Discord = require('discord.js')
 const fs = require('fs')
+const config = require('../config.json')
+const betsFunc = require('../lib/bets')
 
 module.exports = {
 	data: new SlashCommandBuilder()
@@ -34,6 +36,11 @@ module.exports = {
 			subcommand
 				.setName('list')
 				.setDescription('Lista zakładów')
+		)
+		.addSubcommand(subcommand =>
+			subcommand
+				.setName('check')
+				.setDescription('Tylko dla administratorów bota')
 		),
 	async execute(interaction) {
 		if (interaction.options.getSubcommand() == 'bet' || interaction.options.getSubcommand() == 'zmień') {
@@ -94,6 +101,14 @@ module.exports = {
 				.setDescription(desc)
 
 			interaction.reply({ embeds: [embed] })
+		} else if (interaction.options.getSubcommand() == 'check') {
+			if (config.adminID.indexOf(interaction.user.id) == -1) {
+				interaction.reply({ content: 'Tylko dla administratorów', ephemeral: true })
+				return
+			}
+
+			betsFunc.check(interaction.client)
+			interaction.reply({ content: 'ok', ephemeral: true })
 		}
 	}
 }

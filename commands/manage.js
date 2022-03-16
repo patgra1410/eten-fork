@@ -26,14 +26,14 @@ module.exports = {
 						.setDescription('różne opcje')
 						.setRequired(true)
 						.addChoice('block jajco', 'banjajco')
-						.addChoice('unblock jajco', 'unbanjajco'),
+						.addChoice('unblock jajco', 'unbanjajco')
 				)
 				.addStringOption(
 					new SlashCommandStringOption()
 						.setName('additional')
 						.setDescription('Dodatkowe informacji (np. id guildi)')
-						.setRequired(false),
-				),
+						.setRequired(false)
+				)
 		)
 		.addSubcommand(subcommand =>
 			subcommand
@@ -43,7 +43,7 @@ module.exports = {
 					new SlashCommandUserOption()
 						.setName('user')
 						.setDescription('Użytkownik')
-						.setRequired(true),
+						.setRequired(true)
 				)
 				.addStringOption(
 					new SlashCommandStringOption()
@@ -51,8 +51,8 @@ module.exports = {
 						.setDescription('Opcje')
 						.setRequired(true)
 						.addChoice('ban jajco', 'banjajco')
-						.addChoice('unban jajco', 'unbanjajco'),
-				),
+						.addChoice('unban jajco', 'unbanjajco')
+				)
 		)
 		.addSubcommand(subcommand =>
 			subcommand
@@ -64,7 +64,7 @@ module.exports = {
 						.setDescription('Opcja')
 						.setRequired(true)
 						.addChoice('dodaj', 'add')
-						.addChoice('usuń', 'remove'),
+						.addChoice('usuń', 'remove')
 				)
 				.addStringOption(
 					new SlashCommandStringOption()
@@ -73,26 +73,26 @@ module.exports = {
 						.setRequired(true)
 						.addChoice('pogoda', 'pogoda')
 						.addChoice('inspiracja', 'inspiracja')
-						.addChoice('ogłoszenia z librusa', 'notices'),
+						.addChoice('ogłoszenia z librusa', 'notices')
 				)
 				.addStringOption(
 					new SlashCommandStringOption()
 						.setName('guild')
 						.setDescription('ID Gildii')
-						.setRequired(false),
+						.setRequired(false)
 				)
 				.addStringOption(
 					new SlashCommandStringOption()
 						.setName('channel')
 						.setDescription('ID kanału')
-						.setRequired(false),
+						.setRequired(false)
 				)
 				.addBooleanOption(
 					new SlashCommandBooleanOption()
 						.setName('roles')
 						.setDescription('czy oznaczać role (wymagane tylko przy ogłoszeniach) default=false')
-						.setRequired(false),
-				),
+						.setRequired(false)
+				)
 		),
 	async execute(interaction) {
 		if (!config.adminID.includes(interaction.user.id))
@@ -179,5 +179,5 @@ module.exports = {
 			fs.writeFileSync('./data/settings.json', JSON.stringify(settings, null, 2))
 			interaction.reply('ok')
 		}
-	},
+	}
 }
