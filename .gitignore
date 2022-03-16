@@ -2,6 +2,7 @@
 config.json
 cronImageSend.json
 placeholder.jpg
+tmp
 data/*
 !data/leg60.png
 soundeffects/*

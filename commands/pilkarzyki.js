@@ -193,7 +193,7 @@ module.exports = {
 								console.log(error)
 						}
 					}
-					const attachment = new Discord.MessageAttachment('./data/boardPilkarzyki' + id + '.png')
+					const attachment = new Discord.MessageAttachment('./tmp/boardPilkarzyki' + id + '.png')
 					const img = await interaction.client.guilds.cache.get('856926964094337044').channels.cache.get('892842178143997982').send({ files: [attachment] })
 
 					const msg = 'Tura: <@' + boards[id].turnUID() + '>\n' + img.attachments.first().url
@@ -228,7 +228,7 @@ module.exports = {
 								console.log(error)
 						}
 					}
-					const attachment = new Discord.MessageAttachment('./data/boardPilkarzyki' + uids[interaction.user.id] + '.png')
+					const attachment = new Discord.MessageAttachment('./tmp/boardPilkarzyki' + uids[interaction.user.id] + '.png')
 					const img = await interaction.client.guilds.cache.get('856926964094337044').channels.cache.get('892842178143997982').send({ files: [attachment] })
 					const msg = '<@' + interaction.user.id + '> poddał się\n' + img.attachments.first().url
 
@@ -298,7 +298,7 @@ module.exports = {
 							console.log(error)
 					}
 				}
-				const attachment = new Discord.MessageAttachment('./data/boardPilkarzyki' + uids[interaction.user.id] + '.png')
+				const attachment = new Discord.MessageAttachment('./tmp/boardPilkarzyki' + uids[interaction.user.id] + '.png')
 				const img = await interaction.client.guilds.cache.get('856926964094337044').channels.cache.get('892842178143997982').send({ files: [attachment] })
 				const msg = '<@' + winner + '> wygrał przez poddanie się\n' + img.attachments.first().url
 
@@ -341,7 +341,7 @@ module.exports = {
 								console.log(error)
 						}
 					}
-					const attachment = new Discord.MessageAttachment('./data/boardPilkarzyki' + uids[interaction.user.id] + '.png')
+					const attachment = new Discord.MessageAttachment('./tmp/boardPilkarzyki' + uids[interaction.user.id] + '.png')
 					const img = await interaction.client.guilds.cache.get('856926964094337044').channels.cache.get('892842178143997982').send({ files: [attachment] })
 					const msg = 'Remis\n' + img.attachments.first().url
 
@@ -425,7 +425,7 @@ module.exports = {
 							console.log(error)
 					}
 				}
-				let attachment = new Discord.MessageAttachment('./data/boardPilkarzyki' + gID + '.png')
+				let attachment = new Discord.MessageAttachment('./tmp/boardPilkarzyki' + gID + '.png')
 				let img = await interaction.client.guilds.cache.get('856926964094337044').channels.cache.get('892842178143997982').send({ files: [attachment] })
 
 				let msg, components
@@ -539,7 +539,7 @@ module.exports = {
 						}
 					}
 
-					attachment = new Discord.MessageAttachment('./data/boardPilkarzyki' + gID + '.png')
+					attachment = new Discord.MessageAttachment('./tmp/boardPilkarzyki' + gID + '.png')
 					img = await interaction.client.guilds.cache.get('856926964094337044').channels.cache.get('892842178143997982').send({ files: [attachment] })
 
 					msg = 'Bot myślał ' + (Math.round((end - start) * 100) / 100) + 'ms i policzył ' + nodes + ' nodów (' + Math.round((nodes / ((end - start) / 1000)) * 100) / 100 + ' nodes/s)' + '\n' + img.attachments.first().url
@@ -572,7 +572,7 @@ module.exports = {
 					}
 				}
 
-				attachment = new Discord.MessageAttachment('./data/boardPilkarzyki' + gID + '.png')
+				attachment = new Discord.MessageAttachment('./tmp/boardPilkarzyki' + gID + '.png')
 				img = await interaction.client.guilds.cache.get('856926964094337044').channels.cache.get('892842178143997982').send({ files: [attachment] })
 
 				if (boards[bid].win != -1) {
@@ -630,7 +630,7 @@ module.exports = {
 						console.log(error)
 				}
 			}
-			const attachment = new Discord.MessageAttachment('./data/boardPilkarzyki' + uids[interaction.user.id] + '.png')
+			const attachment = new Discord.MessageAttachment('./tmp/boardPilkarzyki' + uids[interaction.user.id] + '.png')
 
 			let msg, components
 			if (boards[uids[interaction.user.id]].win == -1) {
@@ -764,7 +764,7 @@ module.exports = {
 					}
 				}
 
-				const attachment = new Discord.MessageAttachment('./data/boardPilkarzyki' + id + '.png')
+				const attachment = new Discord.MessageAttachment('./tmp/boardPilkarzyki' + id + '.png')
 				const img = await interaction.client.guilds.cache.get('856926964094337044').channels.cache.get('892842178143997982').send({ files: [attachment] })
 
 				const msg = 'Tura: <@' + boards[id].turnUID() + '>\n' + img.attachments.first().url

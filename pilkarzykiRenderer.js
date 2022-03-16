@@ -256,7 +256,7 @@ module.exports = class Board {
 
 		const data = this.canvas.toDataURL().replace(/^data:image\/\w+;base64,/, '')
 		const buf = Buffer.from(data, 'base64')
-		fs.writeFileSync('data/boardPilkarzyki' + fileInd + '.png', buf)
+		fs.writeFileSync('tmp/boardPilkarzyki' + fileInd + '.png', buf)
 	}
 
 	possibleMovesIndexes(x, y) {
@@ -377,7 +377,7 @@ module.exports = class Board {
 
 	removeBoard() {
 		try {
-			fs.unlinkSync('./data/boardPilkarzyki' + this.id + '.png')
+			fs.unlinkSync('./tmp/boardPilkarzyki' + this.id + '.png')
 		}
 		catch (error) {
 			console.log(error)

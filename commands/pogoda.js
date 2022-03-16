@@ -76,11 +76,11 @@ module.exports = {
 			if (!imgResult.ok) throw new Error(`Unexpected response ${result.statusText}`)
 			title = 'Warszawa'
 		}
-		await streamPipeline(imgResult.body, fs.createWriteStream('./data/weather.png'))
-		const img = await joinImages(['data/leg60.png', 'data/weather.png'], { direction: 'horizontal' })
-		await img.toFile('data/weatherFinal.png')
+		await streamPipeline(imgResult.body, fs.createWriteStream('./tmp/weather.png'))
+		const img = await joinImages(['data/leg60.png', 'tmp/weather.png'], { direction: 'horizontal' })
+		await img.toFile('tmp/weatherFinal.png')
 
-		const weatherAttachment = new Discord.MessageAttachment('./data/weatherFinal.png')
+		const weatherAttachment = new Discord.MessageAttachment('./tmp/weatherFinal.png')
 		if (interaction.isCommand !== undefined && interaction.isCommand())
 			await interaction.editReply({ content: title + ':', files: [weatherAttachment] })
 		else

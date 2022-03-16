@@ -6,7 +6,7 @@ const fs = require('fs')
 const directions = [[-1, -1], [0, -1], [1, -1], [-1, 0], [1, 0], [-1, 1], [0, 1], [1, 1]]
 // var DEBUG = false
 
-const SAVE_PATH = 'data/'
+const SAVE_PATH = 'tmp/'
 
 module.exports = class ExtBoard {
 	// class ExtBoard {

@@ -203,7 +203,7 @@ module.exports = {
 								console.log(error)
 						}
 					}
-					const attachment = new Discord.MessageAttachment('./data/boardTeamPilkarzyki' + id + '.png')
+					const attachment = new Discord.MessageAttachment('./tmp/boardTeamPilkarzyki' + id + '.png')
 					const img = await interaction.client.guilds.cache.get('856926964094337044').channels.cache.get('892842178143997982').send({ files: [attachment] })
 
 					const msg = 'Tura: <@' + boards[id].turnUID() + '>\n' + img.attachments.first().url
@@ -248,7 +248,7 @@ module.exports = {
 								console.log(error)
 						}
 					}
-					const attachment = new Discord.MessageAttachment('./data/boardTeamPilkarzyki' + uids[interaction.user.id] + '.png')
+					const attachment = new Discord.MessageAttachment('./tmp/boardTeamPilkarzyki' + uids[interaction.user.id] + '.png')
 					const img = await interaction.client.guilds.cache.get('856926964094337044').channels.cache.get('892842178143997982').send({ files: [attachment] })
 
 					const msg = '<@' + boards[boardID].uids[losers] + '> i <@' + boards[boardID].uids[losers + 2] + '> poddali się\n' + img.attachments.first().url
@@ -321,7 +321,7 @@ module.exports = {
 								console.log(error)
 						}
 					}
-					const attachment = new Discord.MessageAttachment('./data/boardTeamPilkarzyki' + uids[interaction.user.id] + '.png')
+					const attachment = new Discord.MessageAttachment('./tmp/boardTeamPilkarzyki' + uids[interaction.user.id] + '.png')
 					const img = await interaction.client.guilds.cache.get('856926964094337044').channels.cache.get('892842178143997982').send({ files: [attachment] })
 					const msg = 'Remis\n' + img.attachments.first().url
 
@@ -414,7 +414,7 @@ module.exports = {
 				msg = '<@' + boards[boardID].uids[boards[boardID].win] + '> i <@' + boards[boardID].uids[boards[boardID].win + 2] + '> wygrali'
 			}
 
-			const attachment = new Discord.MessageAttachment('./data/boardTeamPilkarzyki' + boardID + '.png')
+			const attachment = new Discord.MessageAttachment('./tmp/boardTeamPilkarzyki' + boardID + '.png')
 			const img = await interaction.client.guilds.cache.get('856926964094337044').channels.cache.get('892842178143997982').send({ files: [attachment] })
 
 			msg += '\n' + img.attachments.first().url

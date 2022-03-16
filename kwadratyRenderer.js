@@ -119,7 +119,7 @@ module.exports = class Board {
 
 		const data = this.canvas.toDataURL().replace(/^data:image\/\w+;base64,/, '')
 		const buf = Buffer.from(data, 'base64')
-		fs.writeFileSync('data/boardKwadraty' + this.id + '.png', buf)
+		fs.writeFileSync('tmp/boardKwadraty' + this.id + '.png', buf)
 	}
 
 	move(mv) {
@@ -179,7 +179,7 @@ module.exports = class Board {
 
 	removeBoard() {
 		try {
-			fs.unlinkSync('./data/boardKwadraty' + this.id + '.png')
+			fs.unlinkSync('./tmp/boardKwadraty' + this.id + '.png')
 		}
 		catch (error) {
 			console.log(error)
@@ -187,6 +187,6 @@ module.exports = class Board {
 	}
 
 	dump() {
-		fs.writeFileSync('./data/boardKwadraty' + this.id + '.dump', inspect(this, { depth: 10 }))
+		fs.writeFileSync('./tmp/boardKwadraty' + this.id + '.dump', inspect(this, { depth: 10 }))
 	}
 }

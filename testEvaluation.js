@@ -71,7 +71,7 @@ function play(eval1, eval2, depth, cleanFiles) {
 
 	// clean files
 	if (cleanFiles) {
-		const path = 'data/'
+		const path = 'tmp/'
 		const regex = /^boardPilkarzyki\d*[.]png$/
 		fs.readdirSync(path)
 			.filter(f => regex.test(f))

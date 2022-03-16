@@ -15,8 +15,8 @@ module.exports = {
 		if (!res.ok) throw new Error(`Unexpected response ${res.statusText}`)
 		const response = await fetch(await res.text())
 		if (!response.ok) throw new Error(`Unexpected response ${response.statusText}`)
-		await streamPipeline(response.body, fs.createWriteStream('./placeholder.jpg'))
-		const attachment = new Discord.MessageAttachment('./placeholder.jpg')
+		await streamPipeline(response.body, fs.createWriteStream('./tmp/placeholder.jpg'))
+		const attachment = new Discord.MessageAttachment('./tmp/placeholder.jpg')
 		interaction.reply({ files: [attachment] })
 	}
 }

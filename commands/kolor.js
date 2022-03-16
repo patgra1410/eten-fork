@@ -81,7 +81,7 @@ module.exports = {
 				board.move(4)
 				board.turn = 0
 				board.draw()
-				const attachment = new Discord.MessageAttachment('./data/boardPilkarzyki-1.png')
+				const attachment = new Discord.MessageAttachment('./tmp/boardPilkarzyki-1.png')
 				const img = await interaction.client.guilds.cache.get('856926964094337044').channels.cache.get('892842178143997982').send({ files: [attachment] })
 				board.removeBoard()
 

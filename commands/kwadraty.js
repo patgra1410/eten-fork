@@ -94,7 +94,7 @@ module.exports = {
 					gameID++
 
 					boards[id].draw()
-					const attachment = new Discord.MessageAttachment('./data/boardKwadraty' + id + '.png')
+					const attachment = new Discord.MessageAttachment('./tmp/boardKwadraty' + id + '.png')
 					const img = await interaction.client.guilds.cache.get('856926964094337044').channels.cache.get('892842178143997982').send({ files: [attachment] })
 
 					const msg = 'Tura: <@' + boards[id].turnUID() + '>\n' + img.attachments.first().url
@@ -135,7 +135,7 @@ module.exports = {
 				fs.writeFileSync('./data/ranking.json', JSON.stringify(ranking))
 
 				boards[uids[[interaction.user.id]]].draw()
-				const attachment = new Discord.MessageAttachment('./data/boardKwadraty' + uids[[interaction.user.id]] + '.png')
+				const attachment = new Discord.MessageAttachment('./tmp/boardKwadraty' + uids[[interaction.user.id]] + '.png')
 				const img = await interaction.client.guilds.cache.get('856926964094337044').channels.cache.get('892842178143997982').send({ files: [attachment] })
 				const msg = '<@' + winner + '> wygrał przez poddanie się\n' + img.attachments.first().url
 				const message = await interaction.update({ content: msg, files: [], components: [] })
@@ -154,7 +154,7 @@ module.exports = {
 				boards[uids[interaction.user.id]].remis.push(interaction.user.id)
 				if (boards[uids[interaction.user.id]].remis.length == 2) {
 					boards[uids[[interaction.user.id]]].draw()
-					const attachment = new Discord.MessageAttachment('./data/boardKwadraty' + uids[[interaction.user.id]] + '.png')
+					const attachment = new Discord.MessageAttachment('./tmp/boardKwadraty' + uids[[interaction.user.id]] + '.png')
 					const img = await interaction.client.guilds.cache.get('856926964094337044').channels.cache.get('892842178143997982').send({ files: [attachment] })
 					const msg = 'Remis\n' + img.attachments.first().url
 					await interaction.update({ content: msg, files: [], components: [] })
@@ -264,7 +264,7 @@ module.exports = {
 			return
 
 		boards[gid].draw()
-		const attachment = new Discord.MessageAttachment('./data/boardKwadraty' + gid + '.png')
+		const attachment = new Discord.MessageAttachment('./tmp/boardKwadraty' + gid + '.png')
 		const img = await message.client.guilds.cache.get('856926964094337044').channels.cache.get('892842178143997982').send({ files: [attachment] })
 
 		let msg, components
