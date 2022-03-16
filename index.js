@@ -32,7 +32,7 @@ async function updateSlashCommands() {
 		for (const alias in command.aliases)
 			client.commands.set(command.aliases[alias], command)
 	}
-	const response = await client.application?.commands.set(slashCommands)
+	await client.application?.commands.set(slashCommands)
 	// console.log(response)
 }
 

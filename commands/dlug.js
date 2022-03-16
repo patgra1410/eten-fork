@@ -6,7 +6,7 @@ module.exports = {
 	data: new SlashCommandBuilder()
 		.setName('długi')
 		.setDescription('List długów (pls chce bajgle)'),
-	async execute(interaction, args) {
+	async execute(interaction) {
 		const settings = JSON.parse(fs.readFileSync('./data/userSettings.json'))
 		const ranking = []
 		for (const [uid, value] of Object.entries(settings)) {

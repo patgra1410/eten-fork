@@ -122,7 +122,7 @@ module.exports = {
 						.setDescription('Głębokość patrzenia (max. ' + config.pilkarzykiBot.maxDepth + ')')
 						.setRequired(true))
 		),
-	async execute(interaction, args) {
+	async execute(interaction) {
 		if (interaction.isButton !== undefined && interaction.isButton()) {
 			const mainMessage = await interaction.update({ content: interaction.message.content, fetchReply: true })
 

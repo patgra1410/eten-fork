@@ -99,7 +99,7 @@ module.exports = {
 
 					const msg = 'Tura: <@' + boards[id].turnUID() + '>\n' + img.attachments.first().url
 
-					const message = await interaction.update({ content: msg, files: [], components: buttons() })
+					await interaction.update({ content: msg, files: [], components: buttons() })
 
 					boards[id].message = rightAccept.message
 				}
@@ -122,7 +122,7 @@ module.exports = {
 				}
 				else {
 					winner = gameuids[0]
-					winn = true
+					win = true
 				}
 
 				const newRating = Elo.calculate(rating1, rating2, win)
@@ -138,7 +138,7 @@ module.exports = {
 				const attachment = new Discord.MessageAttachment('./tmp/boardKwadraty' + uids[[interaction.user.id]] + '.png')
 				const img = await interaction.client.guilds.cache.get('856926964094337044').channels.cache.get('892842178143997982').send({ files: [attachment] })
 				const msg = '<@' + winner + '> wygrał przez poddanie się\n' + img.attachments.first().url
-				const message = await interaction.update({ content: msg, files: [], components: [] })
+				await interaction.update({ content: msg, files: [], components: [] })
 
 				boards[uids[[interaction.user.id]]].removeBoard()
 				delete boards[uids[[interaction.user.id]]]

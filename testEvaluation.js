@@ -103,7 +103,7 @@ function testEval(evalArr, depth) {
 	const end = performance.now()
 
 	for (let i = 0; i < n; ++i)
-		console.log('%s won %f\% of games', evalArr[i].name, Math.round(won[i] / allGames * 10000) / 100)
+		console.log('%s won %f% of games', evalArr[i].name, Math.round(won[i] / allGames * 10000) / 100)
 
 	console.log('\nTournament took %d seconds', Math.round((end - start) / 1000))
 }

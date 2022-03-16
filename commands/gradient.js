@@ -40,7 +40,7 @@ module.exports = {
 			subcommand
 				.setName('reset')
 				.setDescription('Usuń swój gradient')),
-	async execute(interaction, args) {
+	async execute(interaction) {
 		if (interaction.isCommand === undefined || !interaction.isCommand()) {
 			interaction.reply('Pls slash komenda')
 			return
