@@ -62,5 +62,5 @@ module.exports = {
 		await streamPipeline(response.body, fs.createWriteStream('./data/placeholder.jpg'))
 		const attachment = new Discord.MessageAttachment('./data/placeholder.jpg')
 		interaction.reply({ files: [attachment] })
-	},
+	}
 }

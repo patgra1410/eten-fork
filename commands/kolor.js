@@ -26,7 +26,7 @@ module.exports = {
 		let color, uid, username
 		if (interaction.isCommand !== undefined && interaction.isCommand()) {
 			if (interaction.options.getSubcommand() === 'reset') {
-				let settings = JSON.parse(fs.readFileSync('./data/userSettings.json'))
+				const settings = JSON.parse(fs.readFileSync('./data/userSettings.json'))
 				if (settings[uid] !== undefined && settings[uid]['color'] !== undefined)
 					delete settings[uid]['color']
 
@@ -55,7 +55,7 @@ module.exports = {
 			}
 		}
 
-		let settings = JSON.parse(fs.readFileSync('./data/userSettings.json'))
+		const settings = JSON.parse(fs.readFileSync('./data/userSettings.json'))
 
 		if (color == 'default' || (args !== undefined && args[0] == 'reset')) {
 			if (settings[uid] !== undefined && settings[uid]['color'] !== undefined)
@@ -89,5 +89,5 @@ module.exports = {
 			}
 			else {interaction.reply('Zły kolor')}
 		}
-	},
+	}
 }

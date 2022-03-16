@@ -16,13 +16,13 @@ module.exports = {
 					scso.addChoice(config.allowedBoardsForTracking[element], element)
 
 				return scso
-			},
+			}
 		)
 		.addIntegerOption(
 			new SlashCommandIntegerOption()
 				.setName('thread_id')
 				.setDescription('ID of the thread to be watched')
-				.setRequired(true),
+				.setRequired(true)
 		),
 	async execute(interaction) {
 		await interaction.deferReply()
@@ -35,5 +35,5 @@ module.exports = {
 		else
 			await interaction.editReply(`Error: ${result.reason}`)
 
-	},
+	}
 }

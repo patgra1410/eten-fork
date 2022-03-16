@@ -34,7 +34,7 @@ function buttons(id) {
 				.setCustomId('teampilkarzyki#2')
 				.setLabel('Prawo góra')
 				.setStyle(style)
-				.setDisabled(!indexes.includes(2)),
+				.setDisabled(!indexes.includes(2))
 		)
 	const row2 = new Discord.MessageActionRow()
 		.addComponents(
@@ -52,7 +52,7 @@ function buttons(id) {
 				.setCustomId('teampilkarzyki#4')
 				.setLabel('Prawo     ')
 				.setStyle(style)
-				.setDisabled(!indexes.includes(4)),
+				.setDisabled(!indexes.includes(4))
 		)
 	const row3 = new Discord.MessageActionRow()
 		.addComponents(
@@ -70,7 +70,7 @@ function buttons(id) {
 				.setCustomId('teampilkarzyki#7')
 				.setLabel('Prawo dół')
 				.setStyle(style)
-				.setDisabled(!indexes.includes(7)),
+				.setDisabled(!indexes.includes(7))
 		)
 	const row4 = new Discord.MessageActionRow()
 		.addComponents(
@@ -81,7 +81,7 @@ function buttons(id) {
 			new Discord.MessageButton()
 				.setCustomId('teampilkarzyki#surrender')
 				.setLabel('Poddaj się')
-				.setStyle('SECONDARY'),
+				.setStyle('SECONDARY')
 		)
 
 	return [row1, row2, row3, row4]
@@ -95,19 +95,19 @@ module.exports = {
 			new SlashCommandUserOption()
 				.setName('gracz2')
 				.setDescription('Drugi gracz (razem z tobą w drużynie)')
-				.setRequired(true),
+				.setRequired(true)
 		)
 		.addUserOption(
 			new SlashCommandUserOption()
 				.setName('gracz3')
 				.setDescription('Trzeci gracz (w przeciwnej drużynie)')
-				.setRequired(true),
+				.setRequired(true)
 		)
 		.addUserOption(
 			new SlashCommandUserOption()
 				.setName('gracz4')
 				.setDescription('Czwarty gracz (w przeciwnej drużynie)')
-				.setRequired(true),
+				.setRequired(true)
 		),
 	async execute(interaction, args) {
 		if (interaction.isButton !== undefined && interaction.isButton()) {
@@ -157,7 +157,7 @@ module.exports = {
 								new Discord.MessageButton()
 									.setLabel('Nie')
 									.setCustomId('teampilkarzyki#acceptNo#' + buttonsID)
-									.setStyle('PRIMARY'),
+									.setStyle('PRIMARY')
 							)
 
 						let error = false
@@ -567,7 +567,7 @@ module.exports = {
 				new Discord.MessageButton()
 					.setLabel('Nie')
 					.setCustomId('teampilkarzyki#acceptNo#' + buttonsID)
-					.setStyle('PRIMARY'),
+					.setStyle('PRIMARY')
 			)
 
 		const msg = 'Drużynowe piłarzyki: <@' + guids[0] + '> i <@' + guids[2] + '> przeciwko <@' + guids[1] + '> i <@' + guids[3] + '>'
@@ -585,5 +585,5 @@ module.exports = {
 
 		accepts[newAcceptID] = newAccept
 		newAcceptID++
-	},
+	}
 }

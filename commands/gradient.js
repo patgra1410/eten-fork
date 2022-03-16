@@ -15,14 +15,14 @@ module.exports = {
 					new SlashCommandStringOption()
 						.setName('kolor1')
 						.setDescription('Pierwszy kolor')
-						.setRequired(true),
+						.setRequired(true)
 				)
 				.addStringOption(
 					new SlashCommandStringOption()
 						.setName('kolor2')
 						.setDescription('Drugi kolor')
-						.setRequired(true),
-				),
+						.setRequired(true)
+				)
 		)
 		.addSubcommand(subcommand =>
 			subcommand
@@ -34,7 +34,7 @@ module.exports = {
 						.setDescription('Nazwa gradientu')
 						.setRequired(true)
 						.addChoice('Tencza', 'rainbow')
-						.addChoice('Losowe kolory', 'random'),
+						.addChoice('Losowe kolory', 'random')
 				))
 		.addSubcommand(subcommand =>
 			subcommand
@@ -105,5 +105,5 @@ module.exports = {
 		board.removeBoard()
 
 		interaction.reply('Pls dwa bajgiele (gradienty trudna rzecz).\nPreview: ' + img.attachments.first().url)
-	},
+	}
 }

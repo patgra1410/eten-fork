@@ -16,18 +16,18 @@ module.exports = {
 					scso.addChoice(config.allowedBoardsForTracking[element], element)
 
 				return scso
-			},
+			}
 		)
 		.addIntegerOption(
 			new SlashCommandIntegerOption()
 				.setName('thread_id')
 				.setDescription('ID of the thread to be unwatched')
-				.setRequired(true),
+				.setRequired(true)
 		),
 	async execute(interaction) {
 		await interaction.deferReply()
 		const board = interaction.options.getString('board')
 		const threadID = interaction.options.getInteger('thread_id')
 		await interaction.editReply(`${(await threadwatcher.unwatchThread(board, threadID)).response}`)
-	},
+	}
 }

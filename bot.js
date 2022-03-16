@@ -147,7 +147,7 @@ module.exports = class ExtBoard {
 		const queue = new PriorityQueue({
 			comparator: function(a, b) {
 				return (player === 0 ? 1 : -1) * (a[0] - b[0])
-			},
+			}
 		})
 
 		if (canGoFurther) {

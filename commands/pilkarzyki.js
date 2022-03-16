@@ -41,7 +41,7 @@ function buttons(id) {
 				.setCustomId('pilkarzyki#2')
 				.setLabel('Prawo góra')
 				.setStyle(style)
-				.setDisabled(!indexes.includes(2)),
+				.setDisabled(!indexes.includes(2))
 		)
 	const row2 = new Discord.MessageActionRow()
 		.addComponents(
@@ -59,7 +59,7 @@ function buttons(id) {
 				.setCustomId('pilkarzyki#4')
 				.setLabel('Prawo     ')
 				.setStyle(style)
-				.setDisabled(!indexes.includes(4)),
+				.setDisabled(!indexes.includes(4))
 		)
 	const row3 = new Discord.MessageActionRow()
 		.addComponents(
@@ -77,7 +77,7 @@ function buttons(id) {
 				.setCustomId('pilkarzyki#7')
 				.setLabel('Prawo dół')
 				.setStyle(style)
-				.setDisabled(!indexes.includes(7)),
+				.setDisabled(!indexes.includes(7))
 		)
 	const row4 = new Discord.MessageActionRow()
 		.addComponents(
@@ -88,7 +88,7 @@ function buttons(id) {
 			new Discord.MessageButton()
 				.setCustomId('pilkarzyki#surrender')
 				.setLabel('Poddaj się')
-				.setStyle('SECONDARY'),
+				.setStyle('SECONDARY')
 		)
 
 	return [row1, row2, row3, row4]
@@ -110,7 +110,7 @@ module.exports = {
 					new SlashCommandUserOption()
 						.setName('gracz')
 						.setDescription('Drugi gracz')
-						.setRequired(true),
+						.setRequired(true)
 				))
 		.addSubcommand(subcommand =>
 			subcommand
@@ -120,7 +120,7 @@ module.exports = {
 					option
 						.setName('depth')
 						.setDescription('Głębokość patrzenia (max. ' + config.pilkarzykiBot.maxDepth + ')')
-						.setRequired(true)),
+						.setRequired(true))
 		),
 	async execute(interaction, args) {
 		if (interaction.isButton !== undefined && interaction.isButton()) {
@@ -252,7 +252,7 @@ module.exports = {
 
 					return
 				}
-				let ranking = JSON.parse(fs.readFileSync('./data/ranking.json'))
+				const ranking = JSON.parse(fs.readFileSync('./data/ranking.json'))
 				const gameuids = boards[uids[interaction.user.id]].uids
 
 				const tempuids = [...gameuids]
@@ -359,7 +359,7 @@ module.exports = {
 
 					const gameuids = boards[uids[interaction.user.id]].uids
 
-					let ranking = JSON.parse(fs.readFileSync('./data/ranking.json'))
+					const ranking = JSON.parse(fs.readFileSync('./data/ranking.json'))
 					const tempuids = [...gameuids]
 					let uidsString = ''
 					for (const uid of tempuids.sort())
@@ -669,7 +669,7 @@ module.exports = {
 			} while (error)
 
 			if (boards[uids[interaction.user.id]].win != -1) {
-				let ranking = JSON.parse(fs.readFileSync('./data/ranking.json'))
+				const ranking = JSON.parse(fs.readFileSync('./data/ranking.json'))
 				const gameuids = boards[uids[interaction.user.id]].uids
 
 				const tempuids = [...gameuids]
@@ -805,7 +805,7 @@ module.exports = {
 			return
 		}
 
-		let ranking = JSON.parse(fs.readFileSync('./data/ranking.json'))
+		const ranking = JSON.parse(fs.readFileSync('./data/ranking.json'))
 		if (ranking['pilkarzyki'][uid1] === undefined)
 			ranking['pilkarzyki'][uid1] = { lost: 0, won: 0 }
 		if (ranking['pilkarzyki'][uid1]['rating'] === undefined)
@@ -836,7 +836,7 @@ module.exports = {
 				new Discord.MessageButton()
 					.setLabel('Nie')
 					.setCustomId('pilkarzyki#acceptNo#' + uid1 + '#' + uid2)
-					.setStyle('PRIMARY'),
+					.setStyle('PRIMARY')
 			)
 
 		const msg = '<@' + uid2 + '>: ' + usernames[0] + ' chce z tobą zagrać'
@@ -854,5 +854,5 @@ module.exports = {
 			}
 		} while (error)
 		accepts.push(newAccept)
-	},
+	}
 }

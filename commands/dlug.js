@@ -27,5 +27,5 @@ module.exports = {
 			.setTitle('Pls dajcie mi bajgle')
 			.setDescription(desc)
 		interaction.reply({ embeds: [embed] })
-	},
+	}
 }

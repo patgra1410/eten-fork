@@ -42,9 +42,9 @@ threadwatcher.newReply.on('newPost', async (board, threadID, postID, text, attac
 	// console.log(attachmentUrl)
 	await autoMemesChannel.send({
 		content: `<https://boards.4channel.org/${board}/thread/${threadID}#p${postID}>`,
-		files: [attachmentUrl],
+		files: [attachmentUrl]
 	})
-	threadwatcher.changePostTimeoutEvent.emit('subtractTimeout')
+	threadwatcher.changePo1stTimeoutEvent.emit('subtractTimeout')
 })
 
 client.once('ready', async () => {

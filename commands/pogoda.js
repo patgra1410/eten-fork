@@ -15,7 +15,7 @@ module.exports = {
 			new SlashCommandStringOption()
 				.setName('miasto')
 				.setDescription('Miasto')
-				.setRequired(false),
+				.setRequired(false)
 		),
 	async execute(interaction) {
 		let title, imgResult
@@ -47,8 +47,8 @@ module.exports = {
 					'Sec-Fetch-Dest': 'image',
 					'Sec-Fetch-Mode': 'no-cors',
 					'Sec-Fetch-Site': 'same-site',
-					'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.114 Safari/537.36',
-				},
+					'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.114 Safari/537.36'
+				}
 			})
 
 			if (!imgResult.ok)
@@ -70,8 +70,8 @@ module.exports = {
 					'Sec-Fetch-Dest': 'image',
 					'Sec-Fetch-Mode': 'no-cors',
 					'Sec-Fetch-Site': 'same-site',
-					'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.114 Safari/537.36',
-				},
+					'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.114 Safari/537.36'
+				}
 			})
 			if (!imgResult.ok) throw new Error(`Unexpected response ${result.statusText}`)
 			title = 'Warszawa'
@@ -85,5 +85,5 @@ module.exports = {
 			await interaction.editReply({ content: title + ':', files: [weatherAttachment] })
 		else
 			interaction.reply({ content: title + ':', files: [weatherAttachment] })
-	},
+	}
 }

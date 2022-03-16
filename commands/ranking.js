@@ -24,7 +24,7 @@ module.exports = {
 	async execute(interaction, args) {
 		let type
 		if (interaction.isCommand !== undefined && interaction.isCommand())
-			type = interaction.options.getString('gra')
+		{type = interaction.options.getString('gra')}
 		else {
 			if (args === undefined || args.length == 0) {
 				interaction.reply('Nie wybrałeś gry')
@@ -128,5 +128,5 @@ module.exports = {
 			.setDescription(desc)
 
 		interaction.reply({ embeds: [embed] })
-	},
+	}
 }

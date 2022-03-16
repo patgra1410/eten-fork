@@ -19,7 +19,7 @@ function buttons() {
 			new Discord.MessageButton()
 				.setCustomId('kwadraty#surrender')
 				.setLabel('Poddaj się')
-				.setStyle('SECONDARY'),
+				.setStyle('SECONDARY')
 		)
 
 	return [row]
@@ -33,7 +33,7 @@ module.exports = {
 			new SlashCommandUserOption()
 				.setName('gracz')
 				.setDescription('Drugi gracz')
-				.setRequired(true),
+				.setRequired(true)
 		),
 	async execute(interaction, args) {
 		if (interaction.isButton !== undefined && interaction.isButton()) {
@@ -99,7 +99,7 @@ module.exports = {
 
 					const msg = 'Tura: <@' + boards[id].turnUID() + '>\n' + img.attachments.first().url
 
-					let message = await interaction.update({ content: msg, files: [], components: buttons() })
+					const message = await interaction.update({ content: msg, files: [], components: buttons() })
 
 					boards[id].message = rightAccept.message
 				}
@@ -109,7 +109,7 @@ module.exports = {
 				return
 
 			if (interaction.customId == 'surrender') {
-				let ranking = JSON.parse(fs.readFileSync('./data/ranking.json'))
+				const ranking = JSON.parse(fs.readFileSync('./data/ranking.json'))
 				const gameuids = boards[uids[[interaction.user.id]]].uids
 
 				const rating1 = ranking['kwadraty'][gameuids[0]]['rating']
@@ -138,7 +138,7 @@ module.exports = {
 				const attachment = new Discord.MessageAttachment('./data/boardKwadraty' + uids[[interaction.user.id]] + '.png')
 				const img = await interaction.client.guilds.cache.get('856926964094337044').channels.cache.get('892842178143997982').send({ files: [attachment] })
 				const msg = '<@' + winner + '> wygrał przez poddanie się\n' + img.attachments.first().url
-				let message = await interaction.update({ content: msg, files: [], components: [] })
+				const message = await interaction.update({ content: msg, files: [], components: [] })
 
 				boards[uids[[interaction.user.id]]].removeBoard()
 				delete boards[uids[[interaction.user.id]]]
@@ -183,7 +183,7 @@ module.exports = {
 
 
 			if (args.length >= 1 && args[0] == 'save') {
-				for (let [key, value] of Object.entries(boards))
+				for (const [key, value] of Object.entries(boards))
 					value.dump()
 
 				return
@@ -212,7 +212,7 @@ module.exports = {
 			return
 		}
 
-		let ranking = JSON.parse(fs.readFileSync('./data/ranking.json'))
+		const ranking = JSON.parse(fs.readFileSync('./data/ranking.json'))
 		if (ranking['kwadraty'][uid1] === undefined)
 			ranking['kwadraty'][uid1] = { lost: 0, won: 0 }
 		if (ranking['kwadraty'][uid1]['rating'] === undefined)
@@ -243,7 +243,7 @@ module.exports = {
 				new Discord.MessageButton()
 					.setLabel('Nie')
 					.setCustomId('kwadraty#acceptNo#' + uid1 + '#' + uid2)
-					.setStyle('PRIMARY'),
+					.setStyle('PRIMARY')
 			)
 
 		const msg = '<@' + uid2 + '>: ' + usernames[0] + ' chce z tobą zagrać'
@@ -318,5 +318,5 @@ module.exports = {
 			delete uids[gameuids[0]]
 			delete uids[gameuids[1]]
 		}
-	},
+	}
 }
