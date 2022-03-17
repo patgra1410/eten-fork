@@ -1,11 +1,11 @@
-'use strict'
+import { Message } from "discord.js"
 
-const jajco = require('../jajco.js')
-const hashFile = require('../hashFile')
-const archiwum = require('../archiwum')
-const config = require('../../config.json')
+import * as jajco from '../jajco'
+import { hashFile, hashFileFromMessageContent } from '../hashFile'
+import archiwum from '../archiwum'
+import config from '../../config.json'
 
-module.exports = async function(message) {
+export default async function(message: Message<boolean>) {
 	const client = message.client
 
 	if (message.author.bot) return
@@ -56,6 +56,7 @@ module.exports = async function(message) {
 			message.reply(`${mediaLink.replace(/media/, 'cdn').replace(/net/, 'com')}\nFucking goofy ass media link`)
 	}
 
+	// Nie potrzebny await mam nadzieję
 	archiwum(message)
 
 	await message.fetch()
@@ -63,7 +64,7 @@ module.exports = async function(message) {
 	if (message.attachments.size > 0) {
 		for (const [id, attachment] of message.attachments) {
 			if (attachment.contentType.startsWith('video') || attachment.contentType.startsWith('image'))
-				await hashFile.hashFile(attachment, message)
+				await hashFile(attachment, message)
 		}
 	}
 
@@ -73,5 +74,5 @@ module.exports = async function(message) {
 				await hashFile.hashFile(embed, message)
 		}
 	} else */ if ((/https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*).(webm|mp4|mov|avi|flv|mkv|wmv|m4v|png|jpg|gif|jpeg|webp|svg|ovg|ogg)\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/g.test(message.content)))
-		await hashFile.hashFileFromMessageContent(message)
+		await hashFileFromMessageContent(message)
 }

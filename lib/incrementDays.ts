@@ -1,12 +1,10 @@
-'use strict'
-
-const fs = require('fs')
+import fs from 'fs'
 
 function increment() {
-	fs.writeFileSync('./data/uptime', (parseInt(fs.readFileSync('./data/uptime')) + 1).toString())
+	fs.writeFileSync('./data/uptime', (parseInt(fs.readFileSync('./data/uptime', 'utf-8')) + 1).toString());
 }
 
-module.exports = function() {
+export default function() {
 	if (!fs.existsSync('./data/uptime') || fs.existsSync('./data/crashed')) {
 		fs.writeFileSync('./data/uptime', '0')
 

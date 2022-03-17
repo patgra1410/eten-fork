@@ -1,46 +1,22 @@
-const EventEmitter = require('events').EventEmitter
-const NodeCache = require('node-cache')
-const fetch = require('node-fetch')
-// const cheerio = require('cheerio')
+import { EventEmitter } from 'events';
+import nodefetch, { Response } from 'node-fetch';
 
-// Threads we are watching
-// key: "board/threadID"
-// value: Map<postID, bool>
-// bool is just a way of putting the postID in the map since we check if we handled a post by Map.has(postID)
-const watchedThreads = new NodeCache()
+const watchedThreads = new Map<string, Map<string, boolean>>()
+const threadRequestTries = new Map<string, number>()
 
-// threadRequestTries tracks how many times we failed requesting a thread.
-// If fails more than threadRequestMaxTries, stop watching the thread - 4chan either softbanned us or is down
-// TODO: Announce if a thread is unwatched this way?
-const threadRequestTries = new NodeCache()
 const threadRequestMaxTries = 3
-
-// Delay for how often we refresh a thread to see the thread's new state.
-// TODO: This definitely needs to be in the config or as a class constructor. Why isn't this a class anyways?
 const watchDelay = 120 * 1000
 
-// module,exports EventEmitter used for dispatching events when a new, unknown to us post is found.
 const newReply = new EventEmitter()
 
-// A band-aid solution for discord.js' shitty handling of rate limiting,
-// no matter how much you tweak the settings if you spam .send() requests within
-// newPostEvent.on(), it'll do them as fast as possible... Why?
-//
-// At the end of newPostEvent.on() you need to changePostTimeoutEvent.emit().
-// changePostTimeoutEvent.on() in this file then removes desiredPostDelay that was
-// added alongside newPostEvent.emit()
-// TOOD: Could changePostTimeoutEvent.emit() be done within this file? For now it's
-// in module.exports and the file using this lib is expected to emit it
 const changePostTimeoutEvent = new EventEmitter()
-// The delay we want between each newPostEvent emit.
-// TODO: Add to config.json? But preferrably I'd get rid of it entirely.
 const desiredPostDelay = 3500
-// Var for the total timeout for next posts used for newPostEvent.emit()
 let postTimeout = 0
 
 class HTTPResponseError extends Error {
-	constructor(response, ...args) {
-		super(`HTTP Error Response - ${response.status} ${response.statusText}`, ...args)
+	response: Response;
+	constructor(response: Response) {
+		super(`HTTP Error Response - ${response.status} ${response.statusText}`)
 		this.response = response
 	}
 }
@@ -50,7 +26,7 @@ changePostTimeoutEvent.on('subtractTimeout', () => {
 	// console.log(`timeout reduced to ${timeout}`)
 })
 
-async function checkThread(threadKey) {
+async function checkThread(threadKey: string) {
 	// Won't run if thread was removed from watchedThreads by unwatchThread()
 	if (watchedThreads.has(threadKey)) {
 		const knownPosts = watchedThreads.get(threadKey)
@@ -59,7 +35,7 @@ async function checkThread(threadKey) {
 		let threadResult
 		// (Try to) Get thread details
 		try {
-			threadResult = await fetch(`https://a.4cdn.org/${board}/thread/${threadID}.json`)
+			threadResult = await nodefetch(`https://a.4cdn.org/${board}/thread/${threadID}.json`)
 			if (!threadResult.ok)
 				throw new HTTPResponseError(threadResult)
 
@@ -76,7 +52,7 @@ async function checkThread(threadKey) {
 			if (threadRequestTries.has(threadKey)) {
 				const tries = threadRequestTries.get(threadKey)
 				if (tries > threadRequestMaxTries) {
-					threadRequestTries.del(threadKey)
+					threadRequestTries.delete(threadKey)
 				}
 				else {
 					threadRequestTries.set(threadKey, tries + 1)
@@ -116,7 +92,7 @@ module.exports = {
 	newReply,
 	changePostTimeoutEvent,
 	// Add https://boards.4channel.org/${board}/thread/${threadid} to watched threads
-	async watchThread(board, threadID) {
+	async watchThread(board: string, threadID: string) {
 		const threadKey = `${board}/${threadID}`
 		if (watchedThreads.has(threadKey))
 			return { added: false, reason: 'Thread is already watched.' }
@@ -124,7 +100,7 @@ module.exports = {
 		let threadResult
 		try {
 			console.log('Fetching')
-			threadResult = await fetch(`https://a.4cdn.org/${board}/thread/${threadID}.json`)
+			threadResult = await nodefetch(`https://a.4cdn.org/${board}/thread/${threadID}.json`)
 			if (!threadResult.ok)
 				throw new HTTPResponseError(threadResult)
 
@@ -149,10 +125,10 @@ module.exports = {
 		return { added: true }
 	},
 	// Remove https://boards.4channel.org/${board}/thread/${threadid} from watched threads
-	async unwatchThread(board, threadID) {
+	async unwatchThread(board: string, threadID: string) {
 		const threadKey = `${board}/${threadID}`
-		const deletedKeys = watchedThreads.del(threadKey)
-		threadRequestTries.del(threadKey)
+		const deletedKeys = watchedThreads.delete(threadKey)
+		threadRequestTries.delete(threadKey)
 		if (deletedKeys)
 			return { response: `${board}/${threadID} - Thread unwatched` }
 

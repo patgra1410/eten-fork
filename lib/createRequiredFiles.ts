@@ -1,9 +1,7 @@
-'use strict'
+import fs from 'fs'
+import path from 'path'
 
-const fs = require('fs')
-const path = require('path')
-
-module.exports = function() {
+export default function() {
 
 	// TMP DIR
 
@@ -18,7 +16,8 @@ module.exports = function() {
 	if (!fs.existsSync('./data/settings.json'))
 		fs.writeFileSync('./data/settings.json', '{}')
 
-	const settings = require('../data/settings.json')
+	// const settings = require(`${process.cwd()}/data/settings.json`)
+	const settings = JSON.parse(fs.readFileSync(`${process.cwd()}/data/settings.json`, 'utf-8'));
 
 	if (!('jajco' in settings))
 		settings.jajco = {}
@@ -49,7 +48,8 @@ module.exports = function() {
 	if (!fs.existsSync('./data/ranking.json'))
 		fs.writeFileSync('./data/ranking.json', '{}')
 
-	const ranking = require('../data/ranking.json')
+	// const ranking = require(`${process.cwd()}/data/ranking.json`)
+	const ranking = JSON.parse(fs.readFileSync(`${process.cwd()}/data/ranking.json`, 'utf-8'));
 	for (const option of ['pilkarzyki', 'kwadraty', 'teampilkarzyki', 'najdluzszyruch', 'najdluzszagrateampilkarzyki', 'najdluzszagrapilkarzyki', 'sumaruchow', 'jajco', 'bets']) {
 		if (!(option in ranking))
 			ranking[option] = {}

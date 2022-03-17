@@ -1,6 +1,6 @@
-'use strict'
+import { CacheType, Interaction } from "discord.js"
 
-module.exports = async function(interaction) {
+export default async function(interaction: Interaction<CacheType>) {
 	const client = interaction.client
 
 	if (interaction.isButton()) {
@@ -33,7 +33,7 @@ module.exports = async function(interaction) {
 		catch (error2) {
 			console.log('Error: Couldn\'t reply, probably already replied, trying to edit')
 			console.log(error2)
-			await interaction.editReply({ content: 'There was an error while executing this command!', ephemeral: true })
+			await interaction.editReply({ content: 'There was an error while executing this command!' })
 		}
 	}
 }

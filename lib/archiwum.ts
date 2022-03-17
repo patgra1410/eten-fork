@@ -1,14 +1,15 @@
-'use strict'
+import path from 'path'
+import fetch from 'node-fetch'
+import util from 'util'
+import stream from 'stream'
+import { Message } from 'discord.js'
+const streamPipeline = util.promisify(stream.pipeline)
+// const streamPipeline = util.promisify(require('stream').pipeline)
+import formData from 'form-data'
+import fs from 'fs'
+import config from '../config.json'
 
-const path = require('path')
-const fetch = require('node-fetch')
-const util = require('util')
-const streamPipeline = util.promisify(require('stream').pipeline)
-const formData = require('form-data')
-const fs = require('fs')
-const config = require('../config.json')
-
-module.exports = async function(message) {
+export default async function(message: Message<boolean>) {
 	if (config.archiwum.eneabled && message.channel.id == config.archiwum.channel && message.attachments.size) {
 		if (message.content.length == 0) {
 			await message.reply('Tagi są wymagane (zobacz opis kanału)')
@@ -20,7 +21,7 @@ module.exports = async function(message) {
 		const res = await fetch(url)
 		await streamPipeline(res.body, fs.createWriteStream('tmp/tmparchive' + ext))
 
-		const form = formData()
+		const form = new formData()
 		const stats = fs.statSync('tmp/tmparchive' + ext)
 		const size = stats.size
 		form.append('image', fs.createReadStream('tmp/tmparchive' + ext), { knownLength: size })

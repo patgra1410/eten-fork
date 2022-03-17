@@ -1,9 +1,9 @@
-'use strict'
+import { MessageReaction, User } from "discord.js"
 
-module.exports = async function(reaction, reactedUser) {
+export default async function(reaction: MessageReaction, reactedUser: User) {
 	try {
 		const letters = ['🇦', '🇧', '🇨', '🇩', '🇪', '🇫', '🇬', '🇭', '🇮']
-		const letter = String.fromCharCode(letters.indexOf(reaction._emoji.name) + 'a'.charCodeAt())
+		const letter = String.fromCharCode(letters.indexOf(reaction.emoji.name) + 'a'.charCodeAt(0))
 		const user = reaction.message.guild.members.cache.find(member => member.id == reactedUser.id)
 
 		if (reaction.message.id == '932695585465704448') // 1. klasa

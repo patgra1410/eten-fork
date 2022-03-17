@@ -1,13 +1,13 @@
-'use strict'
+import { Client, TextChannel } from "discord.js"
+import config from '../config.json';
+import fetch from 'node-fetch';
+import fs from 'fs';
+import * as bets from './bets';
 
-const config = require('../config.json')
-const fetch = require('node-fetch')
-const bets = require('./bets')
+let librusCurrentBearer: string
+let client: Client<boolean>
 
-let librusCurrentBearer
-let client
-
-function splitMessage(message) {
+function splitMessage(message: string) {
 	const res = []
 	let lastEndl = -1
 	let lastSplit = 0
@@ -43,7 +43,7 @@ function splitMessage(message) {
 async function updateBearer() {
 	let setCookies = []
 	let cookies = []
-	let sendableCookies = []
+	let sendableCookies: string
 	let csrfToken = ''
 	const csrfRegex = /<meta name="csrf-token" content="(.*)">/g
 	// const someFuckingClientIdConstant = 'AyNzeNoSup7IkySMhBdUhSH4ucqc97Jn6DzVcqd5'
@@ -102,7 +102,7 @@ async function updateBearer() {
 	return finalJson.accounts[0].accessToken
 }
 
-function czyZmianyWPlanie(title) {
+function czyZmianyWPlanie(title: string) {
 	if (title.toLowerCase().search('zmiany w planie') != -1 || title.toLowerCase().search('poniedziałek') != -1 || title.toLowerCase().search('wtorek') != -1 || title.toLowerCase().search('środa') != -1 || title.toLowerCase().search('czwartek') != -1 || title.toLowerCase().search('piątek') != -1)
 		return true
 	return false
@@ -214,25 +214,25 @@ async function getSchoolNoticesJson() {
 						// Bold
 						textWithAllClasses = textWithAllClasses.replace(/3[a-iA-i ]*[ABCDEFG]|3[A-Ia-i ]*[AaBbCcDdEeFfGg][A-Ia-i ]*3|3[a-iA-i ]*[abcdefghi]|3[A-Ia-i ]*[AaBbCcDdEeFfGgHhIi][A-Ia-i ]*4|2[a-iA-i ]*[aABbCcDdEeFfGg]|1[a-iA-i ]*[aABbCcDdEeFfGgHh]/g, '**$&**')
 						// roles for 1. class
-						for (let letter = 'a'.charCodeAt(); letter <= 'h'.charCodeAt(); letter++) {
+						for (let letter = 'a'.charCodeAt(0); letter <= 'h'.charCodeAt(0); letter++) {
 							const roleID = '<@&' + client.guilds.cache.get('930512190220435516').roles.cache.find(role => role.name == `1${String.fromCharCode(letter)}`).id + '> $&'
 							const regex = new RegExp(`^.*(1[a-iA-i ]*[${String.fromCharCode(letter)}${String.fromCharCode(letter).toUpperCase()}]).*$`, 'gm')
 							textWithAllClasses = textWithAllClasses.replace(regex, roleID)
 						}
 						// roles for 2. class
-						for (let letter = 'a'.charCodeAt(); letter <= 'g'.charCodeAt(); letter++) {
+						for (let letter = 'a'.charCodeAt(0); letter <= 'g'.charCodeAt(0); letter++) {
 							const roleID = '<@&' + client.guilds.cache.get('930512190220435516').roles.cache.find(role => role.name == `2${String.fromCharCode(letter)}`).id + '> $&'
 							const regex = new RegExp(`^.*(2[a-iA-i ]*[${String.fromCharCode(letter)}${String.fromCharCode(letter).toUpperCase()}]).*$`, 'gm')
 							textWithAllClasses = textWithAllClasses.replace(regex, roleID)
 						}
 						// roles for 3. class gim
-						for (let letter = 'a'.charCodeAt(); letter <= 'g'.charCodeAt(); letter++) {
+						for (let letter = 'a'.charCodeAt(0); letter <= 'g'.charCodeAt(0); letter++) {
 							const roleID = '<@&' + client.guilds.cache.get('930512190220435516').roles.cache.find(role => role.name == `3${String.fromCharCode(letter).toUpperCase()}3`).id + '> $&'
 							const regex = new RegExp(`^.*(3[a-iA-i ]*[${String.fromCharCode(letter).toUpperCase()}]|3[A-Ia-i ]*[${String.fromCharCode(letter)}${String.fromCharCode(letter).toUpperCase()}][A-Ia-i ]*3).*$`, 'gm')
 							textWithAllClasses = textWithAllClasses.replace(regex, roleID)
 						}
 						// roles for 3. class podst
-						for (let letter = 'a'.charCodeAt(); letter <= 'i'.charCodeAt(); letter++) {
+						for (let letter = 'a'.charCodeAt(0); letter <= 'i'.charCodeAt(0); letter++) {
 							const roleID = '<@&' + client.guilds.cache.get('930512190220435516').roles.cache.find(role => role.name == `3${String.fromCharCode(letter)}4`).id + '> $&'
 							const regex = new RegExp(`^.*(3[a-iA-i ]*[${String.fromCharCode(letter)}]|3[A-Ia-i ]*[${String.fromCharCode(letter)}${String.fromCharCode(letter).toUpperCase()}][A-Ia-i ]*4).*$`, 'gm')
 							textWithAllClasses = textWithAllClasses.replace(regex, roleID)
@@ -280,9 +280,10 @@ async function getSchoolNoticesJson() {
 					}
 
 					// Finally, send.
-					const settings = require('../data/settings.json')
+					// const settings = require(`${process.cwd()}/data/settings.json`)
+					const settings = JSON.parse(fs.readFileSync(`${process.cwd()}/data/settings.json`, 'utf-8'));
 					for (const info of settings.notices.where) {
-						const channel = client.guilds.cache.get(info.guild).channels.cache.get(info.channel)
+						const channel: TextChannel = client.guilds.cache.get(info.guild).channels.cache.get(info.channel) as TextChannel
 						if (info.guild == '930512190220435516') {
 							for (const split of splitMessage(textWithAllClasses))
 								await channel.send(split)
@@ -331,7 +332,7 @@ async function getSchoolNoticesJson() {
 	setTimeout(getSchoolNoticesJson, ((Math.round(Math.random() * (6 - 4) + 4)) * 60000))
 }
 
-module.exports = async function(cl) {
+export default async function(cl: Client<boolean>) {
 	if (config.librus) {
 		client = cl
 		librusCurrentBearer = await updateBearer()

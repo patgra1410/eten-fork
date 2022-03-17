@@ -1,23 +1,23 @@
-'use strict'
+import { Client, Collection, GuildMember } from "discord.js"
 
-const config = require('../config.json')
-const fs = require('fs')
-const { joinVoiceChannel, createAudioPlayer, createAudioResource } = require('@discordjs/voice')
+import config from '../config.json'
+import fs from 'fs'
+import { joinVoiceChannel, createAudioPlayer, createAudioResource } from '@discordjs/voice'
 const player = createAudioPlayer()
-let client
+let client: Client<boolean>
 
-function sleep(ms) {
+function sleep(ms: number) {
 	return new Promise((resolve) => {
 		setTimeout(resolve, ms)
 	})
 }
 
 async function randomSoundOnVoice() {
-	const channels = client.guilds.cache.get(config.guild).channels.cache.filter(c => c.type == 'GUILD_VOICE')
+	const channels = client.guilds.cache.get(config.guild)?.channels.cache.filter(c => c.type == 'GUILD_VOICE')
 
 	let isThereAnyone = false
 	for (const [id, channel] of channels) {
-		if (channel.members.size == 0 || Math.random() >= config.randomSoundeffectChance)
+		if ((channel.members as Collection<string, GuildMember>).size == 0 || Math.random() >= config.randomSoundeffectChance)
 			continue
 		isThereAnyone = true
 
@@ -40,7 +40,7 @@ async function randomSoundOnVoice() {
 	setTimeout(randomSoundOnVoice, (isThereAnyone ? 1000 * 60 : 1000 * 60 * 15))
 }
 
-module.exports = async function(cl) {
+export default async function(cl: Client<boolean>) {
 	client = cl
 	if (config.playRandomSoundeffects)
 		setTimeout(randomSoundOnVoice, 1000 * 60)

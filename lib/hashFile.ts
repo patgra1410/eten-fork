@@ -1,19 +1,27 @@
-'use strict'
+import fetch from 'node-fetch'
+import fs from 'fs'
+import crypto from 'crypto'
+import util from 'util'
+import stream from 'stream';
+import { Message, MessageAttachment, TextChannel } from 'discord.js'
+const streamPipeline = util.promisify(stream.pipeline)
+// const streamPipeline = util.promisify(require('stream').pipeline)
 
-const fetch = require('node-fetch')
-const fs = require('fs')
-const crypto = require('crypto')
-const util = require('util')
-const streamPipeline = util.promisify(require('stream').pipeline)
+// let hashes = require(`${process.cwd()}/data/hashes.json`)
+let hashes = JSON.parse(fs.readFileSync(`${process.cwd()}/data/hashes.json`, 'utf-8'));
 
-let hashes = require('../data/hashes.json')
+interface IHashes {
+	[guildId: string]: {
+		[hash: string]: string
+	}
+}
 
-function get_url_extension(url) { // nie kradzione wcale
+function get_url_extension(url: string) { // nie kradzione wcale
 	return url.split(/[#?]/)[0].split('.').pop().trim()
 }
 
-function updateHashes() {
-	const newHashes = {}
+export function updateHashes() {
+	const newHashes: IHashes = {}
 
 	for (const [guildId, hashesGuild] of Object.entries(hashes)) {
 		newHashes[guildId] = {}
@@ -27,8 +35,10 @@ function updateHashes() {
 	hashes = newHashes
 }
 
-async function hashFile(attachment, message) {
-	if (message.author.id == message.client.id)
+export async function hashFile(attachment: MessageAttachment, message: Message<boolean>) {
+	// if (message.author.id == message.client.id)
+	// jak to działało? poprawiłem:
+	if (message.author.id == message.client.user.id)
 		return
 
 	console.time('Downloading')
@@ -50,9 +60,9 @@ async function hashFile(attachment, message) {
 
 	if (hexHash in hashes[message.guildId]) {
 		const splits = hashes[message.guildId][hexHash].split(',')
-		let repost
+		let repost: Message<boolean>
 		try {
-			repost = await message.client.guilds.cache.get(splits[0]).channels.cache.get(splits[1]).messages.fetch(splits[2])
+			repost = await (message.client.guilds.cache.get(splits[0]).channels.cache.get(splits[1]) as TextChannel).messages.fetch(splits[2])
 		} catch (error) {
 			repost = undefined
 		}
@@ -72,23 +82,20 @@ async function hashFile(attachment, message) {
 	console.timeEnd('Hashing')
 }
 
-async function hashFileFromMessageContent(message) {
+export async function hashFileFromMessageContent(message: Message<boolean>) {
 	const regex = /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*).(webm|mp4|mov|avi|flv|mkv|wmv|m4v|png|jpg|gif|jpeg|webp|svg|ovg|ogg)\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/ig
 	let match
 	while (match = regex.exec(message.content)) {
 		const url = message.content.slice(regex.lastIndex - match[0].length, regex.lastIndex)
 		if (url.search('tenor.com') == -1) { // TODO fuch me
 			try {
-				await hashFile({ url: url }, message)
+				// ?? to działało??
+				// hashfile przyjmuje MessageAttachment (bo robisz tam metode chyba .url) a nie to
+				// await hashFile({ url: url }, message)
+				await hashFile(new MessageAttachment(url), message)
 			} catch (error) {
 				console.log(error)
 			}
 		}
 	}
-}
-
-module.exports = {
-	hashFile,
-	hashFileFromMessageContent,
-	updateHashes
 }

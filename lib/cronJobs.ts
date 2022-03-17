@@ -1,22 +1,22 @@
-'use strict'
-
-const cron = require('cron')
-const fetch = require('node-fetch')
-const { joinImages } = require('join-images')
-const util = require('util')
-const fs = require('fs')
-const Discord = require('discord.js')
-const config = require('../config.json')
-
-const streamPipeline = util.promisify(require('stream').pipeline)
-let client
+import cron from 'cron';
+import fetch from 'node-fetch';
+import joinImages from 'join-images'
+import util from 'util';
+import fs from 'fs';
+import { Client, MessageAttachment, TextChannel } from 'discord.js';
+import config from '../config.json';
+import stream from 'stream';
+const streamPipeline = util.promisify(stream.pipeline)
+// const streamPipeline = util.promisify(require('stream').pipeline)
+let client: Client<boolean>
 
 // Daily Inspiration cron
 const dailyJob = new cron.CronJob(
 	'0 0 6 * * *',
 	async function() {
 		// Get inspirational image and send. Or at least, try to.
-		const settings = require('../data/settings.json')
+		// const settings = require(`${process.cwd()}/data/settings.json`)
+		const settings = JSON.parse(fs.readFileSync(`${process.cwd()}/data/settings.json`, 'utf-8'));
 
 		try {
 			const res = await fetch('https://inspirobot.me/api?generate=true')
@@ -24,10 +24,10 @@ const dailyJob = new cron.CronJob(
 			const response = await fetch(await res.text())
 			if (!response.ok) throw new Error(`Unexpected response ${response.statusText}`)
 			await streamPipeline(response.body, fs.createWriteStream('./tmp/placeholder.jpg'))
-			const attachment = new Discord.MessageAttachment('./tmp/placeholder.jpg')
+			const attachment = new MessageAttachment('./tmp/placeholder.jpg')
 
 			for (const info of settings.inspiracja.where) {
-				const inspireChannel = client.guilds.cache.get(info.guild).channels.cache.get(info.channel)
+				const inspireChannel = client.guilds.cache.get(info.guild).channels.cache.get(info.channel) as TextChannel
 				await inspireChannel.send({ content: '**Inspiracja na dziś:**', files: [attachment] })
 			}
 		}
@@ -60,10 +60,10 @@ const dailyJob = new cron.CronJob(
 				await streamPipeline(imgResult.body, fs.createWriteStream('./tmp/weather.png'))
 				const img = await joinImages(['data/leg60.png', 'tmp/weather.png'], { direction: 'horizontal' })
 				await img.toFile('tmp/weatherFinal.png')
-				const weatherAttachment = new Discord.MessageAttachment('./tmp/weatherFinal.png')
+				const weatherAttachment = new MessageAttachment('./tmp/weatherFinal.png')
 
 				for (const info of settings.pogoda.where) {
-					const channel = client.guilds.cache.get(info.guild).channels.cache.get(info.channel)
+					const channel: TextChannel = client.guilds.cache.get(info.guild).channels.cache.get(info.channel) as TextChannel
 					if (config.cronWeather.length == 1)
 						await channel.send({ files: [weatherAttachment] })
 					else
@@ -90,7 +90,7 @@ function cronImageSend() {
 				async function() {
 					for (const img of imgConfig) {
 						if (img.cron == this.cronTime.source) {
-							await client.guilds.cache.get(config.cronImageSend.guild).channels.cache.get(config.cronImageSend.channel).send({ files: [img.imageURL] })
+							await (client.guilds.cache.get(config.cronImageSend.guild).channels.cache.get(config.cronImageSend.channel) as TextChannel).send({ files: [img.imageURL] })
 							return
 						}
 					}
@@ -104,7 +104,7 @@ function cronImageSend() {
 	}
 }
 
-module.exports = function(cl) {
+export default function(cl: Client<boolean>) {
 	client = cl
 	dailyJob.start()
 	cronImageSend()

@@ -98,7 +98,7 @@ module.exports = {
 		if (!config.adminID.includes(interaction.user.id))
 			return
 
-		const settings = require('../data/settings.json')
+		const settings = require(`${__dirname}../data/settings.json`)
 
 		if (interaction.options.getSubcommand() === 'guild') {
 			const option = interaction.options.getString('option')
