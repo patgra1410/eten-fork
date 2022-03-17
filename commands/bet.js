@@ -63,10 +63,11 @@ module.exports = {
 				return
 			}
 
-			if (time >= Date.parse('1970-01-01 10:00 GMT')) {
-				interaction.reply('Nie oszukuj <:waznaDissapoint:833355180329926696>')
-				return
-			}
+			// TODO nie pozwalac na zmiane po 10 rano
+			// if (interaction.options.getSubcommand() == 'zmień' && (new Date).getDay() != 6 && time >= Date.parse('1970-01-01 10:00 GMT') && bets.annoucment != undefined && !bets.annoucment) {
+			// 	interaction.reply('Nie oszukuj <:waznaDissapoint:833355180329926696>')
+			// 	return
+			// }
 
 			bets[interaction.user.id] = {
 				time: time,
