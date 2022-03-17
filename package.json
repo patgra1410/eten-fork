@@ -1,32 +1,39 @@
 {
 	"name": "eten",
 	"version": "1.0.0",
-	"description": "Bot zajebisto�ci",
+	"description": "Bot",
 	"main": "index.js",
 	"author": "meten",
 	"dependencies": {
-		"@discordjs/builders": "^0.5.0",
-		"@discordjs/opus": "^0.5.3",
-		"@discordjs/voice": "^0.6.0",
+		"@discordjs/builders": "^0.12.0",
+		"@discordjs/opus": "^0.7.0",
+		"@discordjs/voice": "^0.8.0",
 		"@eslint/eslintrc": "^1.0.5",
 		"canvas": "^2.8.0",
+		"colors": "^1.4.0",
 		"cron": "^1.8.2",
 		"crypto": "^1.0.1",
 		"discord.js": "^13.2.0",
 		"elo-rating": "^1.0.1",
 		"eslint": "^8.7.0",
-		"ffmpeg-static": "^4.4.0",
-		"form-data": "^2.3.3",
+		"fetch-cookie": "^2.0.3",
+		"ffmpeg-static": "^5.0.0",
+		"form-data": "^4.0.0",
 		"join-images": "^1.0.0",
 		"js-priority-queue": "^0.1.5",
 		"libsodium-wrappers": "^0.7.9",
 		"merge-images": "^2.0.0",
 		"node-cache": "^5.1.2",
-		"node-fetch": "^2.6.2",
+		"node-fetch": "^2.6.7",
 		"request": "^2.88.2",
-		"sharp": "^0.29.1"
+		"sharp": "^0.30.3"
 	},
 	"devDependencies": {
-		"standard": "*"
+		"@types/cron": "^1.7.3",
+		"@types/node": "^17.0.21",
+		"@types/sharp": "^0.30.0",
+		"@types/tough-cookie": "^4.0.1",
+		"@typescript-eslint/eslint-plugin": "^5.15.0",
+		"@typescript-eslint/parser": "^5.15.0"
 	}
 }
