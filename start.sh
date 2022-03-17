@@ -1,6 +1,7 @@
 #!/bin/bash
 
-node . # czy cośtam niewiem zastąp tą linijkę
+tsc
+node dist # czy cośtam niewiem zastąp tą linijkę
 touch data/crashed
 curl -X POST `cat webhook-link` -H "Content-Type: application/json" --data-binary @- <<DATA
 {

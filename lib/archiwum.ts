@@ -29,8 +29,6 @@ export default async function(message: Message<boolean>) {
 		form.append('tags', message.content)
 		form.append('author', message.author.username + '#' + message.author.discriminator)
 
-		console.log(config.archiwum.upload)
-
 		const send = await fetch(config.archiwum.uploadURL, {
 			method: 'POST',
 			body: form

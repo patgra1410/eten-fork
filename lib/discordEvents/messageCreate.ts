@@ -40,7 +40,7 @@ export default async function(message: Message<boolean>) {
 
 		if (!client.commands.has(command)) return
 
-		message.reply('Deprecated. Jebać (wszystkie) nie slashowe komendy')
+		message.reply('Deprecated.')
 		return
 	}
 
