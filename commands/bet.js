@@ -63,6 +63,11 @@ module.exports = {
 				return
 			}
 
+			if (time >= Date.parse('1970-01-01 10:00 GMT')) {
+				interaction.reply('Nie oszukuj <:waznaDissapoint:833355180329926696>')
+				return
+			}
+
 			bets[interaction.user.id] = {
 				time: time,
 				message: content
