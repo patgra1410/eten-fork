@@ -1,70 +1,70 @@
-import { Message } from "discord.js"
+import { Message } from "discord.js";
 
-import * as jajco from '../jajco'
-import { hashFile, hashFileFromMessageContent } from '../hashFile'
-import archiwum from '../archiwum'
-import config from '../../config.json'
+import * as jajco from "../jajco";
+import { hashFile, hashFileFromMessageContent } from "../hashFile";
+import archiwum from "../archiwum";
+import config from "../../config.json";
 
 export default async function(message: Message<boolean>) {
-	const client = message.client
+	const client = message.client;
 
-	if (message.author.bot) return
-	if (!client.application?.owner) await client.application?.fetch()
+	if (message.author.bot) return;
+	if (!client.application?.owner) await client.application?.fetch();
 
-	if (message.channel.id === '813703962838564865') {
+	if (message.channel.id === "813703962838564865") {
 		try {
-			await message.react('<:among_us:754362953104359747>')
+			await message.react("<:among_us:754362953104359747>");
 		}
 		catch (error) {
-			console.error('Failed to react in #amogus channel')
+			console.error("Failed to react in #amogus channel");
 		}
 	}
 
-	if (message.channel.id === '854294979849748510') {
+	if (message.channel.id === "854294979849748510") {
 		try {
-			await message.react('❤')
+			await message.react("❤");
 		}
 		catch (error) {
-			console.error('Failed to react in #bardzo-wazny-kanal')
+			console.error("Failed to react in #bardzo-wazny-kanal");
 		}
 	}
 
 	// TODO: ===
 	if (message.content.length == 4)
-		await client.commands.get('kwadraty').onMessage(message)
+		await client.commands.get("kwadraty").onMessage(message);
 
 
 	if (message.content.startsWith(config.prefix)) {
-		const args = message.content.slice(config.prefix.length).trim().split(/ +/)
-		const command = args.shift().toLowerCase()
+		const args = message.content.slice(config.prefix.length).trim().split(/ +/);
+		const command = args.shift().toLowerCase();
 
-		if (!client.commands.has(command)) return
+		if (!client.commands.has(command)) return;
 
-		message.reply('Deprecated. Jebać (wszystkie) nie slashowe komendy')
-		return
+		message.reply("Deprecated. Jebać (wszystkie) nie slashowe komendy");
+		return;
 	}
 
-	jajco.run(message)
+	jajco.run(message);
 
-	if (message.content.toLowerCase().search('rozpierdol kota') != -1)
-		client.commands.get('cursedkoteł').execute(message)
+	if (message.content.toLowerCase().search("rozpierdol kota") != -1)
+		client.commands.get("cursedkoteł").execute(message);
 
 
 	if (/https?:\/\/media.discordapp.net\/attachments\/[0-9]+\/[0-9]+\/[^ ^\n\t\r]+\.(webm|mp4|mov|avi|flv|mkv|wmv|m4v)/g.test(message.content)) {
-		const foundMediaLinks = message.content.match(/https?:\/\/media.discordapp.net\/attachments\/[0-9]+\/[0-9]+\/[^ ^\n\t\r]+\.(webm|mp4|mov|avi|flv|mkv|wmv|m4v)/g)
+		const foundMediaLinks = message.content.match(/https?:\/\/media.discordapp.net\/attachments\/[0-9]+\/[0-9]+\/[^ ^\n\t\r]+\.(webm|mp4|mov|avi|flv|mkv|wmv|m4v)/g);
 		for (const mediaLink of foundMediaLinks)
-			message.reply(`${mediaLink.replace(/media/, 'cdn').replace(/net/, 'com')}\nFucking goofy ass media link`)
+			message.reply(`${mediaLink.replace(/media/, "cdn").replace(/net/, "com")}\nFucking goofy ass media link`);
 	}
 
 	// Nie potrzebny await mam nadzieję
-	archiwum(message)
+	archiwum(message);
 
-	await message.fetch()
+	await message.fetch();
 	// console.log(message)
 	if (message.attachments.size > 0) {
 		for (const [id, attachment] of message.attachments) {
-			if (attachment.contentType.startsWith('video') || attachment.contentType.startsWith('image'))
-				await hashFile(attachment, message)
+			if (attachment.contentType.startsWith("video") || attachment.contentType.startsWith("image"))
+				await hashFile(attachment, message);
 		}
 	}
 
@@ -74,5 +74,5 @@ export default async function(message: Message<boolean>) {
 				await hashFile.hashFile(embed, message)
 		}
 	} else */ if ((/https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*).(webm|mp4|mov|avi|flv|mkv|wmv|m4v|png|jpg|gif|jpeg|webp|svg|ovg|ogg)\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/g.test(message.content)))
-		await hashFileFromMessageContent(message)
+		await hashFileFromMessageContent(message);
 }

@@ -1,5 +1,5 @@
 interface IResource {
-	Id?: string;
+	Id?: number;
 	Type?: string;
 	Url: string;
 }
@@ -13,10 +13,10 @@ interface IChange {
 }
 
 export interface APIv3BaseResponse {
-	Resources: {
+	Resources?: {
 		[path: string]: IResource; // Url
 	}
-	Url: string;
+	Url?: string;
 	Status?: string;
 	Code?: string;
 	Message?: string;
@@ -46,6 +46,13 @@ export interface APISynergiaAccountsFresh {
 export interface APISynergiaAccounts {
 	lastModification: number;
 	accounts: APISynergiaAccountsFresh[];
+}
+
+// POST https://api.librus.pl/3.0/ChangeRegister
+// also https://api.librus.pl/3.0/ChangeRegister/<pushdevice id>
+// {"sendPush":"0","appVersion":"6.0.0"}
+export interface PostAPIChangeRegister extends APIv3BaseResponse {
+	ChangeRegister: IResource // Id, Url
 }
 
 // https://api.librus.pl/3.0/Me
@@ -112,9 +119,14 @@ interface ISchoolNotice {
 		WasRead: boolean;
 }
 
-// https://api.librus.pl/3.0/SchoolNotices/<Comma separated SchoolNotice IDs>
+// https://api.librus.pl/3.0/SchoolNotices/
 export interface APISchoolNotices extends APIv3BaseResponse {
-	SchoolNotices: ISchoolNotice[];
+	SchoolNotice: ISchoolNotice[];
+}
+
+// https://api.librus.pl/3.0/SchoolNotices/<SchoolNotice ID>
+export interface APISchoolNotice extends APIv3BaseResponse {
+	SchoolNotice: ISchoolNotice;
 }
 
 interface IAttendance {
@@ -213,5 +225,3 @@ interface ILesson {
 export interface APILessons extends APIv3BaseResponse {
 	Lessons: ILesson[]
 }
-
-export type APIv3Response = APILessons | APIUsers

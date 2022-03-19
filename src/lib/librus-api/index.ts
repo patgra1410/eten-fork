@@ -1,14 +1,14 @@
-import nodeFetch, { RequestInit } from 'node-fetch';
-import 'colors';
-import { LibrusError } from './errors/libruserror';
-import fetchCookie from 'fetch-cookie';
-import { APIPushChanges } from './librus-api-types';
+import nodeFetch, { RequestInit } from "node-fetch";
+import "colors";
+import { LibrusError } from "./errors/libruserror";
+import fetchCookie from "fetch-cookie";
+import * as librusApiTypes from "./librus-api-types";
 const fetch = fetchCookie(nodeFetch, new fetchCookie.toughCookie.CookieJar());
 
 type RequestResponseType =
-	'text' |
-	'json' |
-	'raw'
+	| "text"
+	| "json"
+	| "raw"
 
 /**
  * Class for easy interaction with the mobile Librus web API
@@ -18,17 +18,14 @@ type RequestResponseType =
 export default class LibrusClient {
 	bearerToken: string;
 	pushDevice: number;
-	lastPushChanges: number[];
 	/**
 	 * Create a new Librus API client
 	 * TODO: Getters/setters? Or maybe a better option to initialize them?
 	 * @constructor
 	 */
 	constructor() {
-		this.bearerToken = '';
+		this.bearerToken = "";
 		this.pushDevice = 0;
-		// this.cookieJar = new LibrusCookies();
-		this.lastPushChanges = [];
 	}
 
 	/**
@@ -39,28 +36,33 @@ export default class LibrusClient {
 	 */
 	async login(username: string, password: string): Promise<void> {
 		// Get csrf-token from <meta> tag for following requests
-		const result = await this.librusRequest('https://portal.librus.pl/', {}, 'text');
-		const csrfToken = /<meta name="csrf-token" content="(.*)">/g.exec(result)[1];
+		const result = await this.librusRequest("https://portal.librus.pl/", {}, "text") as string;
+		const csrfTokenRegexResult = /<meta name="csrf-token" content="(.*)">/g.exec(result);
+		if (csrfTokenRegexResult == null)
+			throw new LibrusError("No csrf-token meta tag in <head> of main site");
+		const csrfToken = csrfTokenRegexResult[1];
 
 		// Login
 		// Response gives necessary cookies, saved automatically by LibrusClient.rawRequest
-		await this.librusRequest('https://portal.librus.pl/rodzina/login/action', {
-			method: 'POST',
+		await this.librusRequest("https://portal.librus.pl/rodzina/login/action", {
+			method: "POST",
 			body: JSON.stringify({
 				email: username,
 				password: password
 			}),
 			headers: {
-				'Content-Type': 'application/json',
-				'X-CSRF-TOKEN': csrfToken
+				"Content-Type": "application/json",
+				"X-CSRF-TOKEN": csrfToken
 			}
 		});
 
 		// Get the accessToken
-		const result2 = await this.librusRequest('https://portal.librus.pl/api/v3/SynergiaAccounts', {}, 'json');
+		const result2 = await this.librusRequest("https://portal.librus.pl/api/v3/SynergiaAccounts", {}, "json") as librusApiTypes.APISynergiaAccounts;
+		if (result2.accounts[0]?.accessToken == null)
+			throw new LibrusError("SynergiaAccounts endpoint returned no accessToken for account");
 		this.bearerToken = result2.accounts[0].accessToken;
-		console.log('Login OK'.bgGreen);
-		return
+		console.log("Login OK".bgGreen);
+		return;
 	}
 
 	/**
@@ -70,8 +72,9 @@ export default class LibrusClient {
 	 */
 	async initWithCookie(): Promise<void> {
 		// Get the newer accessToken
-		const result = await this.librusRequest('https://portal.librus.pl/api/v3/SynergiaAccounts', {}, 'json');
-		// accouts[0]? Allow for more in the future
+		const result = await this.librusRequest("https://portal.librus.pl/api/v3/SynergiaAccounts", {}, "json") as librusApiTypes.APISynergiaAccounts;
+		if (result.accounts[0]?.accessToken == null)
+			throw new LibrusError("GET SynergiaAccounts returned unexpected JSON format");
 		this.bearerToken = result.accounts[0].accessToken;
 		return;
 	}
@@ -83,34 +86,34 @@ export default class LibrusClient {
 	 * @param options Additional options - passed on to node-fetch call
 	 * @param type What data should the request return: "json", "text", "raw"
 	 */
-	async librusRequest(url: string, options?: RequestInit, type: RequestResponseType = 'text') {
+	async librusRequest(url: string, options?: RequestInit, type: RequestResponseType = "raw"): Promise<unknown> {
 		// Merge default request options with user request options - this can be done much better...
-		const defaultOptions: RequestInit = {
-			method: 'GET',
+		let requestOptions: RequestInit = {
+			method: "GET",
 			headers: {
-				'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.114 Safari/537.36',
-				gzip: 'true',
-				Authorization: ((this.bearerToken !== '') ? `Bearer ${this.bearerToken}` : ''),
-				redirect: 'manual'
+				"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.114 Safari/537.36",
+				gzip: "true",
+				Authorization: ((this.bearerToken !== "") ? `Bearer ${this.bearerToken}` : ""),
+				redirect: "manual"
 			}
 		};
 		if (options) {
-			if ('headers' in options)
-				options.headers = { ...defaultOptions.headers, ...options.headers };
-			options = { ...defaultOptions, ...options };
+			if ("headers" in options)
+				requestOptions.headers = { ...requestOptions.headers, ...options.headers };
+			requestOptions = { ...requestOptions, ...options };
 		}
 
-		console.debug(`${options.method} ${url}`.bgMagenta.white);
-		const result = await fetch(url, options);
+		console.debug(`${requestOptions.method} ${url}`.bgMagenta.white);
+		const result = await fetch(url, requestOptions);
+		// Handle librus timeouts somewhere here
+		// Handle token expiry somewhere here
 		if (!result.ok)
 			throw new LibrusError(`${result.status} ${result.statusText}`);
 
-		if (type === 'json')
+		if (type === "json")
 			return await result.json();
-
-		else if (type === 'raw')
+		else if (type === "raw")
 			return result;
-
 		return await result.text();
 	}
 
@@ -120,15 +123,17 @@ export default class LibrusClient {
 	 * @returns Optionally return the new pushDevice ID
 	 */
 	async newPushDevice(): Promise<number> {
-		const jsonResult = await this.librusRequest('https://api.librus.pl/3.0/ChangeRegister', {
-			method: 'POST',
+		const jsonResult = await this.librusRequest("https://api.librus.pl/3.0/ChangeRegister", {
+			method: "POST",
 			body: JSON.stringify({
 				sendPush: 0,
-				appVersion: '5.9.0'
+				appVersion: "5.9.0"
 			})
-		}, 'json');
-		this.pushDevice = jsonResult.ChangeRegister.Id;
-		return this.pushDevice;
+		}, "json") as librusApiTypes.PostAPIChangeRegister;
+		// this.pushDevice = jsonResult.ChangeRegister.Id;
+		if (jsonResult.ChangeRegister?.Id == null)
+			throw new LibrusError("POST ChangeRegister returned unexpected JSON format");
+		return this.pushDevice = jsonResult.ChangeRegister.Id;
 	}
 
 	/**
@@ -136,36 +141,33 @@ export default class LibrusClient {
 	 * @async
 	 * @returns {JSON} Response if OK in member (of type array) "Changes" of returned object.
 	 */
-	async getPushChanges(): Promise<APIPushChanges> {
-		const resultJson: APIPushChanges = await this.librusRequest(`https://api.librus.pl/3.0/PushChanges?pushDevice=${this.pushDevice}`, {}, 'json');
-		if ('Changes' in resultJson) {
-			if (resultJson.Changes.length > 0) {
-				for (const element of resultJson.Changes) {
-					if (!this.lastPushChanges.includes(element.Id))
-						this.lastPushChanges.push(element.Id);
-				}
+	async getPushChanges(): Promise<librusApiTypes.APIPushChanges> {
+		const resultJson = await this.librusRequest(`https://api.librus.pl/3.0/PushChanges?pushDevice=${this.pushDevice}`, {}, "json") as librusApiTypes.APIPushChanges;
+		if (!("Changes" in resultJson))
+			throw new LibrusError("No \"Changes\" array in received PushChanges JSON");
+		const pushChanges: number[] = [];
+		if (resultJson.Changes.length > 0) {
+			for (const element of resultJson.Changes) {
+				if (!pushChanges.includes(element.Id))
+					pushChanges.push(element.Id);
 			}
 		}
-		else {
-			throw new LibrusError('No "Changes" array in received PushChanges JSON');
-		}
+		await this.deletePushChanges(pushChanges);
 		return resultJson;
 	}
 
 	/**
-	 * Creates a DELETE request for all elements from the last getPushChanges
+	 * Creates one or more DELETE request(s) for all elements from the last getPushChanges
 	 * UNTESTED
 	 * @async
 	 */
-	async deletePushChanges(): Promise<void> {
-		if (!this.lastPushChanges.length) {
-			console.warn('this.lastPushChanges is empty!');
+	private async deletePushChanges(lastPushChanges: number[]): Promise<void> {
+		if (!lastPushChanges.length)
 			return;
-		}
-		while (this.lastPushChanges.length) {
-			const delChanges = this.lastPushChanges.splice(0, 30).join(',')
+		while (lastPushChanges.length) {
+			const delChanges = lastPushChanges.splice(0, 30).join(",");
 			await this.librusRequest(`https://api.librus.pl/3.0/PushChanges/${delChanges}?pushDevice=${this.pushDevice}`, {
-				method: 'DELETE'
+				method: "DELETE"
 			});
 		}
 		return;
