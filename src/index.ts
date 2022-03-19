@@ -42,14 +42,14 @@ async function updateSlashCommands() {
 			client.commands.set(command.aliases[alias], command);
 	}
 	// for typescript command files
-	// const tsCommandFiles: string[] = fs.readdirSync(`${__dirname}/commands`).filter((file: string) => file.startsWith("ts_"));
-	// for (const file of tsCommandFiles) {
-	// 	const command: SlashCommandFile = await import(`${__dirname}/commands/${file}`);
-	// 	client.commands.set(command.data.name, command);
-	// 	slashCommands.push(command.data.toJSON());
-	// 	for (const alias in command.aliases)
-	// 		client.commands.set(command.aliases[alias], command);
-	// }
+	const tsCommandFiles: string[] = fs.readdirSync(`${__dirname}/commands`).filter((file: string) => (file.endsWith(".js") && file.startsWith("ts_")));
+	for (const file of tsCommandFiles) {
+		const command: SlashCommandFile = await import(`${__dirname}/commands/${file}`);
+		client.commands.set(command.data.name, command);
+		slashCommands.push(command.data.toJSON());
+		for (const alias in command.aliases)
+			client.commands.set(command.aliases[alias], command);
+	}
 	await client.application?.commands.set(slashCommands);
 }
 
