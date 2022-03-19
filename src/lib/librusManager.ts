@@ -1,6 +1,6 @@
 import { Snowflake, TextChannel, Util } from "discord.js";
 import config from "../config.json";
-import util from "util";
+// import util from "util";
 import { client } from "../index";
 import * as bets from "./bets";
 import LibrusClient from "./librus-api";
@@ -172,7 +172,7 @@ async function prepareTrackedChannelData(): Promise<void> {
 			rolesRegexArr: rolesRegexArr
 		});
 	}
-	console.debug(util.inspect(trackingChannels, false, null, true));
+	// console.debug(util.inspect(trackingChannels, false, null, true));
 }
 
 export default async function initLibrusManager() {

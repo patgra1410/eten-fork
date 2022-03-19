@@ -14,28 +14,37 @@ import { SlashCommandBuilder } from "@discordjs/builders";
 // LOL
 type SlashCommandFunction = ((interaction: Discord.CommandInteraction|Discord.ButtonInteraction|Discord.Message, args?: string) => Promise<unknown>);
 interface SlashCommandFile {
-	data: SlashCommandBuilder
-	execute: SlashCommandFunction
-	aliases?: string[]
-	onMessage?: SlashCommandFunction
+	__esModule: boolean;
+	data: SlashCommandBuilder;
+	execute: SlashCommandFunction;
+	aliases?: string[];
+	onMessage?: SlashCommandFunction;
 }
 declare module "discord.js" {
 	interface Client {
-		commands: Discord.Collection<string, SlashCommandFile>
-		imageCdnChannel: Discord.TextChannel
+		commands: Discord.Collection<string, SlashCommandFile>;
+		imageCdnChannel: Discord.TextChannel;
 	}
 }
 
 export const client = new Discord.Client({ intents: [Discord.Intents.FLAGS.GUILDS, Discord.Intents.FLAGS.GUILD_MESSAGES, Discord.Intents.FLAGS.GUILD_MEMBERS, Discord.Intents.FLAGS.GUILD_VOICE_STATES, Discord.Intents.FLAGS.GUILD_MESSAGE_REACTIONS], partials: ["MESSAGE", "CHANNEL", "REACTION"] });
 client.commands = new Discord.Collection();
 
-// Do zmiany
-const commandFiles = fs.readdirSync(`${__dirname}/commands`).filter((file: string) => file.endsWith(".js"));
-
 async function updateSlashCommands() {
 	const slashCommands = [];
+	// for javascript command files
+	const commandFiles: string[] = fs.readdirSync(`${__dirname}/commands`).filter((file: string) => file.endsWith(".js"));
 	for (const file of commandFiles) {
 		const command: SlashCommandFile = require(`${__dirname}/commands/${file}`);
+		client.commands.set(command.data.name, command);
+		slashCommands.push(command.data.toJSON());
+		for (const alias in command.aliases)
+			client.commands.set(command.aliases[alias], command);
+	}
+	// for typescript command files
+	const tsCommandFiles: string[] = fs.readdirSync(`${__dirname}/commands`).filter((file: string) => file.startsWith("ts_"));
+	for (const file of tsCommandFiles) {
+		const command: SlashCommandFile = await import(`${__dirname}/commands/${file}`);
 		client.commands.set(command.data.name, command);
 		slashCommands.push(command.data.toJSON());
 		for (const alias in command.aliases)
@@ -53,22 +62,17 @@ threadwatcher.newReply.on("newPost", async (board: string, threadID: string, pos
 });
 
 client.once("ready", async () => {
-	createRequiredFiles();
-
 	client.user.setStatus("online");
-	client.user.setActivity("rucham ci matke", { type: "COMPETING" });
+	client.user.setActivity("MASNY BEN - LOUDA", { type: "LISTENING" });
+	await updateSlashCommands();
 
-	updateSlashCommands();
-	cronJobs(client);
-
-	console.log(`Ready! Logged in as ${client.user.tag}`);
-
+	createRequiredFiles();
 	client.imageCdnChannel = await client.channels.fetch(config.autoMemesChannel) as Discord.TextChannel;
+	cronJobs(client);
 	await initLibrusManager();
-
 	incrementDays();
-
-	randomSounds(client);
+	randomSounds();
+	console.log(`Ready! Logged in as ${client.user.tag}`);
 });
 
 client.on("messageReactionAdd", discordEvents.messageReactionAdd);

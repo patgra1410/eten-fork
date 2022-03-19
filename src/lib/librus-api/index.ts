@@ -61,6 +61,7 @@ export default class LibrusClient {
 		if (result2.accounts[0]?.accessToken == null)
 			throw new LibrusError("SynergiaAccounts endpoint returned no accessToken for account");
 		this.bearerToken = result2.accounts[0].accessToken;
+		await this.newPushDevice();
 		console.log("Login OK".bgGreen);
 		return;
 	}
@@ -70,9 +71,9 @@ export default class LibrusClient {
 	 * Use only if you're using cookies through constructor or session is expired and you don't want to execute login() function.
 	 * @async
 	 */
-	async initWithCookie(): Promise<void> {
+	async refreshToken(): Promise<void> {
 		// Get the newer accessToken
-		const result = await this.librusRequest("https://portal.librus.pl/api/v3/SynergiaAccounts", {}, "json") as librusApiTypes.APISynergiaAccounts;
+		const result = await this.librusRequest("https://portal.librus.pl/api/v3/SynergiaAccounts/1230u/fresh", {}, "json") as librusApiTypes.APISynergiaAccounts;
 		if (result.accounts[0]?.accessToken == null)
 			throw new LibrusError("GET SynergiaAccounts returned unexpected JSON format");
 		this.bearerToken = result.accounts[0].accessToken;
@@ -133,7 +134,8 @@ export default class LibrusClient {
 		// this.pushDevice = jsonResult.ChangeRegister.Id;
 		if (jsonResult.ChangeRegister?.Id == null)
 			throw new LibrusError("POST ChangeRegister returned unexpected JSON format");
-		return this.pushDevice = jsonResult.ChangeRegister.Id;
+		this.pushDevice = jsonResult.ChangeRegister.Id;
+		return this.pushDevice;
 	}
 
 	/**

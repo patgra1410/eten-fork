@@ -8,7 +8,6 @@ data/*
 soundeffects/*
 .vscode
 webhook-link
-package-lock.json
 
 # TS
 lib-cov

@@ -1,10 +1,9 @@
-import { Client, Collection, GuildMember } from "discord.js";
-
+import { Collection, GuildMember } from "discord.js";
 import config from "../config.json";
 import fs from "fs";
 import { joinVoiceChannel, createAudioPlayer, createAudioResource } from "@discordjs/voice";
+import { client } from "../index";
 const player = createAudioPlayer();
-let client: Client<boolean>;
 
 function sleep(ms: number) {
 	return new Promise((resolve) => {
@@ -16,7 +15,7 @@ async function randomSoundOnVoice() {
 	const channels = client.guilds.cache.get(config.guild)?.channels.cache.filter(c => c.type == "GUILD_VOICE");
 
 	let isThereAnyone = false;
-	for (const [id, channel] of channels) {
+	for (const channel of channels.values()) {
 		if ((channel.members as Collection<string, GuildMember>).size == 0 || Math.random() >= config.randomSoundeffectChance)
 			continue;
 		isThereAnyone = true;
@@ -40,8 +39,7 @@ async function randomSoundOnVoice() {
 	setTimeout(randomSoundOnVoice, (isThereAnyone ? 1000 * 60 : 1000 * 60 * 15));
 }
 
-export default async function(cl: Client<boolean>) {
-	client = cl;
+export default async function() {
 	if (config.playRandomSoundeffects)
 		setTimeout(randomSoundOnVoice, 1000 * 60);
 }
