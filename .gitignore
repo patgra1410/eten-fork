@@ -1,5 +1,5 @@
 # Custom
-config.json
+src/config.json
 cronImageSend.json
 placeholder.jpg
 tmp

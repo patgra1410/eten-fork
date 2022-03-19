@@ -10,11 +10,13 @@
 		"@discordjs/voice": "^0.8.0",
 		"@eslint/eslintrc": "^1.0.5",
 		"canvas": "^2.8.0",
+		"colors": "^1.4.0",
 		"cron": "^1.8.2",
 		"crypto": "^1.0.1",
 		"discord.js": "^13.2.0",
 		"elo-rating": "^1.0.1",
 		"eslint": "^8.7.0",
+		"fetch-cookie": "^2.0.3",
 		"ffmpeg-static": "^5.0.0",
 		"form-data": "^4.0.0",
 		"join-images": "^1.0.0",
@@ -24,11 +26,14 @@
 		"node-cache": "^5.1.2",
 		"node-fetch": "^2.6.7",
 		"request": "^2.88.2",
-		"sharp": "^0.29.3"
+		"sharp": "^0.30.3"
 	},
 	"devDependencies": {
 		"@types/cron": "^1.7.3",
 		"@types/node": "^17.0.21",
-		"@types/sharp": "^0.30.0"
+		"@types/sharp": "^0.30.0",
+		"@types/tough-cookie": "^4.0.1",
+		"@typescript-eslint/eslint-plugin": "^5.15.0",
+		"@typescript-eslint/parser": "^5.15.0"
 	}
 }

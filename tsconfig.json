@@ -5,6 +5,7 @@
 		"resolveJsonModule": true,
 		"target": "es6",
 		"noImplicitAny": true,
+		// "strict": true,
 		"allowJs": true,
 		"moduleResolution": "node",
 		"outDir": "dist",
@@ -15,7 +16,7 @@
 			]
 		}
 	},
-	"exclude": [
-		"dist/*/**"
+	"include": [
+		"src/**/*"
 	]
 }
