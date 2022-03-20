@@ -136,13 +136,17 @@ async function fetchNewSchoolNotices(): Promise<void> {
 				const orgSubject = (await librusClient.librusRequest(substitution.OrgSubject.Url, {}, "json") as librusApiTypes.APISubject).Subject;
 				const newSubject = (await librusClient.librusRequest(substitution.Subject.Url, {}, "json") as librusApiTypes.APISubject).Subject;
 				let changeType = "YOU SHOULDN'T BE ABLE TO SEE THIS";
-				if (update.Type === "Add")
-					changeType = "Dodano";
+				if (substitution.IsShifted)
+					changeType = "Przesunięto zajęcia";
+				else if (substitution.IsCancelled)
+					changeType = "Odwołano zajęcia";
+				else if (update.Type === "Add")
+					changeType = "Dodano zastępstwo";
 				else if (update.Type === "Edit")
-					changeType = "Zmieniono";
+					changeType = "Zmieniono zastępstwo";
 				const embed = new MessageEmbed()
 					.setColor("#9B3089")
-					.setTitle(`${changeType} zastępstwo`)
+					.setTitle(changeType)
 					.setDescription(
 						`IsShifted: ${substitution.IsShifted}
 						IsCancelled: ${substitution.IsCancelled}`.replace(/\t/g, "")
