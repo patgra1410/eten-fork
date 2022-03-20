@@ -112,7 +112,7 @@ export default class LibrusClient {
 	 * @param options Additional options - passed on to node-fetch call
 	 * @param type What data should the request return: "json", "text", "raw"
 	 */
-	async librusRequest(url: string, options?: RequestInit, type: RequestResponseType = "raw"): Promise<unknown> {
+	async librusRequest(url: string, options?: RequestInit, type: RequestResponseType = "raw"): Promise<string|Response|unknown> {
 		// Merge default request options with user request options - this can be done much better...
 		let requestOptions: RequestInit = {
 			method: "GET",

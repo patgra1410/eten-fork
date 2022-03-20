@@ -46,9 +46,9 @@ async function fetchNewSchoolNotices(): Promise<void> {
 	try {
 		for (const update of pushChanges.Changes) {
 			// Get the notice if the element is of type 'SchoolNotices'
-			if (update.Resource.Type !== "SchoolNotices")
+			if (update.Resource?.Type !== "SchoolNotices")
 				continue;
-			const librusResponse = await librusClient.librusRequest(update.Resource.Url) as APISchoolNotice;
+			const librusResponse = await librusClient.librusRequest(update.Resource.Url, {}, "json") as APISchoolNotice;
 			// const librusResponse = config.testData;
 			// Temporary
 			if ("Code" in librusResponse) {

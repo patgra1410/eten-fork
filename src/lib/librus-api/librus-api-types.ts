@@ -223,5 +223,38 @@ interface ILesson {
 
 // https://api.librus.pl/3.0/Lessons/<Comma separated Lesson IDs>
 export interface APILessons extends APIv3BaseResponse {
-	Lessons: ILesson[]
+	Lessons: ILesson[];
+}
+
+interface ITeacherFreeDay {
+	Id: number;
+	Name: string;
+	DateFrom: string;
+	DateTo: string;
+	AddDate: string;
+	Teacher: IResource // Id, Url
+}
+
+// https://api.librus.pl/3.0/Calendars/TeacherFreeDays/<Comma separated IDs>
+export interface APICalendarsTeacherFreeDays extends APIv3BaseResponse {
+	TeacherFreeDays: ITeacherFreeDay[];
+}
+
+interface ISubstitution {
+	Date: string;
+	Id: number;
+	IsCancelled: boolean;
+	IsShifted: boolean;
+	LessonNo: string;
+	OrgDate: string;
+	OrgLessonNo: string;
+	OrgSubject: IResource; // Id, Url
+	OrgTeacher: IResource; // Id, Url
+	Subject: IResource; // Id, Url
+	Teacher: IResource; // Id, Url
+}
+
+// https://api.librus.pl/3.0/Calendars/Substitutions/<Comma separated IDs>
+export interface APICalendarsSubstitutions extends APIv3BaseResponse {
+	Substitutions: ISubstitution[];
 }
