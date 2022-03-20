@@ -64,7 +64,7 @@ export default async function(message: Message<boolean>) {
 	if (message.attachments.size > 0) {
 		for (const [id, attachment] of message.attachments) {
 			if (attachment.contentType.startsWith("video") || attachment.contentType.startsWith("image"))
-				await hashFile(attachment, message);
+				await hashFile(attachment.url, message);
 		}
 	}
 

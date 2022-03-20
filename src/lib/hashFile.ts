@@ -35,15 +35,15 @@ export function updateHashes() {
 	hashes = newHashes;
 }
 
-export async function hashFile(attachment: MessageAttachment, message: Message<boolean>) {
+export async function hashFile(url: string, message: Message<boolean>) {
 	// if (message.author.id == message.client.id)
 	// jak to działało? poprawiłem:
 	if (message.author.id == message.client.user.id)
 		return;
 
 	console.time("Downloading");
-	const extension = get_url_extension(attachment.url);
-	const imgResult = await fetch(attachment.url);
+	const extension = get_url_extension(url);
+	const imgResult = await fetch(url);
 	await streamPipeline(imgResult.body, fs.createWriteStream("./tmp/tmp." + extension));
 	console.timeEnd("Downloading");
 
@@ -95,7 +95,7 @@ export async function hashFileFromMessageContent(message: Message<boolean>) {
 				// ?? to działało??
 				// hashfile przyjmuje MessageAttachment (bo robisz tam metode chyba .url) a nie to
 				// await hashFile({ url: url }, message)
-				await hashFile(new MessageAttachment(url), message);
+				await hashFile(url, message);
 			}
 			catch (error) {
 				console.log(error);
