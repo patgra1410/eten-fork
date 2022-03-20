@@ -1,10 +1,10 @@
-import { Snowflake, TextChannel, Util } from "discord.js";
+import { MessageEmbed, Snowflake, TextChannel, Util } from "discord.js";
 import config from "../config.json";
-// import util from "util";
+import util from "util";
 import { client } from "../index";
 import * as bets from "./bets";
 import LibrusClient from "./librus-api";
-import { APIPushChanges, APISchoolNotice } from "./librus-api/librus-api-types";
+import * as librusApiTypes from "./librus-api/librus-api-types";
 
 interface IRoleRegexes {
 	boldRegex: RegExp;
@@ -33,7 +33,7 @@ function isPlanChangeNotice(title: string): boolean {
 }
 
 async function fetchNewSchoolNotices(): Promise<void> {
-	let pushChanges: APIPushChanges;
+	let pushChanges: librusApiTypes.APIPushChanges;
 	try {
 		// pushChanges = await librusClient.getPushChanges();
 		pushChanges = await librusClient.getPushChanges();
@@ -44,48 +44,143 @@ async function fetchNewSchoolNotices(): Promise<void> {
 		return;
 	}
 	try {
+		const pushChangesToDelete: number[] = [];
 		for (const update of pushChanges.Changes) {
 			// Get the notice if the element is of type 'SchoolNotices'
-			if (update.Resource?.Type !== "SchoolNotices")
-				continue;
-			const librusResponse = await librusClient.librusRequest(update.Resource.Url, {}, "json") as APISchoolNotice;
-			// const librusResponse = config.testData;
-			// Temporary
-			if ("Code" in librusResponse) {
-				console.error(`${update.Resource.Id} - has Code:`.yellow);
-				console.error(librusResponse);
-				continue;
-			}
+			pushChangesToDelete.push(update.Id);
+			if (update.Resource?.Type === "SchoolNotices") {
+				const librusResponse = await librusClient.librusRequest(update.Resource.Url, {}, "json") as librusApiTypes.APISchoolNotice;
+				// const librusResponse = config.testData;
+				// Temporary
+				if ("Code" in librusResponse) {
+					console.error(`${update.Resource.Id} - has Code:`.yellow);
+					console.error(librusResponse);
+					continue;
+				}
 
-			let changeType = "YOU SHOULDN'T BE ABLE TO SEE THIS";
-			if (update.Type === "Add")
-				changeType = "Nowe";
-			else if (update.Type === "Edit")
-				changeType = "Zmienione";
-			let messageText =
-				`**__:loudspeaker: ${changeType} Ogłoszenie w Librusie__**
-				**__${librusResponse.SchoolNotice.Subject}__**
-				${librusResponse.SchoolNotice.Content}`.replace(/\t/g, "");
+				let changeType = "YOU SHOULDN'T BE ABLE TO SEE THIS";
+				if (update.Type === "Add")
+					changeType = "Nowe";
+				else if (update.Type === "Edit")
+					changeType = "Zmienione";
+				const baseMessageText =
+					`**__:loudspeaker: ${changeType} Ogłoszenie w Librusie__**
+					**__${librusResponse.SchoolNotice.Subject}__**
+					${librusResponse.SchoolNotice.Content}`.replace(/\t/g, "");
 
-			for (const listener of noticeListenerChannels) {
+				for (const listener of noticeListenerChannels) {
+					if (isPlanChangeNotice(librusResponse.SchoolNotice.Subject) && listener.rolesRegexArr.length > 0) {
+						let messageText = baseMessageText;
+						for (const roleData of listener.rolesRegexArr) {
+							messageText = messageText.replace(roleData.boldRegex, "**$&**");
+							messageText = messageText.replace(roleData.roleRegex, `<@&${roleData.roleId}> $&`);
+							for (const split of Util.splitMessage(messageText))
+								await listener.channel.send(split);
+						}
+					}
+					else {
+						for (const split of Util.splitMessage(baseMessageText))
+							await listener.channel.send(split);
+					}
+
+				}
+				console.log(`${librusResponse.SchoolNotice.Id}  --- Sent!`.green);
+				// Do zmiany?
 				if (isPlanChangeNotice(librusResponse.SchoolNotice.Subject)) {
-					for (const roleData of listener.rolesRegexArr) {
-						messageText = messageText.replace(roleData.boldRegex, "**$&**");
-						messageText = messageText.replace(roleData.roleRegex, `<@&${roleData.roleId}> $&`);
+					if (update.Type === "Add") {
+						await bets.addTime(new Date());
+						await bets.check();
 					}
 				}
-				for (const split of Util.splitMessage(messageText))
-					await listener.channel.send(split);
 			}
-			console.log(`${librusResponse.SchoolNotice.Id}  --- Sent!`.green);
-			// Do zmiany?
-			if (isPlanChangeNotice(librusResponse.SchoolNotice.Subject)) {
-				if (update.Type === "Add") {
-					await bets.addTime(new Date());
-					await bets.check();
+			else if (update.Resource?.Type === "Calendars/TeacherFreeDays") {
+				const teacherFreeDay = (await librusClient.librusRequest(`${update.Resource.Url},`, {}, "json") as librusApiTypes.APICalendarsTeacherFreeDay).TeacherFreeDay;
+				const teacher = (await librusClient.librusRequest(`${teacherFreeDay.Teacher.Url}`, {}, "json") as librusApiTypes.APIUser).User;
+				let changeType = "YOU SHOULDN'T BE ABLE TO SEE THIS";
+				if (update.Type === "Add")
+					changeType = "Dodano";
+				else if (update.Type === "Edit")
+					changeType = "Zmieniono";
+				const embed = new MessageEmbed()
+					.setColor("#E56390")
+					.setTitle(`${changeType} nieobecność nauczyciela`)
+					.setDescription(
+						`${teacher.FirstName} ${teacher.LastName}`.replace(/\t/g, "")
+					)
+					.setFields([
+						{
+							name: "Od:",
+							value: teacherFreeDay.DateFrom,
+							inline: true
+						},
+						{
+							name: "Do:",
+							value: teacherFreeDay.DateTo,
+							inline: true
+						}
+					])
+					.setFooter({
+						text: `Dodano: ${update.AddDate}`
+					});
+				for (const listener of noticeListenerChannels) {
+					// Temporary
+					if (listener.channel.id === "884370476128944148")
+						await listener.channel.send({ content: "<@&885211432025731092>", embeds: [embed] });
+				}
+			}
+			else if (update.Resource?.Type === "Calendars/Substitutions") {
+				const substitution = (await librusClient.librusRequest(`${update.Resource.Url},`, {}, "json") as librusApiTypes.APICalendarsSubstitution).Substitution;
+				// TODO: Caching
+				const orgTeacher = (await librusClient.librusRequest(`${substitution.OrgTeacher.Url}`, {}, "json") as librusApiTypes.APIUser).User;
+				const newTeacher = (await librusClient.librusRequest(`${substitution.Teacher.Url}`, {}, "json") as librusApiTypes.APIUser).User;
+				const orgSubject = (await librusClient.librusRequest(`${substitution.OrgSubject.Url}`, {}, "json") as librusApiTypes.APISubject).Subject;
+				const newSubject = (await librusClient.librusRequest(`${substitution.Subject.Url}`, {}, "json") as librusApiTypes.APISubject).Subject;
+				let changeType = "YOU SHOULDN'T BE ABLE TO SEE THIS";
+				if (update.Type === "Add")
+					changeType = "Dodano";
+				else if (update.Type === "Edit")
+					changeType = "Zmieniono";
+				const embed = new MessageEmbed()
+					.setColor("#9B3089")
+					.setTitle(`${changeType} zastępstwo`)
+					.setDescription(
+						`IsShifted: ${substitution.IsShifted}
+						IsCancelled: ${substitution.IsCancelled}`.replace(/\t/g, "")
+					)
+					.setFields([
+						{
+							name: "Nr Lekcji:",
+							value: (substitution.OrgLessonNo === substitution.LessonNo) ? substitution.OrgLessonNo : `${substitution.OrgLessonNo} ➡️ ${substitution.LessonNo}`,
+							inline: true
+						},
+						{
+							name: "Przedmiot:",
+							value: (substitution.OrgSubject.Id === substitution.Subject.Id) ? orgSubject.Name : `${orgSubject.Name} ➡️ ${newSubject.Name}`,
+							inline: true
+						},
+						{
+							name: "Nauczyciel:",
+							value: (substitution.OrgTeacher.Id === substitution.Teacher.Id) ? `${orgTeacher.FirstName} ${orgTeacher.LastName}` : `${orgTeacher.FirstName} ${orgTeacher.LastName} ➡️ ${newTeacher.FirstName} ${newTeacher.LastName}`,
+							inline: true
+						},
+						{
+							name: "Data i czas:",
+							value: (substitution.OrgDate === substitution.Date) ? substitution.OrgDate : `${substitution.OrgDate} ➡️ ${substitution.Date}`,
+							inline: true
+						}
+					])
+					.setFooter({
+						text: `Dodano: ${update.AddDate}`
+					});
+				for (const listener of noticeListenerChannels) {
+					// Temporary
+					if (listener.channel.id === "884370476128944148")
+						await listener.channel.send({ content: "<@&885211432025731092>", embeds: [embed] });
 				}
 			}
 		}
+		// do the DELETE(s) only once everything else succeeded
+		librusClient.deletePushChanges(pushChangesToDelete);
 	}
 	catch (error) {
 		console.error("Something in updating notices failed:".bgRed.white);
@@ -175,7 +270,7 @@ async function prepareTrackedChannelData(): Promise<void> {
 			rolesRegexArr: rolesRegexArr
 		});
 	}
-	// console.debug(util.inspect(trackingChannels, false, null, true));
+	// console.debug(util.inspect(noticeListenerChannels, false, null, true));
 }
 
 export default async function initLibrusManager() {

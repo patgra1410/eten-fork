@@ -211,8 +211,6 @@ export default class LibrusClient {
 					pushChanges.push(element.Id);
 			}
 		}
-		// If this fails things stawt to get vewwy funky desu uwuuu~~~ >w<
-		await this.deletePushChanges(pushChanges);
 		return resultJson;
 	}
 
@@ -220,9 +218,8 @@ export default class LibrusClient {
 	 * Creates one or more DELETE request(s) for all elements from the last getPushChanges
 	 * UNTESTED
 	 * @async
-	 * @protected
 	 */
-	protected async deletePushChanges(lastPushChanges: number[]): Promise<void> {
+	async deletePushChanges(lastPushChanges: number[]): Promise<void> {
 		if (!lastPushChanges.length)
 			return;
 		while (lastPushChanges.length) {

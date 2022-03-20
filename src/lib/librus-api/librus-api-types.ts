@@ -236,6 +236,9 @@ interface ITeacherFreeDay {
 }
 
 // https://api.librus.pl/3.0/Calendars/TeacherFreeDays/<Comma separated IDs>
+export interface APICalendarsTeacherFreeDay extends APIv3BaseResponse {
+	TeacherFreeDay: ITeacherFreeDay;
+}
 export interface APICalendarsTeacherFreeDays extends APIv3BaseResponse {
 	TeacherFreeDays: ITeacherFreeDay[];
 }
@@ -255,6 +258,42 @@ interface ISubstitution {
 }
 
 // https://api.librus.pl/3.0/Calendars/Substitutions/<Comma separated IDs>
+export interface APICalendarsSubstitution extends APIv3BaseResponse {
+	Substitution: ISubstitution;
+}
 export interface APICalendarsSubstitutions extends APIv3BaseResponse {
 	Substitutions: ISubstitution[];
+}
+
+interface IUser {
+    Id: number;
+    AccountId: string;
+    FirstName: string;
+    LastName: string;
+    IsEmployee: boolean;
+}
+
+// https://api.librus.pl/3.0/Users/<Comma separated IDs>
+export interface APIUser extends APIv3BaseResponse {
+	User: IUser;
+}
+export interface APIUsers extends APIv3BaseResponse {
+	Users: IUser[];
+}
+
+interface ISubject {
+	Id: number;
+	Name: string;
+	No: number;
+	Short: string;
+	IsExtracurricular: boolean;
+	IsBlockLesson: boolean;
+}
+
+// https://api.librus.pl/2.0/Subjects/<Comma separated IDs>
+export interface APISubject extends APIv3BaseResponse {
+	Subject: ISubject;
+}
+export interface APISubjects extends APIv3BaseResponse {
+	Subjects: ISubject[];
 }
