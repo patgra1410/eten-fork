@@ -86,8 +86,6 @@ async function fetchNewSchoolNotices(): Promise<void> {
 				}
 			}
 		}
-		// If this fails things stawt to get vewwy funky desu uwuuu~~~ >w<
-		await this.deletePushChanges(pushChanges);
 	}
 	catch (error) {
 		console.error("Something in updating notices failed:".bgRed.white);
