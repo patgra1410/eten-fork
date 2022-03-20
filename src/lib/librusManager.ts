@@ -94,8 +94,8 @@ async function fetchNewSchoolNotices(): Promise<void> {
 				}
 			}
 			else if (update.Resource?.Type === "Calendars/TeacherFreeDays") {
-				const teacherFreeDay = (await librusClient.librusRequest(`${update.Resource.Url},`, {}, "json") as librusApiTypes.APICalendarsTeacherFreeDay).TeacherFreeDay;
-				const teacher = (await librusClient.librusRequest(`${teacherFreeDay.Teacher.Url}`, {}, "json") as librusApiTypes.APIUser).User;
+				const teacherFreeDay = (await librusClient.librusRequest(update.Resource.Url, {}, "json") as librusApiTypes.APICalendarsTeacherFreeDay).TeacherFreeDay;
+				const teacher = (await librusClient.librusRequest(teacherFreeDay.Teacher.Url, {}, "json") as librusApiTypes.APIUser).User;
 				let changeType = "YOU SHOULDN'T BE ABLE TO SEE THIS";
 				if (update.Type === "Add")
 					changeType = "Dodano";
@@ -129,12 +129,12 @@ async function fetchNewSchoolNotices(): Promise<void> {
 				}
 			}
 			else if (update.Resource?.Type === "Calendars/Substitutions") {
-				const substitution = (await librusClient.librusRequest(`${update.Resource.Url},`, {}, "json") as librusApiTypes.APICalendarsSubstitution).Substitution;
+				const substitution = (await librusClient.librusRequest(update.Resource.Url, {}, "json") as librusApiTypes.APICalendarsSubstitution).Substitution;
 				// TODO: Caching
-				const orgTeacher = (await librusClient.librusRequest(`${substitution.OrgTeacher.Url}`, {}, "json") as librusApiTypes.APIUser).User;
-				const newTeacher = (await librusClient.librusRequest(`${substitution.Teacher.Url}`, {}, "json") as librusApiTypes.APIUser).User;
-				const orgSubject = (await librusClient.librusRequest(`${substitution.OrgSubject.Url}`, {}, "json") as librusApiTypes.APISubject).Subject;
-				const newSubject = (await librusClient.librusRequest(`${substitution.Subject.Url}`, {}, "json") as librusApiTypes.APISubject).Subject;
+				const orgTeacher = (await librusClient.librusRequest(substitution.OrgTeacher.Url, {}, "json") as librusApiTypes.APIUser).User;
+				const newTeacher = (await librusClient.librusRequest(substitution.Teacher.Url, {}, "json") as librusApiTypes.APIUser).User;
+				const orgSubject = (await librusClient.librusRequest(substitution.OrgSubject.Url, {}, "json") as librusApiTypes.APISubject).Subject;
+				const newSubject = (await librusClient.librusRequest(substitution.Subject.Url, {}, "json") as librusApiTypes.APISubject).Subject;
 				let changeType = "YOU SHOULDN'T BE ABLE TO SEE THIS";
 				if (update.Type === "Add")
 					changeType = "Dodano";
