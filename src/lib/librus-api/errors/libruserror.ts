@@ -9,11 +9,7 @@ import { APIv3BaseResponse } from "../librus-api-types";
  */
 export class LibrusError extends Error {
 	json: APIv3BaseResponse | undefined;
-	constructor(msg?: string, json?: APIv3BaseResponse) {
+	constructor(msg?: string) {
 		super(msg);
-		if (json != null) {
-			this.json = json;
-			console.error(json);
-		}
 	}
 }

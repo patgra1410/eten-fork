@@ -16,7 +16,7 @@ interface IChannels {
 	channel: TextChannel;
 	rolesRegexArr: IRoleRegexes[];
 }
-const trackingChannels: IChannels[] = [];
+const noticeListenerChannels: IChannels[] = [];
 let librusClient: LibrusClient;
 
 function isPlanChangeNotice(title: string): boolean {
@@ -67,15 +67,15 @@ async function fetchNewSchoolNotices(): Promise<void> {
 				**__${librusResponse.SchoolNotice.Subject}__**
 				${librusResponse.SchoolNotice.Content}`.replace(/\t/g, "");
 
-			for (const endpoint of trackingChannels) {
+			for (const listener of noticeListenerChannels) {
 				if (isPlanChangeNotice(librusResponse.SchoolNotice.Subject)) {
-					for (const roleData of endpoint.rolesRegexArr) {
+					for (const roleData of listener.rolesRegexArr) {
 						messageText = messageText.replace(roleData.boldRegex, "**$&**");
 						messageText = messageText.replace(roleData.roleRegex, `<@&${roleData.roleId}> $&`);
 					}
 				}
 				for (const split of Util.splitMessage(messageText))
-					await endpoint.channel.send(split);
+					await listener.channel.send(split);
 			}
 			console.log(`${librusResponse.SchoolNotice.Id}  --- Sent!`.green);
 			// Do zmiany?
@@ -86,15 +86,20 @@ async function fetchNewSchoolNotices(): Promise<void> {
 				}
 			}
 		}
+		// If this fails things stawt to get vewwy funky desu uwuuu~~~ >w<
+		await this.deletePushChanges(pushChanges);
 	}
 	catch (error) {
 		console.error("Something in updating notices failed:".bgRed.white);
 		console.error(error);
-		console.error("Retrying getSchoolNoticesJson() in 2 mins.".bgRed.white);
-		setTimeout(fetchNewSchoolNotices, (2 * 60000));
+		console.error("Retrying fetchNewSchoolNotices() in 2 mins.".bgRed.white);
+		const failDelayTime = 2 * 60;
+		setTimeout(fetchNewSchoolNotices, (failDelayTime * 1000));
 		return;
 	}
-	setTimeout(fetchNewSchoolNotices, ((Math.round(Math.random() * (6 - 4) + 4)) * 60000));
+	const maxDelayTime = 5 * 60;
+	const minDelayTime = 4 * 60;
+	setTimeout(fetchNewSchoolNotices, ((Math.round(Math.random() * (maxDelayTime - minDelayTime) + minDelayTime)) * 1000));
 }
 
 async function prepareTrackedChannelData(): Promise<void> {
@@ -167,7 +172,7 @@ async function prepareTrackedChannelData(): Promise<void> {
 				}
 			}
 		}
-		trackingChannels.push({
+		noticeListenerChannels.push({
 			channel: channel,
 			rolesRegexArr: rolesRegexArr
 		});
@@ -178,7 +183,7 @@ async function prepareTrackedChannelData(): Promise<void> {
 export default async function initLibrusManager() {
 	librusClient = new LibrusClient();
 	await librusClient.login(config.librusLogin, config.librusPass);
-	librusClient.pushDevice = 6305649;
+	await librusClient.newPushDevice(); // Alternatively: librusClient.pushDevice = your_pushdevice_id_here
 	await prepareTrackedChannelData();
 	setTimeout(fetchNewSchoolNotices, 2000);
 }

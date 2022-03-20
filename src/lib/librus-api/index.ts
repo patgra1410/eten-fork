@@ -42,17 +42,17 @@ export default class LibrusClient {
 	 */
 	async login(username: string, password: string): Promise<void> {
 		if (username.length < 2 || password.length < 2)
-			throw new Error("Username or password too short");
+			throw new Error("Invalid username or password");
 		// Get csrf-token from <meta> tag for following requests
-		const result = await this.librusRequest("https://portal.librus.pl/", {}, "text") as string;
+		const result = await (await fetch("https://portal.librus.pl/")).text();
 		const csrfTokenRegexResult = /<meta name="csrf-token" content="(.*)">/g.exec(result);
 		if (csrfTokenRegexResult == null)
 			throw new LibrusError("No csrf-token meta tag in <head> of main site");
 		const csrfToken = csrfTokenRegexResult[1];
 
 		// Login
-		// Response gives necessary cookies, saved automatically by LibrusClient.rawRequest
-		await this.librusRequest("https://portal.librus.pl/rodzina/login/action", {
+		// Response gives necessary cookies, saved automatically thanks to fetch-cookie
+		await fetch("https://portal.librus.pl/rodzina/login/action", {
 			method: "POST",
 			body: JSON.stringify({
 				email: username,
@@ -60,19 +60,26 @@ export default class LibrusClient {
 			}),
 			headers: {
 				"Content-Type": "application/json",
-				"X-CSRF-TOKEN": csrfToken
+				"X-CSRF-TOKEN": csrfToken,
+				"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.114 Safari/537.36"
 			}
 		});
 
 		// Get the accessToken
-		const result2 = await this.librusRequest("https://portal.librus.pl/api/v3/SynergiaAccounts", {}, "json") as librusApiTypes.APISynergiaAccounts;
-		if (result2.accounts[0]?.accessToken == null)
+		const accountsResult = await (await fetch("https://portal.librus.pl/api/v3/SynergiaAccounts", {
+			method: "GET",
+			headers: {
+				"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.114 Safari/537.36"
+			}
+		})).json() as librusApiTypes.APISynergiaAccounts;
+		// TODO: Fix the existence checking here
+		if (accountsResult.accounts[0]?.accessToken == null)
 			throw new LibrusError("SynergiaAccounts endpoint returned no accessToken for account");
-		this.bearerToken = result2.accounts[0].accessToken;
-		if (result2.accounts[0]?.login == null)
-			throw new LibrusError("SynergiaAccounts endpoint returned no accessToken for account");
-		this.synergiaLogin = result2.accounts[0].login;
-		console.log("Login OK".bgGreen);
+		this.bearerToken = accountsResult.accounts[0].accessToken;
+		if (accountsResult.accounts[0]?.login == null)
+			throw new LibrusError("SynergiaAccounts endpoint returned no login for account");
+		this.synergiaLogin = accountsResult.accounts[0].login;
+		console.log(" Librus Login OK ".bgGreen.white);
 		return;
 	}
 
@@ -83,7 +90,15 @@ export default class LibrusClient {
 	 */
 	async refreshToken(): Promise<void> {
 		// Get the newer accessToken
-		const result = await this.librusRequest(`https://portal.librus.pl/api/v3/SynergiaAccounts/${this.synergiaLogin}/fresh`, {}, "json") as librusApiTypes.APISynergiaAccountsFresh;
+		const result = await (await fetch(`https://portal.librus.pl/api/v3/SynergiaAccounts/${this.synergiaLogin}/fresh`,
+			{
+				method: "GET",
+				headers: {
+					"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.114 Safari/537.36"
+				},
+				redirect: "manual"
+			}
+		)).json() as librusApiTypes.APISynergiaAccountsFresh;
 		if (result.accessToken == null)
 			throw new LibrusError("GET SynergiaAccounts returned unexpected JSON format");
 		this.bearerToken = result.accessToken;
@@ -104,9 +119,9 @@ export default class LibrusClient {
 			headers: {
 				"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.114 Safari/537.36",
 				gzip: "true",
-				Authorization: ((this.bearerToken !== "") ? `Bearer ${this.bearerToken}` : ""),
-				redirect: "manual"
-			}
+				Authorization: ((this.bearerToken !== "") ? `Bearer ${this.bearerToken}` : "")
+			},
+			redirect: "manual"
 		};
 		if (options) {
 			if ("headers" in options)
@@ -114,41 +129,50 @@ export default class LibrusClient {
 			requestOptions = { ...requestOptions, ...options };
 		}
 
+		// Execute request
 		console.debug(`${requestOptions.method} ${url}`.bgMagenta.white);
-		const result = await fetch(url, requestOptions);
+		let result = await fetch(url, requestOptions);
+		let resultText = await result.text();
+
+		// Check for correctness
 		if (!result.ok) {
-			let json = undefined;
-			try {
-				json = await result.json();
-			}
-			catch (error) {
-				console.warn("Couldn't get body from failed Librus response".bgYellow.white);
+			if (resultText.length) {
+				try {
+					console.log(JSON.parse(resultText));
+				}
+				catch (error) {
+					console.log(resultText);
+				}
 			}
 			if (result.status === 401) {
-				// hotfix for token refresh
-				console.error(json);
+				// Try to refresh token
 				try {
 					await this.refreshToken();
 				}
 				catch (error) {
-					console.error("Couldn't refresh tokin, retrying full login".bgRed.white);
+					console.error("Couldn't refresh token, retrying full login".bgRed.white);
 					await this.login(this.appUsername, this.appPassword);
 				}
-				finally {
-					console.log("Retrying request after reauthentication");
-					return this.librusRequest(url, options, type);
-				}
+				console.debug("Retrying request after reauthentication");
+				console.debug(`${requestOptions.method} ${url}`.bgMagenta.white);
+				result = await fetch(url, requestOptions);
+				if (!result.ok)
+					throw new LibrusError(`${result.status} ${result.statusText} after reauth attempt`);
+				resultText = await result.text();
 			}
 			else {
-				throw new LibrusError(`${result.status} ${result.statusText}`, json);
+				// For unhandled error codes (Most likely maintenance or endpoints forbidden by school)
+				throw new LibrusError(`${result.status} ${result.statusText}`);
 			}
 		}
 
+		// Return
 		if (type === "json")
-			return await result.json();
-		else if (type === "raw")
+			return JSON.parse(resultText);
+		else if (type === "text")
+			return await result.text();
+		else
 			return result;
-		return await result.text();
 	}
 
 	/**
@@ -187,7 +211,7 @@ export default class LibrusClient {
 					pushChanges.push(element.Id);
 			}
 		}
-		await this.deletePushChanges(pushChanges);
+		// await this.deletePushChanges(pushChanges);
 		return resultJson;
 	}
 

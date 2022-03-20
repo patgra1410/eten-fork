@@ -38,8 +38,10 @@ async function updateSlashCommands() {
 		const command: SlashCommandFile = require(`${__dirname}/commands/${file}`);
 		client.commands.set(command.data.name, command);
 		slashCommands.push(command.data.toJSON());
-		for (const alias in command.aliases)
-			client.commands.set(command.aliases[alias], command);
+		if ("aliases" in command) {
+			for (const alias of command.aliases)
+				client.commands.set(alias, command);
+		}
 	}
 	// for typescript command files
 	const tsCommandFiles: string[] = fs.readdirSync(`${__dirname}/commands`).filter((file: string) => (file.endsWith(".js") && file.startsWith("ts_")));
@@ -47,8 +49,11 @@ async function updateSlashCommands() {
 		const command: SlashCommandFile = await import(`${__dirname}/commands/${file}`);
 		client.commands.set(command.data.name, command);
 		slashCommands.push(command.data.toJSON());
-		for (const alias in command.aliases)
-			client.commands.set(command.aliases[alias], command);
+		// This won't set the aliases in Discord?
+		if ("aliases" in command) {
+			for (const alias of command.aliases)
+				client.commands.set(alias, command);
+		}
 	}
 	await client.application?.commands.set(slashCommands);
 }
@@ -62,6 +67,7 @@ threadwatcher.newReply.on("newPost", async (board: string, threadID: string, pos
 });
 
 client.once("ready", async () => {
+	console.log(`Logged in as ${client.user.tag}`);
 	client.user.setStatus("online");
 	client.user.setActivity("MASNY BEN - LOUDA", { type: "LISTENING" });
 	await updateSlashCommands();
@@ -72,7 +78,7 @@ client.once("ready", async () => {
 	await initLibrusManager();
 	incrementDays();
 	randomSounds();
-	console.log(`Ready! Logged in as ${client.user.tag}`);
+	console.log("Ready!");
 });
 
 client.on("messageReactionAdd", discordEvents.messageReactionAdd);
