@@ -177,7 +177,8 @@ async function prepareTrackedChannelData(): Promise<void> {
 
 export default async function initLibrusManager() {
 	librusClient = new LibrusClient();
-	librusClient.login(config.librusLogin, config.librusPass);
+	await librusClient.login(config.librusLogin, config.librusPass);
+	librusClient.pushDevice = 6305649;
 	await prepareTrackedChannelData();
 	setTimeout(fetchNewSchoolNotices, 2000);
 }

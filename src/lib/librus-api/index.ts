@@ -18,6 +18,9 @@ type RequestResponseType =
 export default class LibrusClient {
 	bearerToken: string;
 	pushDevice: number;
+	synergiaLogin: string;
+	appUsername: string;
+	appPassword: string;
 	/**
 	 * Create a new Librus API client
 	 * TODO: Getters/setters? Or maybe a better option to initialize them?
@@ -26,6 +29,9 @@ export default class LibrusClient {
 	constructor() {
 		this.bearerToken = "";
 		this.pushDevice = 0;
+		this.synergiaLogin = "";
+		this.appUsername = "";
+		this.appPassword = "";
 	}
 
 	/**
@@ -35,6 +41,8 @@ export default class LibrusClient {
 	 * @param password Your Librus app password
 	 */
 	async login(username: string, password: string): Promise<void> {
+		if (username.length < 2 || password.length < 2)
+			throw new Error("Username or password too short");
 		// Get csrf-token from <meta> tag for following requests
 		const result = await this.librusRequest("https://portal.librus.pl/", {}, "text") as string;
 		const csrfTokenRegexResult = /<meta name="csrf-token" content="(.*)">/g.exec(result);
@@ -61,7 +69,9 @@ export default class LibrusClient {
 		if (result2.accounts[0]?.accessToken == null)
 			throw new LibrusError("SynergiaAccounts endpoint returned no accessToken for account");
 		this.bearerToken = result2.accounts[0].accessToken;
-		await this.newPushDevice();
+		if (result2.accounts[0]?.login == null)
+			throw new LibrusError("SynergiaAccounts endpoint returned no accessToken for account");
+		this.synergiaLogin = result2.accounts[0].login;
 		console.log("Login OK".bgGreen);
 		return;
 	}
@@ -73,10 +83,10 @@ export default class LibrusClient {
 	 */
 	async refreshToken(): Promise<void> {
 		// Get the newer accessToken
-		const result = await this.librusRequest("https://portal.librus.pl/api/v3/SynergiaAccounts/1230u/fresh", {}, "json") as librusApiTypes.APISynergiaAccounts;
-		if (result.accounts[0]?.accessToken == null)
+		const result = await this.librusRequest(`https://portal.librus.pl/api/v3/SynergiaAccounts/${this.synergiaLogin}/fresh`, {}, "json") as librusApiTypes.APISynergiaAccountsFresh;
+		if (result.accessToken == null)
 			throw new LibrusError("GET SynergiaAccounts returned unexpected JSON format");
-		this.bearerToken = result.accounts[0].accessToken;
+		this.bearerToken = result.accessToken;
 		return;
 	}
 
@@ -106,10 +116,33 @@ export default class LibrusClient {
 
 		console.debug(`${requestOptions.method} ${url}`.bgMagenta.white);
 		const result = await fetch(url, requestOptions);
-		// Handle librus timeouts somewhere here
-		// Handle token expiry somewhere here
-		if (!result.ok)
-			throw new LibrusError(`${result.status} ${result.statusText}`);
+		if (!result.ok) {
+			let json = undefined;
+			try {
+				json = await result.json();
+			}
+			catch (error) {
+				console.warn("Couldn't get body from failed Librus response".bgYellow.white);
+			}
+			if (result.status === 401) {
+				// hotfix for token refresh
+				console.error(json);
+				try {
+					await this.refreshToken();
+				}
+				catch (error) {
+					console.error("Couldn't refresh tokin, retrying full login".bgRed.white);
+					await this.login(this.appUsername, this.appPassword);
+				}
+				finally {
+					console.log("Retrying request after reauthentication");
+					return this.librusRequest(url, options, type);
+				}
+			}
+			else {
+				throw new LibrusError(`${result.status} ${result.statusText}`, json);
+			}
+		}
 
 		if (type === "json")
 			return await result.json();
