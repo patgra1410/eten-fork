@@ -104,6 +104,9 @@ interface ICategory {
 }
 
 // https://api.librus.pl/3.0/Grades/Categories/<Comma separated GradeCategory IDs?>
+export interface APIGradesCategorie extends APIv3BaseResponse {
+	Categorie: ICategory;
+}
 export interface APIGradesCategories extends APIv3BaseResponse {
 	Categories: ICategory[];
 }
@@ -142,6 +145,9 @@ interface IAttendance {
 }
 
 // https://api.librus.pl/3.0/Attendances/<Comma separated Attendance IDs>
+export interface APIAttendance extends APIv3BaseResponse {
+	Attendance: IAttendance;
+}
 export interface APIAttendances extends APIv3BaseResponse {
 	Attendances: IAttendance[];
 }
@@ -161,6 +167,9 @@ interface IHomework {
 }
 
 // https://api.librus.pl/3.0/Homeworks/<Comma separated Homework IDs>
+export interface APIHomework extends APIv3BaseResponse {
+	Homework: IHomework;
+}
 export interface APIHomeworks extends APIv3BaseResponse {
 	Homeworks: IHomework[];
 }
@@ -192,11 +201,17 @@ interface IGradeComment {
 }
 
 // https://api.librus.pl/3.0/Grades/<Comma separated Grade IDs>
+export interface APIGrade extends APIv3BaseResponse {
+	Grade: IGrade;
+}
 export interface APIGrades extends APIv3BaseResponse {
 	Grades: IGrade[];
 }
 
 // https://api.librus.pl/3.0/Grades/Comments/<Comma separated Grade IDs>
+export interface APIGradesComment extends APIv3BaseResponse {
+	Comment: IGradeComment;
+}
 export interface APIGradesComments extends APIv3BaseResponse {
 	Comments: IGradeComment[];
 }
@@ -210,6 +225,9 @@ interface IUser {
 }
 
 // https://api.librus.pl/3.0/Users/<Comma separated User IDs>
+export interface APIUser extends APIv3BaseResponse {
+	User: IUser;
+}
 export interface APIUsers extends APIv3BaseResponse {
 	Users: IUser[];
 }
@@ -222,6 +240,9 @@ interface ILesson {
 }
 
 // https://api.librus.pl/3.0/Lessons/<Comma separated Lesson IDs>
+export interface APILesson extends APIv3BaseResponse {
+	Lesson: ILesson;
+}
 export interface APILessons extends APIv3BaseResponse {
 	Lessons: ILesson[];
 }

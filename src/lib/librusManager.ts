@@ -1,6 +1,6 @@
 import { MessageEmbed, Snowflake, TextChannel, Util } from "discord.js";
 import config from "../config.json";
-import util from "util";
+// import util from "util";
 import { client } from "../index";
 import * as bets from "./bets";
 import LibrusClient from "./librus-api";

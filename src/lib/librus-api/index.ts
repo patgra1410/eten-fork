@@ -197,6 +197,8 @@ export default class LibrusClient {
 
 	/**
 	 * Get changes since last check given our pushDevice
+	 *
+	 * **NOTE:** To not get repeat changes you have to call the deletePushChanges() method after handling the changes yourself.
 	 * @async
 	 * @returns {JSON} Response if OK in member (of type array) "Changes" of returned object.
 	 */
@@ -204,19 +206,18 @@ export default class LibrusClient {
 		const resultJson = await this.librusRequest(`https://api.librus.pl/3.0/PushChanges?pushDevice=${this.pushDevice}`, {}, "json") as librusApiTypes.APIPushChanges;
 		if (!("Changes" in resultJson))
 			throw new LibrusError("No \"Changes\" array in received PushChanges JSON");
-		const pushChanges: number[] = [];
-		if (resultJson.Changes.length > 0) {
-			for (const element of resultJson.Changes) {
-				if (!pushChanges.includes(element.Id))
-					pushChanges.push(element.Id);
-			}
-		}
+		// const pushChanges: number[] = [];
+		// if (resultJson.Changes.length > 0) {
+		// 	for (const element of resultJson.Changes) {
+		// 		if (!pushChanges.includes(element.Id))
+		// 			pushChanges.push(element.Id);
+		// 	}
+		// }
 		return resultJson;
 	}
 
 	/**
-	 * Creates one or more DELETE request(s) for all elements from the last getPushChanges
-	 * UNTESTED
+	 * Creates one or more DELETE request(s) for all IDs in given array
 	 * @async
 	 */
 	async deletePushChanges(lastPushChanges: number[]): Promise<void> {
