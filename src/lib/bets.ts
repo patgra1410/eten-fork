@@ -5,7 +5,7 @@ import { client } from "../index";
 
 interface IBets {
 	[user: string]: {
-		time: number, message: string
+		time: number, message: string, timeAdded: number
 	}
 }
 
@@ -26,13 +26,23 @@ export async function check() {
 	const now = date.getMilliseconds() + date.getSeconds() * 1000 + date.getMinutes() * 60 * 1000 + date.getHours() * 60 * 60 * 1000;
 
 	const users = [];
+	const cheaters = [];
 	const bets: IBets = JSON.parse(fs.readFileSync("./data/bets.json", "utf8"));
 
 	if (Object.keys(bets).length == 0)
 		return;
 
 	for (const [user, time] of Object.entries(bets)) {
-		const diff = Math.abs(time.time - now);
+		let diff;
+		let cheated = false;
+		if (Math.abs(time.timeAdded - date.getTime()) <= 10 * 60 * 1000) {
+			diff = Math.abs(time.timeAdded - date.getTime());
+			cheated = true;
+		}
+		else {
+			diff = Math.abs(time.time - now);
+		}
+
 		// let mili = parseInt(diff)
 		// parseInt jest dla stringów, czy nie chciałeś tu roundować czy coś idk? podieniłem na math.round
 		const mili = Math.round(diff);
@@ -46,10 +56,13 @@ export async function check() {
 		const hoursS = ("00" + (hours % 60)).slice(-2);
 
 		let niceDiff = "";
-		if (time.time > now)
-			niceDiff = "za pózno o ";
-		else
-			niceDiff = "za wcześnie o ";
+		if (!cheated) {
+			if (time.time > now)
+				niceDiff = "za pózno o ";
+			else
+				niceDiff = "za wcześnie o ";
+		}
+
 		if (hours > 0)
 			niceDiff += `${hoursS}:${minsS} godzin`;
 		else if (mins > 0)
@@ -59,40 +72,85 @@ export async function check() {
 		else if (mili > 0)
 			niceDiff += `${miliS} milisekund`;
 
-		users.push({
-			user: user,
-			time: time.time,
-			message: time.message,
-			diff: diff,
-			niceDiff: niceDiff
-		});
+		if (cheated)
+			niceDiff += " temu";
+
+		if (cheated) {
+			cheaters.push({
+				user: user,
+				timeAdded: time.timeAdded,
+				diff: diff,
+				niceDiff: niceDiff
+			});
+		}
+		else {
+			users.push({
+				user: user,
+				time: time.time,
+				timeAdded: time.timeAdded,
+				message: time.message,
+				diff: diff,
+				niceDiff: niceDiff
+			});
+		}
 	}
 
 	users.sort((a, b) => {
+		if (a.diff == b.diff)
+			return a.timeAdded - b.timeAdded;
 		return a.diff - b.diff;
 	});
 
-	let desc = "";
-	let i = 1;
-	for (const user of users) {
-		desc += `**${i.toString()}.** <@${user.user}>: ${user.niceDiff} (podany czas: ${user.message})\n`;
+	cheaters.sort((a, b) => {
+		if (a.diff == b.diff)
+			return a.timeAdded - b.timeAdded;
+		return a.diff - b.diff;
+	});
+
+	let embed, desc, i;
+	if (users.length != 0) {
+		desc = "";
+		i = 1;
+		for (const user of users) {
+			desc += `**${i.toString()}.** <@${user.user}>: ${user.niceDiff} (podany czas: ${user.message})\n`;
+			i++;
+		}
+
+		embed = new Discord.MessageEmbed()
+			.setColor(`#${Math.floor(Math.random() * 16777215).toString(16)}`)
+			.setTitle("Dzisiejsze wyniki zakładuw")
+			.setDescription(desc);
+
+		(client.guilds.cache.get(config.bets.guild).channels.cache.get(config.bets.channel) as TextChannel).send({ embeds: [embed] });
+
+		fs.writeFileSync("./data/bets.json", "{}");
+
+		const ranking = JSON.parse(fs.readFileSync("./data/ranking.json", "utf-8"));
+
+		if (!(users[0].user in ranking.bets))
+			ranking.bets[users[0].user] = 0;
+		ranking.bets[users[0].user]++;
+
+		fs.writeFileSync("./data/ranking.json", JSON.stringify(ranking));
+	}
+
+	fs.writeFileSync("./data/bets.json", "{}");
+
+	if (cheaters.length == 0)
+		return;
+
+	desc = "";
+	i = 1;
+	for (const user of cheaters) {
+		desc += `**${i.toString()}.** <@${user.user}>: ${user.niceDiff}\n`;
 		i++;
 	}
 
-	const embed = new Discord.MessageEmbed()
+	embed = new Discord.MessageEmbed()
 		.setColor(`#${Math.floor(Math.random() * 16777215).toString(16)}`)
-		.setTitle("Dzisiejsze wyniki zakładuw")
+		.setTitle("Dzisiejsi oszuści")
 		.setDescription(desc);
 
 	(client.guilds.cache.get(config.bets.guild).channels.cache.get(config.bets.channel) as TextChannel).send({ embeds: [embed] });
 
-	fs.writeFileSync("./data/bets.json", "{}");
-
-	const ranking = JSON.parse(fs.readFileSync("./data/ranking.json", "utf-8"));
-
-	if (!(users[0].user in ranking.bets))
-		ranking.bets[users[0].user] = 0;
-	ranking.bets[users[0].user]++;
-
-	fs.writeFileSync("./data/ranking.json", JSON.stringify(ranking));
 }

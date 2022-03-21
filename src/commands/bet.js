@@ -44,7 +44,7 @@ module.exports = {
 		),
 	async execute(interaction) {
 		if (interaction.options.getSubcommand() == "bet" || interaction.options.getSubcommand() == "zmień") {
-			const now = new Date()
+			const now = new Date();
 			const content = interaction.options.getString("czas");
 			if (!/[0-2]{1}[0-9]{1}:[0-6]{1}[0-9]{1}:[0-6]{1}[0-9]{1}.[0-9]{3}$|[0-2]{1}[0-9]{1}:[0-6]{1}[0-9]{1}:[0-6]{1}[0-9]{1}$|[0-2]{1}[0-9]{1}:[0-6]{1}[0-9]{1}$/.test(content)) {
 				interaction.reply("Zły format (dozwolone formaty: godzina:minuta, godzina:minuta:sekunda, godzina:minuta:sekunda.milisekunda)");
@@ -72,6 +72,7 @@ module.exports = {
 
 			bets[interaction.user.id] = {
 				time: time,
+				timeAdded: now.getTime(),
 				message: content
 			};
 			fs.writeFileSync("./data/bets.json", JSON.stringify(bets));
