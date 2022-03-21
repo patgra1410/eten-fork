@@ -92,7 +92,7 @@ export default class LibrusClient {
 	 */
 	async refreshToken(): Promise<void> {
 		// Get the newer accessToken
-		const result = await fetch(`https://portal.librus.pl/api/v3/SynergiaAccounts/${this.synergiaLogin}/fresh`,
+		const result = await fetch(`https://portal.librus.pl/api/v3/SynergiaAccounts/fresh/${this.synergiaLogin}`,
 			{
 				method: "GET",
 				headers: {
@@ -141,13 +141,13 @@ export default class LibrusClient {
 
 		// Check for correctness
 		if (!result.ok) {
-			console.error("Result not OK".bgYellow.white);
+			console.debug("Result not OK".bgYellow.white);
 			if (resultText.length) {
 				try {
-					console.log(JSON.parse(resultText));
+					console.debug(JSON.parse(resultText));
 				}
 				catch (error) {
-					console.log(resultText);
+					console.debug(resultText);
 				}
 			}
 			if (result.status === 401) {
@@ -156,11 +156,13 @@ export default class LibrusClient {
 					await this.refreshToken();
 				}
 				catch (error) {
-					console.error(error);
-					console.error("Couldn't refresh token, retrying full login".bgRed.white);
+					console.debug(error);
+					console.debug("Couldn't refresh token, retrying full login".bgRed.white);
 					await this.login(this.appUsername, this.appPassword);
 				}
-				console.debug("Retrying request after reauthentication");
+				console.debug("Retrying request after reauthentication".bgYellow.white);
+				// This is stupid
+				(requestOptions.headers as {[key: string]: string}).Authorization = `Bearer ${this.bearerToken}`;
 				console.debug(`${requestOptions.method} ${url}`.bgMagenta.white);
 				result = await fetch(url, requestOptions);
 				if (!result.ok)
