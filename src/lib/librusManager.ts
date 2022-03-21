@@ -50,8 +50,7 @@ async function fetchNewSchoolNotices(): Promise<void> {
 			pushChangesToDelete.push(update.Id);
 			if (update.Resource?.Type === "SchoolNotices") {
 				const librusResponse = await librusClient.librusRequest(update.Resource.Url, {}, "json") as librusApiTypes.APISchoolNotice;
-				// const librusResponse = config.testData;
-				// Temporary
+				// Handle blocked SchoolNotices
 				if ("Code" in librusResponse) {
 					console.error(`${update.Resource.Id} - has Code:`.yellow);
 					console.error(librusResponse);
@@ -74,9 +73,9 @@ async function fetchNewSchoolNotices(): Promise<void> {
 						for (const roleData of listener.rolesRegexArr) {
 							messageText = messageText.replace(roleData.boldRegex, "**$&**");
 							messageText = messageText.replace(roleData.roleRegex, `<@&${roleData.roleId}> $&`);
-							for (const split of Util.splitMessage(messageText))
-								await listener.channel.send(split);
 						}
+						for (const split of Util.splitMessage(messageText))
+							await listener.channel.send(split);
 					}
 					else {
 						for (const split of Util.splitMessage(baseMessageText))
