@@ -16,11 +16,11 @@ type RequestResponseType =
  * @class
  */
 export default class LibrusClient {
-	bearerToken: string;
+	protected bearerToken: string;
 	pushDevice: number;
-	synergiaLogin: string;
-	appUsername: string;
-	appPassword: string;
+	protected synergiaLogin: string;
+	protected appUsername: string;
+	protected appPassword: string;
 	/**
 	 * Create a new Librus API client
 	 * TODO: Getters/setters? Or maybe a better option to initialize them?
@@ -79,6 +79,8 @@ export default class LibrusClient {
 		if (accountsResult.accounts[0]?.login == null)
 			throw new LibrusError("SynergiaAccounts endpoint returned no login for account");
 		this.synergiaLogin = accountsResult.accounts[0].login;
+		this.appUsername = username;
+		this.appPassword = password;
 		console.log(" Librus Login OK ".bgGreen.white);
 		return;
 	}
@@ -90,7 +92,7 @@ export default class LibrusClient {
 	 */
 	async refreshToken(): Promise<void> {
 		// Get the newer accessToken
-		const result = await (await fetch(`https://portal.librus.pl/api/v3/SynergiaAccounts/${this.synergiaLogin}/fresh`,
+		const result = await fetch(`https://portal.librus.pl/api/v3/SynergiaAccounts/${this.synergiaLogin}/fresh`,
 			{
 				method: "GET",
 				headers: {
@@ -98,10 +100,13 @@ export default class LibrusClient {
 				},
 				redirect: "manual"
 			}
-		)).json() as librusApiTypes.APISynergiaAccountsFresh;
-		if (result.accessToken == null)
+		);
+		if (!result.ok)
+			throw new LibrusError(`refreshToken: ${result.statusText}`);
+		const resultJson = await result.json() as librusApiTypes.APISynergiaAccountsFresh;
+		if (resultJson.accessToken == null)
 			throw new LibrusError("GET SynergiaAccounts returned unexpected JSON format");
-		this.bearerToken = result.accessToken;
+		this.bearerToken = resultJson.accessToken;
 		return;
 	}
 
@@ -136,6 +141,7 @@ export default class LibrusClient {
 
 		// Check for correctness
 		if (!result.ok) {
+			console.error("Result not OK".bgYellow.white);
 			if (resultText.length) {
 				try {
 					console.log(JSON.parse(resultText));
@@ -150,6 +156,7 @@ export default class LibrusClient {
 					await this.refreshToken();
 				}
 				catch (error) {
+					console.error(error);
 					console.error("Couldn't refresh token, retrying full login".bgRed.white);
 					await this.login(this.appUsername, this.appPassword);
 				}
@@ -185,7 +192,7 @@ export default class LibrusClient {
 			method: "POST",
 			body: JSON.stringify({
 				sendPush: 0,
-				appVersion: "5.9.0"
+				appVersion: "6.0.0"
 			})
 		}, "json") as librusApiTypes.PostAPIChangeRegister;
 		// this.pushDevice = jsonResult.ChangeRegister.Id;
