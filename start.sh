@@ -1,7 +1,13 @@
 #!/bin/bash
 
 tsc
-node dist # czy cośtam niewiem zastąp tą linijkę
+if [ ! $? -eq 0 ] 
+then
+	echo "Typesript didn't compile :("
+	exit
+fi
+
+node dist
 touch data/crashed
 curl -X POST `cat webhook-link` -H "Content-Type: application/json" --data-binary @- <<DATA
 {
