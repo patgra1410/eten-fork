@@ -35,7 +35,7 @@ export async function check() {
 	for (const [user, time] of Object.entries(bets)) {
 		let diff;
 		let cheated = false;
-		if (Math.abs(time.timeAdded - date.getTime()) <= 10 * 60 * 1000) {
+		if (Math.abs(time.timeAdded - date.getTime()) <= 30 * 60 * 1000) {
 			diff = Math.abs(time.timeAdded - date.getTime());
 			cheated = true;
 		}
