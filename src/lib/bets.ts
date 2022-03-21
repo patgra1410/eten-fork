@@ -17,12 +17,11 @@ export async function addTime(time: Date) {
 	fs.writeFileSync("./data/predictions.json", JSON.stringify(predictions));
 }
 
-export async function check() {
+export async function check(date: Date) {
 	// eneabled?
 	if (!config.bets.eneabled)
 		return;
 
-	const date = new Date();
 	const now = date.getMilliseconds() + date.getSeconds() * 1000 + date.getMinutes() * 60 * 1000 + date.getHours() * 60 * 60 * 1000;
 
 	const users = [];
@@ -35,7 +34,7 @@ export async function check() {
 	for (const [user, time] of Object.entries(bets)) {
 		let diff;
 		let cheated = false;
-		if (Math.abs(time.timeAdded - date.getTime()) <= 30 * 60 * 1000) {
+		if (Math.abs(time.timeAdded - date.getTime()) <= 15 * 60 * 1000) {
 			diff = Math.abs(time.timeAdded - date.getTime());
 			cheated = true;
 		}

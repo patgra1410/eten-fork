@@ -87,8 +87,9 @@ async function fetchNewSchoolNotices(): Promise<void> {
 				// Do zmiany?
 				if (isPlanChangeNotice(librusResponse.SchoolNotice.Subject)) {
 					if (update.Type === "Add") {
-						await bets.addTime(new Date());
-						await bets.check();
+						const date = new Date("1970-01-01 " + update.AddDate.split(" ")[1] + " GMT");
+						await bets.addTime(date);
+						await bets.check(date);
 					}
 				}
 			}

@@ -64,11 +64,10 @@ module.exports = {
 				return;
 			}
 
-			// TODO nie pozwalac na zmiane po 10 rano
-			// if (interaction.options.getSubcommand() == 'zmień' && (new Date).getDay() != 6 && time >= Date.parse('1970-01-01 10:00 GMT') && bets.annoucment != undefined && !bets.annoucment) {
-			// 	interaction.reply('Nie oszukuj <:waznaDissapoint:833355180329926696>')
-			// 	return
-			// }
+			if (interaction.options.getSubcommand() == "zmień" && bets[interaction.user.id] != undefined && now.getTime() - new Date(now.toDateString()).getTime() > bets[interaction.user.id].time) {
+				interaction.reply("You cheated not only the game, but yourself. You didn't grow. You didn't improve. You took a shortcut and gained nothing. You experienced a hollow victory. Nothing was risked and nothing was gained. It's sad that you don't know the difference. <:copium:945419768222081114>");
+				return;
+			}
 
 			bets[interaction.user.id] = {
 				time: time,
@@ -117,7 +116,7 @@ module.exports = {
 				return;
 			}
 
-			betsFunc.check(interaction.client);
+			betsFunc.check(new Date());
 			interaction.reply({ content: "ok", ephemeral: true });
 		}
 	}
