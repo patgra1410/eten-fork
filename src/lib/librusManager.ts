@@ -105,18 +105,16 @@ async function fetchNewSchoolNotices(): Promise<void> {
 					.setColor("#E56390")
 					.setTitle(`${changeType} nieobecność nauczyciela`)
 					.setDescription(
-						`${teacher.FirstName} ${teacher.LastName}`.replace(/\t/g, "")
+						`${teacher.FirstName} ${teacher.LastName}${update.extraData == null ? "" : (update.extraData.length > 0 ? `\n${update.extraData}` : "")}`.replace(/\t/g, "")
 					)
 					.setFields([
 						{
 							name: "Od:",
-							value: teacherFreeDay.DateFrom,
-							inline: true
+							value: teacherFreeDay.DateFrom
 						},
 						{
 							name: "Do:",
-							value: teacherFreeDay.DateTo,
-							inline: true
+							value: teacherFreeDay.DateTo
 						}
 					])
 					.setFooter({
@@ -147,35 +145,29 @@ async function fetchNewSchoolNotices(): Promise<void> {
 				const embed = new MessageEmbed()
 					.setColor("#9B3089")
 					.setTitle(changeType)
-					.setDescription(
-						`IsShifted: ${substitution.IsShifted}
-						IsCancelled: ${substitution.IsCancelled}`.replace(/\t/g, "")
-					)
 					.setFields([
 						{
 							name: "Nr Lekcji:",
-							value: (substitution.OrgLessonNo === substitution.LessonNo) ? substitution.OrgLessonNo : `${substitution.OrgLessonNo} ➡️ ${substitution.LessonNo}`,
-							inline: true
+							value: (substitution.OrgLessonNo === substitution.LessonNo) ? substitution.OrgLessonNo : `${substitution.OrgLessonNo} ➡️ ${substitution.LessonNo}`
 						},
 						{
 							name: "Przedmiot:",
-							value: (substitution.OrgSubject.Id === substitution.Subject.Id) ? orgSubject.Name : `${orgSubject.Name} ➡️ ${newSubject.Name}`,
-							inline: true
+							value: (substitution.OrgSubject.Id === substitution.Subject.Id) ? orgSubject.Name : `${orgSubject.Name} ➡️ ${newSubject.Name}`
 						},
 						{
 							name: "Nauczyciel:",
-							value: (substitution.OrgTeacher.Id === substitution.Teacher.Id) ? `${orgTeacher.FirstName} ${orgTeacher.LastName}` : `${orgTeacher.FirstName} ${orgTeacher.LastName} ➡️ ${newTeacher.FirstName} ${newTeacher.LastName}`,
-							inline: true
+							value: (substitution.OrgTeacher.Id === substitution.Teacher.Id) ? `${orgTeacher.FirstName} ${orgTeacher.LastName}` : `${orgTeacher.FirstName} ${orgTeacher.LastName} ➡️ ${newTeacher.FirstName} ${newTeacher.LastName}`
 						},
 						{
 							name: "Data i czas:",
-							value: (substitution.OrgDate === substitution.Date) ? substitution.OrgDate : `${substitution.OrgDate} ➡️ ${substitution.Date}`,
-							inline: true
+							value: (substitution.OrgDate === substitution.Date) ? substitution.OrgDate : `${substitution.OrgDate} ➡️ ${substitution.Date}`
 						}
 					])
 					.setFooter({
 						text: `Dodano: ${update.AddDate}`
 					});
+				if (update.extraData?.length > 0)
+					embed.setDescription(update.extraData);
 				for (const listener of noticeListenerChannels) {
 					// Temporary
 					if (listener.channel.id === "884370476128944148")

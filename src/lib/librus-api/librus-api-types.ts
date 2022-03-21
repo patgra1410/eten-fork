@@ -9,7 +9,7 @@ interface IChange {
 	Resource: IResource; // Id, Type, Url
 	Type: string;
 	AddDate: string;
-	extraData: string;
+	extraData: string|null;
 }
 
 export interface APIv3BaseResponse {
