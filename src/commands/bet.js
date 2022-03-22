@@ -58,7 +58,7 @@ module.exports = {
 				return;
 			}
 
-			const time = Date.parse("1970-01-01 " + content + " GMT");
+			const time = Date.parse("1970-01-01 " + content);
 			if (isNaN(time)) {
 				interaction.reply("Zły czas. <:widelinus:687065253153996835>");
 				return;

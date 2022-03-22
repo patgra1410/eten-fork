@@ -118,7 +118,8 @@ export async function check(date: Date) {
 		embed = new Discord.MessageEmbed()
 			.setColor(`#${Math.floor(Math.random() * 16777215).toString(16)}`)
 			.setTitle("Dzisiejsze wyniki zakładuw")
-			.setDescription(desc);
+			.setDescription(desc)
+			.setFooter({ text: "Ogłoszenie dodane o " + date.toTimeString().split(" ")[0] });
 
 		(client.guilds.cache.get(config.bets.guild).channels.cache.get(config.bets.channel) as TextChannel).send({ embeds: [embed] });
 

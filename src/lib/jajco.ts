@@ -5,8 +5,11 @@ import fs from "fs";
 let coChannel: string = undefined;
 let coUsers: any;
 
-function deleteMessage(message: Message<boolean>) {
-	message.delete();
+async function deleteMessage(message: Message<boolean>) {
+	try {
+		await message.delete();
+	}
+	catch (error) {}
 }
 
 function updateMessage(message: Message<boolean>) {
