@@ -1,4 +1,4 @@
-import { MessageEmbed, Snowflake, TextChannel, Util } from "discord.js";
+import { MessageEmbed, Snowflake, TextChannel } from "discord.js";
 import config from "../config.json";
 // import util from "util";
 import { client } from "../index";
@@ -14,10 +14,10 @@ interface IRoleRegexes {
 
 interface IChannels {
 	channel: TextChannel;
+	knownNotices: Map<string, Snowflake>;
 	rolesRegexArr: IRoleRegexes[];
 }
 const noticeListenerChannels: IChannels[] = [];
-const knownNotices: Map<string, Snowflake> = new Map();
 let librusClient: LibrusClient;
 
 function isPlanChangeNotice(title: string): boolean {
@@ -81,8 +81,8 @@ async function fetchNewSchoolNotices(): Promise<void> {
 						})
 						.setTitle(`**__${librusResponse.SchoolNotice.Subject}__**`)
 						.setDescription(messageText.substring(0, 6000));
-					if (knownNotices.has(librusResponse.SchoolNotice.Id)) {
-						const messageId = knownNotices.get(librusResponse.SchoolNotice.Id);
+					if (listener.knownNotices.has(librusResponse.SchoolNotice.Id)) {
+						const messageId = listener.knownNotices.get(librusResponse.SchoolNotice.Id);
 						await (await listener.channel.messages.fetch(messageId)).edit({ embeds: [embed] });
 						await listener.channel.send({
 							reply: { messageReference: messageId, failIfNotExists: false },
@@ -91,7 +91,7 @@ async function fetchNewSchoolNotices(): Promise<void> {
 					}
 					else {
 						const message = await listener.channel.send({ embeds: [embed] });
-						knownNotices.set(librusResponse.SchoolNotice.Id, message.id);
+						listener.knownNotices.set(librusResponse.SchoolNotice.Id, message.id);
 					}
 				}
 				console.log(`${librusResponse.SchoolNotice.Id}  --- Sent!`.green);
@@ -274,7 +274,8 @@ async function prepareTrackedChannelData(): Promise<void> {
 		}
 		noticeListenerChannels.push({
 			channel: channel,
-			rolesRegexArr: rolesRegexArr
+			rolesRegexArr: rolesRegexArr,
+			knownNotices: new Map()
 		});
 	}
 	// console.debug(util.inspect(noticeListenerChannels, false, null, true));
