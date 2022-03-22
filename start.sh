@@ -7,10 +7,13 @@ then
 	exit
 fi
 
-node dist
-touch data/crashed
-curl -X POST `cat webhook-link` -H "Content-Type: application/json" --data-binary @- <<DATA
-{
-  "content": "@everyone\n\nETEN HAS WORKED\n`cat ./data/uptime`\nDAYS WITHOUT AN ACCIDENT"
-}
+while true
+do
+	node dist
+	touch data/crashed
+	curl -X POST `cat webhook-link` -H "Content-Type: application/json" --data-binary @- <<DATA
+	{
+	"content": "@everyone\n\nETEN HAS WORKED\n`cat ./data/uptime`\nDAYS WITHOUT AN ACCIDENT"
+	}
 DATA
+done
