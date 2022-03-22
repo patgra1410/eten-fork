@@ -17,6 +17,7 @@ interface IChannels {
 	rolesRegexArr: IRoleRegexes[];
 }
 const noticeListenerChannels: IChannels[] = [];
+const knownNotices: Map<string, Snowflake> = new Map();
 let librusClient: LibrusClient;
 
 function isPlanChangeNotice(title: string): boolean {
@@ -59,29 +60,39 @@ async function fetchNewSchoolNotices(): Promise<void> {
 
 				let changeType = "YOU SHOULDN'T BE ABLE TO SEE THIS";
 				if (update.Type === "Add")
-					changeType = "Nowe";
+					changeType = "Nowe ogłoszenie";
 				else if (update.Type === "Edit")
-					changeType = "Zmienione";
-				const baseMessageText =
-					`**__:loudspeaker: ${changeType} Ogłoszenie w Librusie__**
-					**__${librusResponse.SchoolNotice.Subject}__**
-					${librusResponse.SchoolNotice.Content}`.replace(/\t/g, "");
+					changeType = "Najnowsza zmiana ogłoszenia";
+				const baseMessageText = librusResponse.SchoolNotice.Content;
 
 				for (const listener of noticeListenerChannels) {
+					// TODO: Pinging outside of embed (within message.content)
+					let messageText = baseMessageText;
 					if (isPlanChangeNotice(librusResponse.SchoolNotice.Subject) && listener.rolesRegexArr.length > 0) {
-						let messageText = baseMessageText;
 						for (const roleData of listener.rolesRegexArr) {
 							messageText = messageText.replace(roleData.boldRegex, "**$&**");
 							messageText = messageText.replace(roleData.roleRegex, `<@&${roleData.roleId}> $&`);
 						}
-						for (const split of Util.splitMessage(messageText))
-							await listener.channel.send(split);
+					}
+					const embed = new MessageEmbed()
+						.setColor("#D3A5FF")
+						.setAuthor({
+							name: `:loudspeaker: ${changeType} w Librusie`
+						})
+						.setTitle(`**__${librusResponse.SchoolNotice.Subject}__**`)
+						.setDescription(messageText.substring(0, 6000));
+					if (knownNotices.has(librusResponse.SchoolNotice.Id)) {
+						const messageId = knownNotices.get(librusResponse.SchoolNotice.Id);
+						await (await listener.channel.messages.fetch(messageId)).edit({ embeds: [embed] });
+						await listener.channel.send({
+							reply: { messageReference: messageId, failIfNotExists: false },
+							content: "Zmieniono ogłoszenie ^"
+						});
 					}
 					else {
-						for (const split of Util.splitMessage(baseMessageText))
-							await listener.channel.send(split);
+						const message = await listener.channel.send({ embeds: [embed] });
+						knownNotices.set(librusResponse.SchoolNotice.Id, message.id);
 					}
-
 				}
 				console.log(`${librusResponse.SchoolNotice.Id}  --- Sent!`.green);
 				// Do zmiany?
