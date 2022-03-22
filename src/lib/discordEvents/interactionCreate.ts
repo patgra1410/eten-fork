@@ -13,7 +13,7 @@ export default async function(interaction: Interaction<CacheType>) {
 		return;
 	}
 
-	if (!interaction.isCommand()) return;
+	if (!interaction.isCommand() && !interaction.isContextMenu()) return;
 
 	if (!client.commands.has(interaction.commandName)) return;
 

@@ -12,12 +12,13 @@ import * as discordEvents from "./lib/discordEvents";
 import { SlashCommandBuilder } from "@discordjs/builders";
 
 // LOL
-type SlashCommandFunction = ((interaction: Discord.CommandInteraction|Discord.ButtonInteraction|Discord.Message, args?: string) => Promise<unknown>);
+type SlashCommandFunction = ((interaction: Discord.CommandInteraction|Discord.ButtonInteraction|Discord.Message|Discord.ContextMenuInteraction, args?: string) => Promise<unknown>);
 interface SlashCommandFile {
 	__esModule: boolean;
 	data: SlashCommandBuilder;
 	execute: SlashCommandFunction;
 	aliases?: string[];
+	// pls delete
 	onMessage?: SlashCommandFunction;
 }
 declare module "discord.js" {
@@ -43,7 +44,7 @@ async function updateSlashCommands() {
 				client.commands.set(alias, command);
 		}
 	}
-	// for typescript command files
+	// for typescript slash command files
 	const tsCommandFiles: string[] = fs.readdirSync(`${__dirname}/commands`).filter((file: string) => (file.endsWith(".js") && file.startsWith("ts_")));
 	for (const file of tsCommandFiles) {
 		const command: SlashCommandFile = await import(`${__dirname}/commands/${file}`);
@@ -55,7 +56,15 @@ async function updateSlashCommands() {
 				client.commands.set(alias, command);
 		}
 	}
-	await client.application?.commands.set(slashCommands);
+	// for typescript context menu interaction files
+	const contextMenuFiles: string[] = fs.readdirSync(`${__dirname}/contextMenus`);
+	for (const file of contextMenuFiles) {
+		const command: SlashCommandFile = await import(`${__dirname}/contextMenus/${file}`);
+		client.commands.set(command.data.name, command);
+		slashCommands.push(command.data.toJSON());
+	}
+	// const guild = await (await client.guilds.fetch("653601807481962534")).commands.set(slashCommands);
+	console.log(await client.application?.commands.set(slashCommands));
 }
 
 threadwatcher.newReply.on("newPost", async (board: string, threadID: string, postID: string, text: string, attachmentUrl: string) => {
@@ -69,7 +78,7 @@ threadwatcher.newReply.on("newPost", async (board: string, threadID: string, pos
 client.once("ready", async () => {
 	console.log(`Logged in as ${client.user.tag}`);
 	client.user.setStatus("online");
-	client.user.setActivity("MASNY BEN - LOUDA", { type: "LISTENING" });
+	client.user.setActivity("Dosko - Jacek Stachursky", { type: "LISTENING" });
 	await updateSlashCommands();
 
 	createRequiredFiles();

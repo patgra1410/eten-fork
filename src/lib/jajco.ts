@@ -6,10 +6,7 @@ let coChannel: string = undefined;
 let coUsers: any;
 
 async function deleteMessage(message: Message<boolean>) {
-	try {
-		await message.delete();
-	}
-	catch (error) {}
+	message.delete().catch();
 }
 
 function updateMessage(message: Message<boolean>) {
