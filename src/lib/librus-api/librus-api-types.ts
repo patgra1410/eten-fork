@@ -1,5 +1,5 @@
 interface IResource {
-	Id?: number;
+	Id?: string;
 	Type?: string;
 	Url: string;
 }
@@ -52,7 +52,10 @@ export interface APISynergiaAccounts {
 // also https://api.librus.pl/3.0/ChangeRegister/<pushdevice id>
 // {"sendPush":"0","appVersion":"6.0.0"}
 export interface PostAPIChangeRegister extends APIv3BaseResponse {
-	ChangeRegister: IResource // Id, Url
+	ChangeRegister: {
+		Id: number;
+		Url: string;
+	}
 }
 
 // https://api.librus.pl/3.0/Me

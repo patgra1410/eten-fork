@@ -36,7 +36,6 @@ function isPlanChangeNotice(title: string): boolean {
 async function fetchNewSchoolNotices(): Promise<void> {
 	let pushChanges: librusApiTypes.APIPushChanges;
 	try {
-		// pushChanges = await librusClient.getPushChanges();
 		pushChanges = await librusClient.getPushChanges();
 	}
 	catch (error) {
@@ -133,8 +132,10 @@ async function fetchNewSchoolNotices(): Promise<void> {
 					});
 				for (const listener of noticeListenerChannels) {
 					// Temporary
-					if (listener.channel.id === "884370476128944148")
+					if (listener.channel.id === "884370476128944148") {
 						await listener.channel.send({ content: "<@&885211432025731092>", embeds: [embed] });
+						console.log(`${update.Resource.Url}  --- Sent!`.green);
+					}
 				}
 			}
 			else if (update.Resource?.Type === "Calendars/Substitutions") {
@@ -181,8 +182,10 @@ async function fetchNewSchoolNotices(): Promise<void> {
 					embed.setDescription(update.extraData);
 				for (const listener of noticeListenerChannels) {
 					// Temporary
-					if (listener.channel.id === "884370476128944148")
+					if (listener.channel.id === "884370476128944148") {
 						await listener.channel.send({ content: "<@&885211432025731092>", embeds: [embed] });
+						console.log(`${update.Resource.Url}  --- Sent!`.green);
+					}
 				}
 			}
 			else {
