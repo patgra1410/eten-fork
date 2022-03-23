@@ -39,7 +39,7 @@ async function updateSlashCommands() {
 		const command: SlashCommandFile = require(`${__dirname}/commands/${file}`);
 		client.commands.set(command.data.name, command);
 		slashCommands.push(command.data.toJSON());
-		if ("aliases" in command) {
+		if ("aliases" in command && command.aliases != null) {
 			for (const alias of command.aliases)
 				client.commands.set(alias, command);
 		}
@@ -51,7 +51,7 @@ async function updateSlashCommands() {
 		client.commands.set(command.data.name, command);
 		slashCommands.push(command.data.toJSON());
 		// This won't set the aliases in Discord?
-		if ("aliases" in command) {
+		if ("aliases" in command && command.aliases != null) {
 			for (const alias of command.aliases)
 				client.commands.set(alias, command);
 		}
@@ -77,6 +77,8 @@ threadwatcher.newReply.on("newPost", async (board: string, threadID: string, pos
 });
 
 client.once("ready", async () => {
+	if (client.user == null)
+		throw new Error("user does not exist on client");
 	console.log(`Logged in as ${client.user.tag}`);
 	client.user.setStatus("online");
 	client.user.setActivity("Dosko - Jacek Stachursky", { type: "LISTENING" });
@@ -85,7 +87,8 @@ client.once("ready", async () => {
 	createRequiredFiles();
 	client.imageCdnChannel = await client.channels.fetch(config.autoMemesChannel) as Discord.TextChannel;
 	cronJobs(client);
-	await initLibrusManager();
+	if (config.librus)
+		await initLibrusManager();
 	incrementDays();
 	randomSounds();
 	console.log("Ready!");

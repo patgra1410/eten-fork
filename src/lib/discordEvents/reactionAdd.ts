@@ -1,6 +1,6 @@
-import { MessageReaction, User } from "discord.js";
+import { MessageReaction, PartialMessageReaction, PartialUser, User } from "discord.js";
 
-export default async function(reaction: MessageReaction, reactedUser: User) {
+export default async function(reaction: MessageReaction|PartialMessageReaction, reactedUser: User|PartialUser) {
 	try {
 		const letters = ["🇦", "🇧", "🇨", "🇩", "🇪", "🇫", "🇬", "🇭", "🇮"];
 		const letter = String.fromCharCode(letters.indexOf(reaction.emoji.name) + "a".charCodeAt(0));
