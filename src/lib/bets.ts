@@ -2,12 +2,7 @@ import fs from "fs";
 import Discord, { TextChannel } from "discord.js";
 import config from "../config.json";
 import { client } from "../index";
-
-export interface IBets {
-	[user: string]: {
-		time: number, message: string, timeAdded: number
-	}
-}
+import { IBets } from "./types";
 
 export async function addTime(time: Date) {
 	const predictions = JSON.parse(fs.readFileSync("./data/predictions.json", "utf-8"));

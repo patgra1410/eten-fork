@@ -1,20 +1,9 @@
-"use strict";
-
 import { SlashCommandBuilder, SlashCommandStringOption } from "@discordjs/builders";
 import Discord, { ColorResolvable, CommandInteraction } from "discord.js";
 import fs from "fs";
 import config from "../config.json";
 import * as betsLib from "../lib/bets";
-
-interface IUser {
-	time: number,
-	timeAdded: number,
-	message: string
-}
-
-interface IBets {
-	[user: string]: IUser
-}
+import { IBets } from "../lib/types";
 
 export const data = new SlashCommandBuilder()
 	.setName("bet")
