@@ -185,6 +185,9 @@ async function fetchNewSchoolNotices(): Promise<void> {
 						await listener.channel.send({ content: "<@&885211432025731092>", embeds: [embed] });
 				}
 			}
+			else {
+				console.log(`Skipping ${update.Resource.Url}`.bgMagenta.white);
+			}
 		}
 		// do the DELETE(s) only once everything else succeeded
 		librusClient.deletePushChanges(pushChangesToDelete);

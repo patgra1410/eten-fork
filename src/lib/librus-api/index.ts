@@ -169,10 +169,6 @@ export default class LibrusClient {
 					throw new LibrusError(`${result.status} ${result.statusText} after reauth attempt`);
 				resultText = await result.text();
 			}
-			else {
-				// For unhandled error codes (Most likely maintenance or endpoints forbidden by school)
-				throw new LibrusError(`${result.status} ${result.statusText}`);
-			}
 		}
 
 		// Return
