@@ -64,7 +64,8 @@ async function updateSlashCommands() {
 		slashCommands.push(command.data.toJSON());
 	}
 	// const guild = await (await client.guilds.fetch("653601807481962534")).commands.set(slashCommands);
-	console.log(await client.application?.commands.set(slashCommands));
+	// console.log(await client.application?.commands.set(slashCommands));
+	await client.application?.commands.set(slashCommands);
 }
 
 threadwatcher.newReply.on("newPost", async (board: string, threadID: string, postID: string, text: string, attachmentUrl: string) => {

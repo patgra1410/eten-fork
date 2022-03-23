@@ -3,7 +3,7 @@ import Discord, { TextChannel } from "discord.js";
 import config from "../config.json";
 import { client } from "../index";
 
-interface IBets {
+export interface IBets {
 	[user: string]: {
 		time: number, message: string, timeAdded: number
 	}
@@ -135,6 +135,7 @@ export async function check(date: Date) {
 	}
 
 	fs.writeFileSync("./data/bets.json", "{}");
+	fs.writeFileSync("./data/betsInfo.json", `{"time": ${date.toDateString()}}`);
 
 	if (cheaters.length == 0)
 		return;
