@@ -20,7 +20,7 @@ export default class LibrusClient {
 	private synergiaLogin: string;
 	private appUsername: string;
 	private appPassword: string;
-	private fetch;
+	private cookieFetch;
 	/**
 	 * Create a new Librus API client
 	 * TODO: Getters/setters? Or maybe a better option to initialize them?
@@ -32,7 +32,7 @@ export default class LibrusClient {
 		this.synergiaLogin = "";
 		this.appUsername = "";
 		this.appPassword = "";
-		this.fetch = fetchCookie(nodeFetch, new fetchCookie.toughCookie.CookieJar());
+		this.cookieFetch = fetchCookie(nodeFetch, new fetchCookie.toughCookie.CookieJar());
 	}
 
 	/**
@@ -45,7 +45,7 @@ export default class LibrusClient {
 		if (username.length < 2 || password.length < 2)
 			throw new Error("Invalid username or password");
 		// Get csrf-token from <meta> tag for following requests
-		const result = await (await this.fetch("https://portal.librus.pl/")).text();
+		const result = await (await this.cookieFetch("https://portal.librus.pl/")).text();
 		const csrfTokenRegexResult = /<meta name="csrf-token" content="(.*)">/g.exec(result);
 		if (csrfTokenRegexResult == null)
 			throw new LibrusError("No csrf-token meta tag in <head> of main site");
@@ -53,7 +53,7 @@ export default class LibrusClient {
 
 		// Login
 		// Response gives necessary cookies, saved automatically thanks to fetch-cookie
-		await this.fetch("https://portal.librus.pl/rodzina/login/action", {
+		await this.cookieFetch("https://portal.librus.pl/rodzina/login/action", {
 			method: "POST",
 			body: JSON.stringify({
 				email: username,
@@ -67,7 +67,7 @@ export default class LibrusClient {
 		});
 
 		// Get the accessToken
-		const accountsResult = await (await this.fetch("https://portal.librus.pl/api/v3/SynergiaAccounts", {
+		const accountsResult = await (await this.cookieFetch("https://portal.librus.pl/api/v3/SynergiaAccounts", {
 			method: "GET",
 			headers: {
 				"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.114 Safari/537.36"
@@ -93,7 +93,7 @@ export default class LibrusClient {
 	 */
 	async refreshToken(): Promise<void> {
 		// Get the newer accessToken
-		const result = await this.fetch(`https://portal.librus.pl/api/v3/SynergiaAccounts/fresh/${this.synergiaLogin}`,
+		const result = await this.cookieFetch(`https://portal.librus.pl/api/v3/SynergiaAccounts/fresh/${this.synergiaLogin}`,
 			{
 				method: "GET",
 				headers: {
@@ -137,7 +137,7 @@ export default class LibrusClient {
 
 		// Execute request
 		console.debug(`${requestOptions.method} ${url}`.bgMagenta.white);
-		let result = await this.fetch(url, requestOptions);
+		let result = await this.cookieFetch(url, requestOptions);
 		let resultText = await result.text();
 
 		// Check for correctness
@@ -165,7 +165,7 @@ export default class LibrusClient {
 				// This is stupid
 				(requestOptions.headers as {[key: string]: string}).Authorization = `Bearer ${this.bearerToken}`;
 				console.debug(`${requestOptions.method} ${url}`.bgMagenta.white);
-				result = await this.fetch(url, requestOptions);
+				result = await this.cookieFetch(url, requestOptions);
 				if (!result.ok)
 					throw new LibrusError(`${result.status} ${result.statusText} after reauth attempt`);
 				resultText = await result.text();
