@@ -43,7 +43,7 @@ export const data = new SlashCommandBuilder()
 
 export async function execute(interaction: CommandInteraction) {
 	if (interaction.options.getSubcommand() == "bet" || interaction.options.getSubcommand() == "zmień") {
-		const now = new Date();
+		const now = new Date(Date.now());
 		const content = interaction.options.getString("czas");
 		if (!/[0-2]{1}[0-9]{1}:[0-6]{1}[0-9]{1}:[0-6]{1}[0-9]{1}.[0-9]{3}$|[0-2]{1}[0-9]{1}:[0-6]{1}[0-9]{1}:[0-6]{1}[0-9]{1}$|[0-2]{1}[0-9]{1}:[0-6]{1}[0-9]{1}$/.test(content)) {
 			interaction.reply("Zły format (dozwolone formaty: godzina:minuta, godzina:minuta:sekunda, godzina:minuta:sekunda.milisekunda)");
@@ -66,7 +66,7 @@ export async function execute(interaction: CommandInteraction) {
 		let annoucmentDate = undefined;
 		if (fs.existsSync("./data/betsInfo.json"))
 			annoucmentDate = JSON.parse(fs.readFileSync("./data/betsInfo.json", "utf8")).time;
-		if (annoucmentDate != undefined && annoucmentDate != new Date().toDateString() && new Date().getDay() != 6 && interaction.options.getSubcommand() == "zmień" && bets[interaction.user.id] != undefined && now.getTime() - new Date(now.toDateString()).getTime() > bets[interaction.user.id].time) {
+		if (annoucmentDate != undefined && annoucmentDate != new Date(Date.now()).toDateString() && new Date(Date.now()).getDay() != 6 && interaction.options.getSubcommand() == "zmień" && bets[interaction.user.id] != undefined && now.getTime() - new Date(now.toDateString()).getTime() > bets[interaction.user.id].time) {
 			interaction.reply("You cheated not only the game, but yourself. You didn't grow. You didn't improve. You took a shortcut and gained nothing. You experienced a hollow victory. Nothing was risked and nothing was gained. It's sad that you don't know the difference. <:copium:945419768222081114>");
 			return;
 		}
@@ -118,7 +118,7 @@ export async function execute(interaction: CommandInteraction) {
 			return;
 		}
 
-		betsLib.check(new Date());
+		betsLib.check(new Date(Date.now()));
 		interaction.reply({ content: "ok", ephemeral: true });
 	}
 }

@@ -36,7 +36,7 @@ export async function execute(interaction: CommandInteraction) {
 		if (statkiManager.pendingChallengesMap.has(challenger.id)) {
 			const lastChallenge = statkiManager.pendingChallengesMap.get(challenger.id);
 			if (lastChallenge.userId === challenged.id) {
-				if (lastChallenge.time > new Date().getTime() - 1000 * 60 * 60 * 2) {
+				if (lastChallenge.time > new Date(Date.now()).getTime() - 1000 * 60 * 60 * 2) {
 					await interaction.reply({ content: "Już wyzwałeś tego gracza!", ephemeral: true });
 					return;
 				}
@@ -63,6 +63,6 @@ export async function execute(interaction: CommandInteraction) {
 				fetchReply: true
 			}
 		);
-		statkiManager.pendingChallengesMap.set(challenger.id, { userId: challenged.id, time: new Date().getTime(), message: (msg as Message) });
+		statkiManager.pendingChallengesMap.set(challenger.id, { userId: challenged.id, time: new Date(Date.now()).getTime(), message: (msg as Message) });
 	}
 }

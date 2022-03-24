@@ -17,7 +17,7 @@ export async function check(date: Date) {
 	if (!config.bets.eneabled)
 		return;
 
-	const now = date.getMilliseconds() + date.getSeconds() * 1000 + date.getMinutes() * 60 * 1000 + date.getHours() * 60 * 60 * 1000;
+	const now = Date.parse(`1970-01-01 ${date.toTimeString()}`);
 
 	const users = [];
 	const cheaters = [];
@@ -29,7 +29,7 @@ export async function check(date: Date) {
 	for (const [user, time] of Object.entries(bets)) {
 		let diff;
 		let cheated = false;
-		if (Math.abs(time.timeAdded - date.getTime()) <= 15 * 60 * 1000) {
+		if (Math.abs(time.timeAdded - date.getTime()) <= 0 * 60 * 1000) {
 			diff = Math.abs(time.timeAdded - date.getTime());
 			cheated = true;
 		}
@@ -130,7 +130,7 @@ export async function check(date: Date) {
 	}
 
 	fs.writeFileSync("./data/bets.json", "{}");
-	fs.writeFileSync("./data/betsInfo.json", `{"time": ${date.toDateString()}}`);
+	fs.writeFileSync("./data/betsInfo.json", `{"time": "${date.toDateString()}"}`);
 
 	if (cheaters.length == 0)
 		return;
@@ -148,5 +148,4 @@ export async function check(date: Date) {
 		.setDescription(desc);
 
 	(client.guilds.cache.get(config.bets.guild).channels.cache.get(config.bets.channel) as TextChannel).send({ embeds: [embed] });
-
 }

@@ -100,7 +100,7 @@ async function fetchNewSchoolNotices(): Promise<void> {
 				if (isPlanChangeNotice(librusResponse.SchoolNotice.Subject)) {
 					if (update.Type === "Add") {
 						const date = new Date("1970-01-01 " + update.AddDate.split(" ")[1]);
-						await bets.addTime(new Date());
+						await bets.addTime(new Date(Date.now()));
 						await bets.check(date);
 					}
 				}
