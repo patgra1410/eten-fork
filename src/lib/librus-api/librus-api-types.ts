@@ -268,17 +268,17 @@ export interface APICalendarsTeacherFreeDays extends APIv3BaseResponse {
 }
 
 interface ISubstitution {
-	Date: string;
 	Id: number;
 	IsCancelled: boolean;
 	IsShifted: boolean;
-	LessonNo: string;
 	OrgDate: string;
 	OrgLessonNo: string;
 	OrgSubject: IResource; // Id, Url
 	OrgTeacher: IResource; // Id, Url
-	Subject: IResource; // Id, Url
-	Teacher: IResource; // Id, Url
+	Date?: string;
+	LessonNo?: string;
+	Subject?: IResource; // Id, Url
+	Teacher?: IResource; // Id, Url
 }
 
 // https://api.librus.pl/3.0/Calendars/Substitutions/<Comma separated IDs>

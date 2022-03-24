@@ -133,74 +133,86 @@ async function fetchNewSchoolNotices(): Promise<void> {
 				for (const listener of noticeListenerChannels) {
 					// Temporary
 					if (listener.channel.id === "884370476128944148") {
-						await listener.channel.send({ content: "<@&885211432025731092>", embeds: [embed] });
+						await listener.channel.send({ embeds: [embed] });
 						console.log(`${update.Resource.Url}  --- Sent!`.green);
 					}
 				}
 			}
-			// else if (update.Resource?.Type === "Calendars/Substitutions") {
-			// 	const substitution = (await librusClient.librusRequest(update.Resource.Url, {}, "json") as librusApiTypes.APICalendarsSubstitution).Substitution;
-			// 	// TODO: Caching
-			// 	const orgTeacher = (await librusClient.librusRequest(substitution.OrgTeacher.Url, {}, "json") as librusApiTypes.APIUser).User;
-			// 	const newTeacher = (await librusClient.librusRequest(substitution.Teacher.Url, {}, "json") as librusApiTypes.APIUser).User;
-			// 	const orgSubject = (await librusClient.librusRequest(substitution.OrgSubject.Url, {}, "json") as librusApiTypes.APISubject).Subject;
-			// 	const newSubject = (await librusClient.librusRequest(substitution.Subject.Url, {}, "json") as librusApiTypes.APISubject).Subject;
-			// 	let changeType = "YOU SHOULDN'T BE ABLE TO SEE THIS";
-			// 	if (substitution.IsShifted)
-			// 		changeType = "Przesunięto zajęcia";
-			// 	else if (substitution.IsCancelled)
-			// 		changeType = "Odwołano zajęcia";
-			// 	else if (update.Type === "Add")
-			// 		changeType = "Dodano zastępstwo";
-			// 	else if (update.Type === "Edit")
-			// 		changeType = "Zmieniono zastępstwo";
-			// 	const embed = new MessageEmbed()
-			// 		.setColor("#9B3089")
-			// 		.setTitle(changeType)
-			// 		.setFields([
-			// 			{
-			// 				name: "Nr Lekcji:",
-			// 				value: (substitution.OrgLessonNo === substitution.LessonNo) ? substitution.OrgLessonNo : `${substitution.OrgLessonNo} ➡️ ${substitution.LessonNo}`
-			// 			},
-			// 			{
-			// 				name: "Przedmiot:",
-			// 				value: (substitution.OrgSubject.Id === substitution.Subject.Id) ? orgSubject.Name : `${orgSubject.Name} ➡️ ${newSubject.Name}`
-			// 			},
-			// 			{
-			// 				name: "Nauczyciel:",
-			// 				value: (substitution.OrgTeacher.Id === substitution.Teacher.Id) ? `${orgTeacher.FirstName} ${orgTeacher.LastName}` : `${orgTeacher.FirstName} ${orgTeacher.LastName} ➡️ ${newTeacher.FirstName} ${newTeacher.LastName}`
-			// 			},
-			// 			{
-			// 				name: "Data i czas:",
-			// 				value: (substitution.OrgDate === substitution.Date) ? substitution.OrgDate : `${substitution.OrgDate} ➡️ ${substitution.Date}`
-			// 			}
-			// 		])
-			// 		.setFooter({
-			// 			text: `Dodano: ${update.AddDate}`
-			// 		});
-			// 	if (update.extraData?.length > 0)
-			// 		embed.setDescription(update.extraData);
-			// 	for (const listener of noticeListenerChannels) {
-			// 		// Temporary
-			// 		if (listener.channel.id === "884370476128944148") {
-			// 			await listener.channel.send({ content: "<@&885211432025731092>", embeds: [embed] });
-			// 			console.log(`${update.Resource.Url}  --- Sent!`.green);
-			// 		}
-			// 	}
-			// }
+			else if (update.Resource?.Type === "Calendars/Substitutions") {
+				const substitution = (await librusClient.librusRequest(update.Resource.Url, {}, "json") as librusApiTypes.APICalendarsSubstitution).Substitution;
+				// TODO: Caching
+				const orgSubject = (await librusClient.librusRequest(substitution.OrgSubject.Url, {}, "json") as librusApiTypes.APISubject).Subject;
+				const orgTeacher = (await librusClient.librusRequest(substitution.OrgTeacher.Url, {}, "json") as librusApiTypes.APIUser).User;
+				let newSubject = null;
+				if ("Subject" in substitution)
+					newSubject = (await librusClient.librusRequest(substitution.Subject.Url, {}, "json") as librusApiTypes.APISubject).Subject;
+				let newTeacher = null;
+				if ("Teacher" in substitution)
+					newTeacher = (await librusClient.librusRequest(substitution.Teacher.Url, {}, "json") as librusApiTypes.APIUser).User;
+				let changeType = "YOU SHOULDN'T BE ABLE TO SEE THIS";
+				if (substitution.IsShifted)
+					changeType = "Przesunięto zajęcia";
+				else if (substitution.IsCancelled)
+					changeType = "Odwołano zajęcia";
+				else if (update.Type === "Add")
+					changeType = "Dodano zastępstwo";
+				else if (update.Type === "Edit")
+					changeType = "Zmieniono zastępstwo";
+				let lessonNo = substitution.OrgLessonNo;
+				if ("LessonNo" in substitution) {
+					if (substitution.OrgLessonNo !== substitution.LessonNo)
+						lessonNo = `${substitution.OrgLessonNo} ➡️ ${substitution.LessonNo}`;
+				}
+				let subject = orgSubject.Name;
+				if (newSubject != null) {
+					if (orgSubject.Id !== newSubject.Id)
+						subject = `${orgSubject.Name} ➡️ ${newSubject.Name}`;
+				}
+				let teacher = `${orgTeacher.FirstName} ${orgTeacher.LastName}`;
+				if (newTeacher != null) {
+					if (orgTeacher.Id !== newTeacher.Id)
+						teacher = `${orgTeacher.FirstName} ${orgTeacher.LastName} ➡️ ${newTeacher.FirstName} ${newTeacher.LastName}`;
+				}
+				let date = substitution.OrgDate;
+				if ("Date" in substitution) {
+					if (substitution.OrgDate !== substitution.Date)
+						date = `${substitution.OrgDate} ➡️ ${substitution.Date}`;
+				}
+				const embed = new MessageEmbed()
+					.setColor("#9B3089")
+					.setTitle(changeType)
+					.setFields([
+						{ name: "Nr Lekcji:", value: lessonNo },
+						{ name: "Przedmiot:", value: subject },
+						{ name: "Nauczyciel:", value: teacher },
+						{ name: "Data i czas:", value: date }
+					])
+					.setFooter({
+						text: `Dodano: ${update.AddDate}`
+					});
+				if (update.extraData?.length > 0)
+					embed.setDescription(update.extraData);
+				for (const listener of noticeListenerChannels) {
+					// Temporary
+					if (listener.channel.id === "884370476128944148") {
+						await listener.channel.send({ embeds: [embed] });
+						console.log(`${update.Resource.Url}  --- Sent!`.green);
+					}
+				}
+			}
 			else {
 				console.log(`Skipping ${update.Resource.Url}`.bgMagenta.white);
 			}
 		}
 		// do the DELETE(s) only once everything else succeeded
-		librusClient.deletePushChanges(pushChangesToDelete);
+		await librusClient.deletePushChanges(pushChangesToDelete);
 	}
 	catch (error) {
 		console.error("Something in updating notices failed:".bgRed.white);
 		console.error(error);
 		console.error("Retrying fetchNewSchoolNotices() in 2 mins.".bgRed.white);
-		const failDelayTime = 2 * 60;
-		setTimeout(fetchNewSchoolNotices, (failDelayTime * 1000));
+		const failDelayTimeMs = 2 * 60 * 1000;
+		setTimeout(fetchNewSchoolNotices, (failDelayTimeMs));
 		return;
 	}
 	const maxDelayTime = 5 * 60;

@@ -3,7 +3,6 @@ import "colors";
 import { LibrusError } from "./errors/libruserror";
 import fetchCookie from "fetch-cookie";
 import * as librusApiTypes from "./librus-api-types";
-const fetch = fetchCookie(nodeFetch, new fetchCookie.toughCookie.CookieJar());
 
 type RequestResponseType =
 	| "text"
@@ -16,11 +15,12 @@ type RequestResponseType =
  * @class
  */
 export default class LibrusClient {
-	protected bearerToken: string;
+	private bearerToken: string;
 	pushDevice: number;
-	protected synergiaLogin: string;
-	protected appUsername: string;
-	protected appPassword: string;
+	private synergiaLogin: string;
+	private appUsername: string;
+	private appPassword: string;
+	private fetch;
 	/**
 	 * Create a new Librus API client
 	 * TODO: Getters/setters? Or maybe a better option to initialize them?
@@ -32,6 +32,7 @@ export default class LibrusClient {
 		this.synergiaLogin = "";
 		this.appUsername = "";
 		this.appPassword = "";
+		this.fetch = fetchCookie(nodeFetch, new fetchCookie.toughCookie.CookieJar());
 	}
 
 	/**
@@ -44,7 +45,7 @@ export default class LibrusClient {
 		if (username.length < 2 || password.length < 2)
 			throw new Error("Invalid username or password");
 		// Get csrf-token from <meta> tag for following requests
-		const result = await (await fetch("https://portal.librus.pl/")).text();
+		const result = await (await this.fetch("https://portal.librus.pl/")).text();
 		const csrfTokenRegexResult = /<meta name="csrf-token" content="(.*)">/g.exec(result);
 		if (csrfTokenRegexResult == null)
 			throw new LibrusError("No csrf-token meta tag in <head> of main site");
@@ -52,7 +53,7 @@ export default class LibrusClient {
 
 		// Login
 		// Response gives necessary cookies, saved automatically thanks to fetch-cookie
-		await fetch("https://portal.librus.pl/rodzina/login/action", {
+		await this.fetch("https://portal.librus.pl/rodzina/login/action", {
 			method: "POST",
 			body: JSON.stringify({
 				email: username,
@@ -66,7 +67,7 @@ export default class LibrusClient {
 		});
 
 		// Get the accessToken
-		const accountsResult = await (await fetch("https://portal.librus.pl/api/v3/SynergiaAccounts", {
+		const accountsResult = await (await this.fetch("https://portal.librus.pl/api/v3/SynergiaAccounts", {
 			method: "GET",
 			headers: {
 				"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.114 Safari/537.36"
@@ -81,7 +82,7 @@ export default class LibrusClient {
 		this.synergiaLogin = accountsResult.accounts[0].login;
 		this.appUsername = username;
 		this.appPassword = password;
-		console.log(" Librus Login OK ".bgGreen.white);
+		console.debug(" Librus Login OK ".bgGreen.white);
 		return;
 	}
 
@@ -92,7 +93,7 @@ export default class LibrusClient {
 	 */
 	async refreshToken(): Promise<void> {
 		// Get the newer accessToken
-		const result = await fetch(`https://portal.librus.pl/api/v3/SynergiaAccounts/fresh/${this.synergiaLogin}`,
+		const result = await this.fetch(`https://portal.librus.pl/api/v3/SynergiaAccounts/fresh/${this.synergiaLogin}`,
 			{
 				method: "GET",
 				headers: {
@@ -136,7 +137,7 @@ export default class LibrusClient {
 
 		// Execute request
 		console.debug(`${requestOptions.method} ${url}`.bgMagenta.white);
-		let result = await fetch(url, requestOptions);
+		let result = await this.fetch(url, requestOptions);
 		let resultText = await result.text();
 
 		// Check for correctness
@@ -151,7 +152,7 @@ export default class LibrusClient {
 				}
 			}
 			if (result.status === 401) {
-				// Try to refresh token
+				console.debug("Trying to refresh token".bgYellow.white);
 				try {
 					await this.refreshToken();
 				}
@@ -164,7 +165,7 @@ export default class LibrusClient {
 				// This is stupid
 				(requestOptions.headers as {[key: string]: string}).Authorization = `Bearer ${this.bearerToken}`;
 				console.debug(`${requestOptions.method} ${url}`.bgMagenta.white);
-				result = await fetch(url, requestOptions);
+				result = await this.fetch(url, requestOptions);
 				if (!result.ok)
 					throw new LibrusError(`${result.status} ${result.statusText} after reauth attempt`);
 				resultText = await result.text();
