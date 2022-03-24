@@ -138,56 +138,56 @@ async function fetchNewSchoolNotices(): Promise<void> {
 					}
 				}
 			}
-			else if (update.Resource?.Type === "Calendars/Substitutions") {
-				const substitution = (await librusClient.librusRequest(update.Resource.Url, {}, "json") as librusApiTypes.APICalendarsSubstitution).Substitution;
-				// TODO: Caching
-				const orgTeacher = (await librusClient.librusRequest(substitution.OrgTeacher.Url, {}, "json") as librusApiTypes.APIUser).User;
-				const newTeacher = (await librusClient.librusRequest(substitution.Teacher.Url, {}, "json") as librusApiTypes.APIUser).User;
-				const orgSubject = (await librusClient.librusRequest(substitution.OrgSubject.Url, {}, "json") as librusApiTypes.APISubject).Subject;
-				const newSubject = (await librusClient.librusRequest(substitution.Subject.Url, {}, "json") as librusApiTypes.APISubject).Subject;
-				let changeType = "YOU SHOULDN'T BE ABLE TO SEE THIS";
-				if (substitution.IsShifted)
-					changeType = "Przesunięto zajęcia";
-				else if (substitution.IsCancelled)
-					changeType = "Odwołano zajęcia";
-				else if (update.Type === "Add")
-					changeType = "Dodano zastępstwo";
-				else if (update.Type === "Edit")
-					changeType = "Zmieniono zastępstwo";
-				const embed = new MessageEmbed()
-					.setColor("#9B3089")
-					.setTitle(changeType)
-					.setFields([
-						{
-							name: "Nr Lekcji:",
-							value: (substitution.OrgLessonNo === substitution.LessonNo) ? substitution.OrgLessonNo : `${substitution.OrgLessonNo} ➡️ ${substitution.LessonNo}`
-						},
-						{
-							name: "Przedmiot:",
-							value: (substitution.OrgSubject.Id === substitution.Subject.Id) ? orgSubject.Name : `${orgSubject.Name} ➡️ ${newSubject.Name}`
-						},
-						{
-							name: "Nauczyciel:",
-							value: (substitution.OrgTeacher.Id === substitution.Teacher.Id) ? `${orgTeacher.FirstName} ${orgTeacher.LastName}` : `${orgTeacher.FirstName} ${orgTeacher.LastName} ➡️ ${newTeacher.FirstName} ${newTeacher.LastName}`
-						},
-						{
-							name: "Data i czas:",
-							value: (substitution.OrgDate === substitution.Date) ? substitution.OrgDate : `${substitution.OrgDate} ➡️ ${substitution.Date}`
-						}
-					])
-					.setFooter({
-						text: `Dodano: ${update.AddDate}`
-					});
-				if (update.extraData?.length > 0)
-					embed.setDescription(update.extraData);
-				for (const listener of noticeListenerChannels) {
-					// Temporary
-					if (listener.channel.id === "884370476128944148") {
-						await listener.channel.send({ content: "<@&885211432025731092>", embeds: [embed] });
-						console.log(`${update.Resource.Url}  --- Sent!`.green);
-					}
-				}
-			}
+			// else if (update.Resource?.Type === "Calendars/Substitutions") {
+			// 	const substitution = (await librusClient.librusRequest(update.Resource.Url, {}, "json") as librusApiTypes.APICalendarsSubstitution).Substitution;
+			// 	// TODO: Caching
+			// 	const orgTeacher = (await librusClient.librusRequest(substitution.OrgTeacher.Url, {}, "json") as librusApiTypes.APIUser).User;
+			// 	const newTeacher = (await librusClient.librusRequest(substitution.Teacher.Url, {}, "json") as librusApiTypes.APIUser).User;
+			// 	const orgSubject = (await librusClient.librusRequest(substitution.OrgSubject.Url, {}, "json") as librusApiTypes.APISubject).Subject;
+			// 	const newSubject = (await librusClient.librusRequest(substitution.Subject.Url, {}, "json") as librusApiTypes.APISubject).Subject;
+			// 	let changeType = "YOU SHOULDN'T BE ABLE TO SEE THIS";
+			// 	if (substitution.IsShifted)
+			// 		changeType = "Przesunięto zajęcia";
+			// 	else if (substitution.IsCancelled)
+			// 		changeType = "Odwołano zajęcia";
+			// 	else if (update.Type === "Add")
+			// 		changeType = "Dodano zastępstwo";
+			// 	else if (update.Type === "Edit")
+			// 		changeType = "Zmieniono zastępstwo";
+			// 	const embed = new MessageEmbed()
+			// 		.setColor("#9B3089")
+			// 		.setTitle(changeType)
+			// 		.setFields([
+			// 			{
+			// 				name: "Nr Lekcji:",
+			// 				value: (substitution.OrgLessonNo === substitution.LessonNo) ? substitution.OrgLessonNo : `${substitution.OrgLessonNo} ➡️ ${substitution.LessonNo}`
+			// 			},
+			// 			{
+			// 				name: "Przedmiot:",
+			// 				value: (substitution.OrgSubject.Id === substitution.Subject.Id) ? orgSubject.Name : `${orgSubject.Name} ➡️ ${newSubject.Name}`
+			// 			},
+			// 			{
+			// 				name: "Nauczyciel:",
+			// 				value: (substitution.OrgTeacher.Id === substitution.Teacher.Id) ? `${orgTeacher.FirstName} ${orgTeacher.LastName}` : `${orgTeacher.FirstName} ${orgTeacher.LastName} ➡️ ${newTeacher.FirstName} ${newTeacher.LastName}`
+			// 			},
+			// 			{
+			// 				name: "Data i czas:",
+			// 				value: (substitution.OrgDate === substitution.Date) ? substitution.OrgDate : `${substitution.OrgDate} ➡️ ${substitution.Date}`
+			// 			}
+			// 		])
+			// 		.setFooter({
+			// 			text: `Dodano: ${update.AddDate}`
+			// 		});
+			// 	if (update.extraData?.length > 0)
+			// 		embed.setDescription(update.extraData);
+			// 	for (const listener of noticeListenerChannels) {
+			// 		// Temporary
+			// 		if (listener.channel.id === "884370476128944148") {
+			// 			await listener.channel.send({ content: "<@&885211432025731092>", embeds: [embed] });
+			// 			console.log(`${update.Resource.Url}  --- Sent!`.green);
+			// 		}
+			// 	}
+			// }
 			else {
 				console.log(`Skipping ${update.Resource.Url}`.bgMagenta.white);
 			}

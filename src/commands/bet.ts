@@ -66,7 +66,7 @@ export async function execute(interaction: CommandInteraction) {
 		let annoucmentDate = undefined;
 		if (fs.existsSync("./data/betsInfo.json"))
 			annoucmentDate = JSON.parse(fs.readFileSync("./data/betsInfo.json", "utf8")).time;
-		if (annoucmentDate != undefined && annoucmentDate == new Date().toDateString() && interaction.options.getSubcommand() == "zmień" && bets[interaction.user.id] != undefined && now.getTime() - new Date(now.toDateString()).getTime() > bets[interaction.user.id].time) {
+		if (annoucmentDate != undefined && annoucmentDate != new Date().toDateString() && new Date().getDay() != 6 && interaction.options.getSubcommand() == "zmień" && bets[interaction.user.id] != undefined && now.getTime() - new Date(now.toDateString()).getTime() > bets[interaction.user.id].time) {
 			interaction.reply("You cheated not only the game, but yourself. You didn't grow. You didn't improve. You took a shortcut and gained nothing. You experienced a hollow victory. Nothing was risked and nothing was gained. It's sad that you don't know the difference. <:copium:945419768222081114>");
 			return;
 		}
