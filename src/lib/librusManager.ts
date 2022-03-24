@@ -70,7 +70,7 @@ async function fetchNewSchoolNotices(): Promise<void> {
 					if (isPlanChangeNotice(librusResponse.SchoolNotice.Subject) && listener.rolesRegexArr.length > 0) {
 						for (const roleData of listener.rolesRegexArr) {
 							if (roleData.boldRegex.test(messageText))
-								taggers = taggers.concat(roleData.roleId);
+								taggers = taggers.concat(`<@&${roleData.roleId}>`);
 							messageText = messageText.replace(roleData.boldRegex, "**$&**");
 							messageText = messageText.replace(roleData.roleRegex, `<@&${roleData.roleId}> $&`);
 						}
