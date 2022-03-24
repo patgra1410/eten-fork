@@ -65,10 +65,12 @@ async function fetchNewSchoolNotices(): Promise<void> {
 				const baseMessageText = librusResponse.SchoolNotice.Content;
 
 				for (const listener of noticeListenerChannels) {
-					// TODO: Pinging outside of embed (within message.content)
 					let messageText = baseMessageText;
+					let taggers = "";
 					if (isPlanChangeNotice(librusResponse.SchoolNotice.Subject) && listener.rolesRegexArr.length > 0) {
 						for (const roleData of listener.rolesRegexArr) {
+							if (roleData.boldRegex.test(messageText))
+								taggers = taggers.concat(roleData.roleId);
 							messageText = messageText.replace(roleData.boldRegex, "**$&**");
 							messageText = messageText.replace(roleData.roleRegex, `<@&${roleData.roleId}> $&`);
 						}
@@ -76,20 +78,20 @@ async function fetchNewSchoolNotices(): Promise<void> {
 					const embed = new MessageEmbed()
 						.setColor("#D3A5FF")
 						.setAuthor({
-							name: `:loudspeaker: ${changeType} w Librusie`
+							name: `📣 ${changeType} w Librusie`
 						})
 						.setTitle(`**__${librusResponse.SchoolNotice.Subject}__**`)
 						.setDescription(messageText.substring(0, 6000));
 					if (listener.knownNotices.has(librusResponse.SchoolNotice.Id)) {
 						const messageId = listener.knownNotices.get(librusResponse.SchoolNotice.Id);
-						await (await listener.channel.messages.fetch(messageId)).edit({ embeds: [embed] });
+						await (await listener.channel.messages.fetch(messageId)).edit({ content: taggers, embeds: [embed] });
 						await listener.channel.send({
 							reply: { messageReference: messageId, failIfNotExists: false },
 							content: "Zmieniono ogłoszenie ^"
 						});
 					}
 					else {
-						const message = await listener.channel.send({ embeds: [embed] });
+						const message = await listener.channel.send({ content: taggers, embeds: [embed] });
 						listener.knownNotices.set(librusResponse.SchoolNotice.Id, message.id);
 					}
 				}
@@ -118,22 +120,14 @@ async function fetchNewSchoolNotices(): Promise<void> {
 						`${teacher.FirstName} ${teacher.LastName}${update.extraData == null ? "" : (update.extraData.length > 0 ? `\n${update.extraData}` : "")}`.replace(/\t/g, "")
 					)
 					.setFields([
-						{
-							name: "Od:",
-							value: teacherFreeDay.DateFrom
-						},
-						{
-							name: "Do:",
-							value: teacherFreeDay.DateTo
-						}
+						{ name: "Od:", value: teacherFreeDay.DateFrom },
+						{ name: "Do:", value: teacherFreeDay.DateTo }
 					])
-					.setFooter({
-						text: `Dodano: ${update.AddDate}`
-					});
+					.setFooter({ text: `Dodano: ${update.AddDate}` });
 				for (const listener of noticeListenerChannels) {
 					// Temporary
 					if (listener.channel.id === "884370476128944148") {
-						await listener.channel.send({ embeds: [embed] });
+						await listener.channel.send({ content: "<@&885211432025731092>", embeds: [embed] });
 						console.log(`${update.Resource.Url}  --- Sent!`.green);
 					}
 				}
@@ -195,7 +189,7 @@ async function fetchNewSchoolNotices(): Promise<void> {
 				for (const listener of noticeListenerChannels) {
 					// Temporary
 					if (listener.channel.id === "884370476128944148") {
-						await listener.channel.send({ embeds: [embed] });
+						await listener.channel.send({ content: "<@&885211432025731092>", embeds: [embed] });
 						console.log(`${update.Resource.Url}  --- Sent!`.green);
 					}
 				}
