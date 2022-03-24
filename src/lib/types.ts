@@ -79,3 +79,7 @@ export interface IRanking {
 		[user: string]: number
 	}
 }
+
+export interface IInfo {
+	uptimeCron: string
+}

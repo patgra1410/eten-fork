@@ -75,4 +75,9 @@ export default function() {
 
 	if (!fs.existsSync("./data/predictions.json"))
 		fs.writeFileSync("./data/predictions.json", "{\"bets\": {}}");
+
+	// INFO
+
+	if (!fs.existsSync("./data/info.json"))
+		fs.writeFileSync("./data/info.json", "{\"uptimeCron\": \"\"}");
 }
