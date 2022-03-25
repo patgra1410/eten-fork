@@ -125,11 +125,8 @@ async function fetchNewSchoolNotices(): Promise<void> {
 					])
 					.setFooter({ text: `Dodano: ${update.AddDate}` });
 				for (const listener of noticeListenerChannels) {
-					// Temporary
-					if (listener.channel.id === "884370476128944148") {
-						await listener.channel.send({ embeds: [embed] });
-						console.log(`${update.Resource.Url}  --- Sent!`.green);
-					}
+					await listener.channel.send({ embeds: [embed] });
+					console.log(`${update.Resource.Url}  --- Sent!`.green);
 				}
 			}
 			else if (update.Resource?.Type === "Calendars/Substitutions") {
