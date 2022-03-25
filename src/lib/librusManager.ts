@@ -127,7 +127,7 @@ async function fetchNewSchoolNotices(): Promise<void> {
 				for (const listener of noticeListenerChannels) {
 					// Temporary
 					if (listener.channel.id === "884370476128944148") {
-						await listener.channel.send({ content: "<@&885211432025731092>", embeds: [embed] });
+						await listener.channel.send({ embeds: [embed] });
 						console.log(`${update.Resource.Url}  --- Sent!`.green);
 					}
 				}
