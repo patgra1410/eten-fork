@@ -53,7 +53,7 @@ export default class LibrusClient {
 
 		// Login
 		// Response gives necessary cookies, saved automatically thanks to fetch-cookie
-		await this.cookieFetch("https://portal.librus.pl/rodzina/login/action", {
+		const loginResult = await this.cookieFetch("https://portal.librus.pl/rodzina/login/action", {
 			method: "POST",
 			body: JSON.stringify({
 				email: username,
@@ -65,6 +65,8 @@ export default class LibrusClient {
 				"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.114 Safari/537.36"
 			}
 		});
+		if (!loginResult.ok)
+			throw new Error(`https://portal.librus.pl/rodzina/login/action ${loginResult.statusText}`);
 
 		// Get the accessToken
 		const accountsResult = await (await this.cookieFetch("https://portal.librus.pl/api/v3/SynergiaAccounts", {
@@ -73,6 +75,8 @@ export default class LibrusClient {
 				"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.114 Safari/537.36"
 			}
 		})).json() as librusApiTypes.APISynergiaAccounts;
+		if (!loginResult.ok)
+			throw new Error(`https://portal.librus.pl/api/v3/SynergiaAccounts ${loginResult.statusText}`);
 		// TODO: Fix the existence checking here
 		if (accountsResult.accounts[0]?.accessToken == null)
 			throw new LibrusError("SynergiaAccounts endpoint returned no accessToken for account");
@@ -143,6 +147,7 @@ export default class LibrusClient {
 		// Check for correctness
 		if (!result.ok) {
 			console.debug("Result not OK".bgYellow.white);
+			console.debug(`${result.status} ${result.statusText}`.bgYellow.white);
 			if (resultText.length) {
 				try {
 					console.debug(JSON.parse(resultText));

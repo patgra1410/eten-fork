@@ -34,16 +34,8 @@ function isPlanChangeNotice(title: string): boolean {
 }
 
 async function fetchNewSchoolNotices(): Promise<void> {
-	let pushChanges: librusApiTypes.APIPushChanges;
 	try {
-		pushChanges = await librusClient.getPushChanges();
-	}
-	catch (error) {
-		console.log("Couldn't get PushChanges to get new SchoolNotices:".bgRed.white);
-		console.error(error);
-		return;
-	}
-	try {
+		const pushChanges = await librusClient.getPushChanges();
 		const pushChangesToDelete: number[] = [];
 		for (const update of pushChanges.Changes) {
 			// Get the notice if the element is of type 'SchoolNotices'
