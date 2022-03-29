@@ -47,7 +47,7 @@ export async function execute(interaction: CommandInteraction) {
 
 		interaction.reply({ embeds: [embed] });
 	}
-	else if (interaction.options.getSubcommand() == "play") {
+	else if (interaction.options.getSubcommand() == "sound") {
 		const num = interaction.options.getInteger("numer");
 		const files = fs.readdirSync("./soundeffects");
 
