@@ -1,4 +1,4 @@
-import { MessageEmbed, Snowflake, TextChannel } from "discord.js";
+import { MessageEmbed, Snowflake, TextChannel, MessageOptions } from "discord.js";
 import config from "../config.json";
 // import util from "util";
 import { client } from "../index";
@@ -83,7 +83,10 @@ async function fetchNewSchoolNotices(): Promise<void> {
 						});
 					}
 					else {
-						const message = await listener.channel.send({ content: taggers, embeds: [embed] });
+						const messagePayload: MessageOptions = { embeds: [embed] };
+						if (taggers != "")
+							messagePayload.content = taggers;
+						const message = await listener.channel.send(messagePayload);
 						listener.knownNotices.set(librusResponse.SchoolNotice.Id, message.id);
 					}
 				}
