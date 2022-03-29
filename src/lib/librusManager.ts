@@ -48,14 +48,18 @@ async function fetchNewSchoolNotices(): Promise<void> {
 					console.error(librusResponse);
 					continue;
 				}
-
 				let changeType = "YOU SHOULDN'T BE ABLE TO SEE THIS";
-				if (update.Type === "Add")
+				if (update.Type === "Add") {
 					changeType = "Nowe ogłoszenie";
-				else if (update.Type === "Edit")
+				}
+				else if (update.Type === "Edit") {
 					changeType = "Najnowsza zmiana ogłoszenia";
-				else if (update.Type === "Delete")
-					changeType = "Usunięte (jak???//?/?) ogłoszenie";
+				}
+				else if (update.Type === "Delete") {
+					console.error(`${update.Resource.Id} - Is deleted but accessible???`.yellow);
+					console.error(librusResponse);
+					continue;
+				}
 				const baseMessageText = librusResponse.SchoolNotice.Content;
 
 				for (const listener of noticeListenerChannels) {
