@@ -54,6 +54,8 @@ async function fetchNewSchoolNotices(): Promise<void> {
 					changeType = "Nowe ogłoszenie";
 				else if (update.Type === "Edit")
 					changeType = "Najnowsza zmiana ogłoszenia";
+				else if (update.Type === "Delete")
+					changeType = "Usunięte (jak???//?/?) ogłoszenie";
 				const baseMessageText = librusResponse.SchoolNotice.Content;
 
 				for (const listener of noticeListenerChannels) {
