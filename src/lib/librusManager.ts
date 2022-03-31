@@ -107,7 +107,13 @@ async function fetchNewSchoolNotices(): Promise<void> {
 				}
 			}
 			else if (update.Resource?.Type === "Calendars/TeacherFreeDays") {
-				const teacherFreeDay = (await librusClient.librusRequest(update.Resource.Url, {}, "json") as librusApiTypes.APICalendarsTeacherFreeDay).TeacherFreeDay;
+				const teacherFreeDayResponse = await librusClient.librusRequest(update.Resource.Url, {}, "json") as librusApiTypes.APICalendarsTeacherFreeDay
+				if ("Code" in teacherFreeDayResponse) {
+					console.error(`TeacherFreeDay ${update.Resource.Id} - has Code:`.yellow);
+					console.error(teacherFreeDayResponse);
+					continue;
+				}
+				const teacherFreeDay = teacherFreeDayResponse.TeacherFreeDay;
 				const teacher = (await librusClient.librusRequest(teacherFreeDay.Teacher.Url, {}, "json") as librusApiTypes.APIUser).User;
 				let changeType = "YOU SHOULDN'T BE ABLE TO SEE THIS";
 				if (update.Type === "Add")
@@ -131,8 +137,15 @@ async function fetchNewSchoolNotices(): Promise<void> {
 				}
 			}
 			else if (update.Resource?.Type === "Calendars/Substitutions") {
-				const substitution = (await librusClient.librusRequest(update.Resource.Url, {}, "json") as librusApiTypes.APICalendarsSubstitution).Substitution;
+				const substitutionResponse = await librusClient.librusRequest(update.Resource.Url, {}, "json") as librusApiTypes.APICalendarsSubstitution;
+				if ("Code" in substitutionResponse) {
+					console.error(`Substitution ${update.Resource.Id} - has Code:`.yellow);
+					console.error(substitutionResponse);
+					continue;
+				}
+				const substitution = substitutionResponse.Substitution;
 				// TODO: Caching
+				// Error handling? If these don't respond something is very wrong anyways.
 				const orgSubject = (await librusClient.librusRequest(substitution.OrgSubject.Url, {}, "json") as librusApiTypes.APISubject).Subject;
 				const orgTeacher = (await librusClient.librusRequest(substitution.OrgTeacher.Url, {}, "json") as librusApiTypes.APIUser).User;
 				let newSubject = null;
