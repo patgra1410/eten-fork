@@ -4,10 +4,11 @@ import { LibrusError } from "./errors/libruserror";
 import fetchCookie from "fetch-cookie";
 import * as librusApiTypes from "./librus-api-types";
 
-type RequestResponseType =
-	| "text"
-	| "json"
-	| "raw"
+interface ILibrusRequestOptions {
+	fetchOptions?: RequestInit
+	response?: "text" | "json" | "raw";
+	force?: boolean;
+}
 
 /**
  * Class for easy interaction with the mobile Librus web API
@@ -119,10 +120,9 @@ export default class LibrusClient {
 	 * Creates a request to Librus API using provided link, method, body and returns the JSON data sent back
 	 * @async
 	 * @param url API endpoit URL
-	 * @param options Additional options - passed on to node-fetch call
-	 * @param type What data should the request return: "json", "text", "raw"
+	 * @param options Additional request options
 	 */
-	async librusRequest(url: string, options?: RequestInit, type: RequestResponseType = "raw"): Promise<string|Response|unknown> {
+	async librusRequest(url: string, options?: ILibrusRequestOptions): Promise<string|Response|unknown> {
 		// Merge default request options with user request options - this can be done much better...
 		let requestOptions: RequestInit = {
 			method: "GET",
@@ -133,10 +133,10 @@ export default class LibrusClient {
 			},
 			redirect: "manual"
 		};
-		if (options) {
+		if (options?.fetchOptions) {
 			if ("headers" in options)
-				requestOptions.headers = { ...requestOptions.headers, ...options.headers };
-			requestOptions = { ...requestOptions, ...options };
+				requestOptions.headers = { ...requestOptions.headers, ...options.fetchOptions.headers };
+			requestOptions = { ...requestOptions, ...options.fetchOptions };
 		}
 
 		// Execute request
@@ -178,9 +178,9 @@ export default class LibrusClient {
 		}
 
 		// Return
-		if (type === "json")
+		if (options.response === "json")
 			return JSON.parse(resultText);
-		else if (type === "text")
+		else if (options.response === "text")
 			return await result.text();
 		else
 			return result;
@@ -193,12 +193,14 @@ export default class LibrusClient {
 	 */
 	async newPushDevice(): Promise<number> {
 		const jsonResult = await this.librusRequest("https://api.librus.pl/3.0/ChangeRegister", {
-			method: "POST",
-			body: JSON.stringify({
-				sendPush: 0,
-				appVersion: "6.0.0"
-			})
-		}, "json") as librusApiTypes.PostAPIChangeRegister;
+			fetchOptions: {
+				method: "POST",
+				body: JSON.stringify({
+					sendPush: 0,
+					appVersion: "6.0.0"
+				})
+			}
+		}) as librusApiTypes.PostAPIChangeRegister;
 		// this.pushDevice = jsonResult.ChangeRegister.Id;
 		if (jsonResult.ChangeRegister?.Id == null)
 			throw new LibrusError("POST ChangeRegister returned unexpected JSON format");
@@ -214,7 +216,7 @@ export default class LibrusClient {
 	 * @returns {JSON} Response if OK in member (of type array) "Changes" of returned object.
 	 */
 	async getPushChanges(): Promise<librusApiTypes.APIPushChanges> {
-		const resultJson = await this.librusRequest(`https://api.librus.pl/3.0/PushChanges?pushDevice=${this.pushDevice}`, {}, "json") as librusApiTypes.APIPushChanges;
+		const resultJson = await this.librusRequest(`https://api.librus.pl/3.0/PushChanges?pushDevice=${this.pushDevice}`, {response: "json"}) as librusApiTypes.APIPushChanges;
 		if (!("Changes" in resultJson))
 			throw new LibrusError("No \"Changes\" array in received PushChanges JSON");
 		// const pushChanges: number[] = [];
@@ -237,7 +239,9 @@ export default class LibrusClient {
 		while (lastPushChanges.length) {
 			const delChanges = lastPushChanges.splice(0, 30).join(",");
 			await this.librusRequest(`https://api.librus.pl/3.0/PushChanges/${delChanges}?pushDevice=${this.pushDevice}`, {
-				method: "DELETE"
+				fetchOptions: {
+					method: "DELETE"
+				}
 			});
 		}
 		return;

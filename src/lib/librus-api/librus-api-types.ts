@@ -1,12 +1,25 @@
-interface IResource {
-	Id?: string;
-	Type?: string;
+// interface IResource {
+// 	Id?: string;
+// 	Type?: string;
+// 	Url: string;
+// }
+
+interface IResourcesResource {
+	Url: string;
+}
+interface IChangeResource {
+	Id: string;
+	Type: string;
+	Url: string;
+}
+interface IStandardResource {
+	Id: string;
 	Url: string;
 }
 
 interface IChange {
 	Id: number;
-	Resource: IResource; // Id, Type, Url
+	Resource: IChangeResource; // Id, Type, Url
 	Type: string;
 	AddDate: string;
 	extraData: string|null;
@@ -14,7 +27,7 @@ interface IChange {
 
 export interface APIv3BaseResponse {
 	Resources?: {
-		[path: string]: IResource; // Url
+		[path: string]: IResourcesResource; // Url
 	}
 	Url?: string;
 	Status?: string;
@@ -79,7 +92,7 @@ export interface APIMe extends APIv3BaseResponse {
 			FirstName: string;
 			LastName: string;
 		}
-		Class: IResource; // Id, Url
+		Class: IStandardResource; // Id, Url
 	}
 }
 
@@ -92,8 +105,8 @@ export interface APISystemData extends APIv3BaseResponse {
 
 interface ICategory {
 	Id: number;
-	Teacher: IResource; // Id, Url
-	Color: IResource; // Id, Url
+	Teacher: IStandardResource; // Id, Url
+	Color: IStandardResource; // Id, Url
 	Name: string;
 	AdultsExtramural: boolean;
 	AdultsDaily: boolean;
@@ -120,7 +133,7 @@ interface ISchoolNotice {
 		EndDate: string;
 		Subject: string;
 		Content: string;
-		AddedBy: IResource // Id, Url
+		AddedBy: IStandardResource // Id, Url
 		CreationDate: string;
 		WasRead: boolean;
 }
@@ -137,14 +150,14 @@ export interface APISchoolNotice extends APIv3BaseResponse {
 
 interface IAttendance {
 	Id: number;
-	Lesson: IResource; // Id, Url
-	Student: IResource; // Id, Url
+	Lesson: IStandardResource; // Id, Url
+	Student: IStandardResource; // Id, Url
 	Date: string;
 	AddDate: string;
 	LessonNo: number;
 	Semester: number;
-	Type: IResource; // Id, Url
-	AddedBy: IResource; // Id, Url
+	Type: IStandardResource; // Id, Url
+	AddedBy: IStandardResource; // Id, Url
 }
 
 // https://api.librus.pl/3.0/Attendances/<Comma separated Attendance IDs>
@@ -159,14 +172,14 @@ interface IHomework {
 	Id: number;
 	Content: string;
 	Date: string;
-	Category: IResource; // Id, Url
+	Category: IStandardResource; // Id, Url
 	LessonNo: string;
 	TimeFrom: string;
 	TimeTo: string;
 	AddDate: string;
-	CreatedBy: IResource; // Id, Url
-	Class: IResource; // Id, Url
-	Subject: IResource; // Id, Url
+	CreatedBy: IStandardResource; // Id, Url
+	Class: IStandardResource; // Id, Url
+	Subject: IStandardResource; // Id, Url
 }
 
 // https://api.librus.pl/3.0/Homeworks/<Comma separated Homework IDs>
@@ -179,11 +192,11 @@ export interface APIHomeworks extends APIv3BaseResponse {
 
 interface IGrade {
 	Id: number;
-	Lesson: IResource; // Id, Url
-	Subject: IResource; // Id, Url
-	Student: IResource; // Id, Url
-	Category: IResource; // Id, Url
-	AddedBy: IResource; // Id, Url
+	Lesson: IStandardResource; // Id, Url
+	Subject: IStandardResource; // Id, Url
+	Student: IStandardResource; // Id, Url
+	Category: IStandardResource; // Id, Url
+	AddedBy: IStandardResource; // Id, Url
 	Grade: string;
 	Date: string;
 	AddDate: string;
@@ -193,13 +206,13 @@ interface IGrade {
 	IsSemesterProposition: boolean;
 	IsFinal: boolean;
 	IsFinalProposition: boolean;
-	Comments: IResource[]; // Id, Url
+	Comments: IStandardResource[]; // Id, Url
 }
 
 interface IGradeComment {
 	Id: number;
-	AddedBy: IResource; // Id, Url
-	Grade: IResource; // Id, Url
+	AddedBy: IStandardResource; // Id, Url
+	Grade: IStandardResource; // Id, Url
 	Text: string;
 }
 
@@ -237,9 +250,9 @@ export interface APIUsers extends APIv3BaseResponse {
 
 interface ILesson {
 	Id: number;
-	Teacher: IResource; // Id, Url
-	Subject: IResource; // Id, Url
-	Class: IResource; // Id, Url
+	Teacher: IStandardResource; // Id, Url
+	Subject: IStandardResource; // Id, Url
+	Class: IStandardResource; // Id, Url
 }
 
 // https://api.librus.pl/3.0/Lessons/<Comma separated Lesson IDs>
@@ -256,7 +269,9 @@ interface ITeacherFreeDay {
 	DateFrom: string;
 	DateTo: string;
 	AddDate: string;
-	Teacher: IResource // Id, Url
+	Teacher: IStandardResource // Id, Url
+	TimeFrom: string;
+	TimeTo: string;
 }
 
 // https://api.librus.pl/3.0/Calendars/TeacherFreeDays/<Comma separated IDs>
@@ -273,12 +288,12 @@ interface ISubstitution {
 	IsShifted: boolean;
 	OrgDate: string;
 	OrgLessonNo: string;
-	OrgSubject: IResource; // Id, Url
-	OrgTeacher: IResource; // Id, Url
+	OrgSubject: IStandardResource; // Id, Url
+	OrgTeacher: IStandardResource; // Id, Url
 	Date?: string;
 	LessonNo?: string;
-	Subject?: IResource; // Id, Url
-	Teacher?: IResource; // Id, Url
+	Subject?: IStandardResource; // Id, Url
+	Teacher?: IStandardResource; // Id, Url
 }
 
 // https://api.librus.pl/3.0/Calendars/Substitutions/<Comma separated IDs>
