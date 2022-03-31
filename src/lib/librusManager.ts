@@ -250,15 +250,25 @@ async function prepareTrackedChannelData(): Promise<void> {
 					// Create the beautifully looking regex
 					const res = classGroupRoleRegex.exec(role[1].name);
 					if (res == null)
-						throw new Error("RegEx result is null");
+						throw new Error("RegExp result is null");
 					const classYear = res[1];
-					const classLetter = res[2];
+					const groupText = res[3]; // " - gr. p. TeacherNameHere"
+					let years = "4";
+					let badYears = "3";
+					let letterForSuffix = res[2].toUpperCase();
+					let letterForNoSuffix = res[2];
+					if (res[2].toUpperCase() === res[2]) {
+						years = "3";
+						badYears = "4";
+						letterForSuffix = res[2].toLowerCase();
+						letterForNoSuffix = res[2];
+					}
 					rolesRegexArr.push({
 						boldRegex: new RegExp(
-							`^${classYear}${classLetter}${res[3]}`, "gm"
+							`^((?:${classYear}[A-Ia-i]*[${letterForNoSuffix}][A-Ia-i]*${years}?(?!${badYears}))|(?:${classYear}[A-Ia-i]*[${letterForSuffix}][A-Ia-i]*${years}))${groupText}`, "gm"
 						),
 						roleRegex: new RegExp(
-							`\\*\\*${classYear}${classLetter}${res[3]}\\*\\*`, "gm"
+							`\\*\\*((?:${classYear}[A-Ia-i]*[${letterForNoSuffix}][A-Ia-i]*${years}?(?!${badYears}))|(?:${classYear}[A-Ia-i]*[${letterForSuffix}][A-Ia-i]*${years}))${groupText}\\*\\*`, "gm"
 						),
 						roleId: role[1].id
 					});
@@ -271,7 +281,7 @@ async function prepareTrackedChannelData(): Promise<void> {
 					// Create the beautifully looking regex
 					const res = classRoleRegex.exec(role[1].name);
 					if (res == null)
-						throw new Error("RegEx result is null");
+						throw new Error("RegExp result is null");
 					const classYear = res[1];
 					let years = "4";
 					let badYears = "3";
