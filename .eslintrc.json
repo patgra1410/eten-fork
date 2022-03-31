@@ -21,7 +21,6 @@
         "comma-dangle": ["error", "never"],
         "comma-spacing": "error",
         "comma-style": "error",
-        "curly": ["error", "all", "consistent"],
         "dot-location": ["error", "property"],
         "handle-callback-err": "off",
         "indent": ["error", "tab"],

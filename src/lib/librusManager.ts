@@ -41,13 +41,15 @@ async function fetchNewSchoolNotices(): Promise<void> {
 			// Get the notice if the element is of type 'SchoolNotices'
 			pushChangesToDelete.push(update.Id);
 			if (update.Resource?.Type === "SchoolNotices") {
-				const librusResponse = await librusClient.librusRequest(update.Resource.Url, {response: "json"}) as librusApiTypes.APISchoolNotice;
-				// Handle blocked SchoolNotices
-				if ("Code" in librusResponse) {
-					console.error(`${update.Resource.Id} - has Code:`.yellow);
-					console.error(librusResponse);
+				let schoolNoticeResponse: librusApiTypes.ISchoolNotice;
+				try {
+					schoolNoticeResponse = await librusClient.schoolNotices.fetch(update.Resource.Url, { force: true });
+				}
+				catch (error) {
+					console.error(error);
 					continue;
 				}
+				// Handle blocked SchoolNotices
 				let changeType = `changetype: ${update.Type}`;
 				if (update.Type === "Add") {
 					changeType = "Nowe ogłoszenie";
@@ -57,15 +59,15 @@ async function fetchNewSchoolNotices(): Promise<void> {
 				}
 				else if (update.Type === "Delete") {
 					console.error(`${update.Resource.Id} - Is deleted but accessible???`.yellow);
-					console.error(librusResponse);
+					console.error(schoolNoticeResponse);
 					continue;
 				}
-				const baseMessageText = librusResponse.SchoolNotice.Content;
+				const baseMessageText = schoolNoticeResponse.Content;
 
 				for (const listener of noticeListenerChannels) {
 					let messageText = baseMessageText;
 					let taggers = "";
-					if (isPlanChangeNotice(librusResponse.SchoolNotice.Subject) && listener.rolesRegexArr.length > 0) {
+					if (isPlanChangeNotice(schoolNoticeResponse.Subject) && listener.rolesRegexArr.length > 0) {
 						for (const roleData of listener.rolesRegexArr) {
 							if (roleData.boldRegex.test(messageText))
 								taggers = taggers.concat(`<@&${roleData.roleId}>`);
@@ -78,10 +80,10 @@ async function fetchNewSchoolNotices(): Promise<void> {
 						.setAuthor({
 							name: `📣 ${changeType} w Librusie`
 						})
-						.setTitle(`**__${librusResponse.SchoolNotice.Subject}__**`)
+						.setTitle(`**__${schoolNoticeResponse.Subject}__**`)
 						.setDescription(messageText.substring(0, 6000));
-					if (listener.knownNotices.has(librusResponse.SchoolNotice.Id)) {
-						const messageId = listener.knownNotices.get(librusResponse.SchoolNotice.Id);
+					if (listener.knownNotices.has(schoolNoticeResponse.Id)) {
+						const messageId = listener.knownNotices.get(schoolNoticeResponse.Id);
 						await (await listener.channel.messages.fetch(messageId)).edit({ content: taggers, embeds: [embed] });
 						await listener.channel.send({
 							reply: { messageReference: messageId, failIfNotExists: false },
@@ -93,25 +95,25 @@ async function fetchNewSchoolNotices(): Promise<void> {
 						if (taggers != "")
 							messagePayload.content = taggers;
 						const message = await listener.channel.send(messagePayload);
-						listener.knownNotices.set(librusResponse.SchoolNotice.Id, message.id);
+						listener.knownNotices.set(schoolNoticeResponse.Id, message.id);
 					}
 				}
-				console.log(`${librusResponse.SchoolNotice.Id}  --- Sent!`.green);
-				if (isPlanChangeNotice(librusResponse.SchoolNotice.Subject) && update.Type === "Add") {
+				console.log(`${schoolNoticeResponse.Id}  --- Sent!`.green);
+				if (isPlanChangeNotice(schoolNoticeResponse.Subject) && update.Type === "Add") {
 					const date = new Date("1970-01-01 " + update.AddDate.split(" ")[1]);
 					await bets.addTime(new Date(Date.now()));
 					await bets.check(date);
 				}
 			}
 			else if (update.Resource?.Type === "Calendars/TeacherFreeDays") {
-				const teacherFreeDayResponse = await librusClient.librusRequest(update.Resource.Url, {response: "json"}) as librusApiTypes.APICalendarsTeacherFreeDay;
+				const teacherFreeDayResponse = await librusClient.customLibrusRequest(update.Resource.Url, { response: "json" }) as librusApiTypes.APICalendarsTeacherFreeDay;
 				if ("Code" in teacherFreeDayResponse) {
 					console.error(`TeacherFreeDay ${update.Resource.Id} - has Code:`.yellow);
 					console.error(teacherFreeDayResponse);
 					continue;
 				}
 				const teacherFreeDay = teacherFreeDayResponse.TeacherFreeDay;
-				const teacher = (await librusClient.librusRequest(teacherFreeDay.Teacher.Url, {response: "json"}) as librusApiTypes.APIUser).User;
+				const teacher = (await librusClient.customLibrusRequest(teacherFreeDay.Teacher.Url, { response: "json" }) as librusApiTypes.APIUser).User;
 				let changeType = `changetype: ${update.Type}`;
 				if (update.Type === "Add")
 					changeType = "Dodano nieobecność nauczyciela";
@@ -143,7 +145,7 @@ async function fetchNewSchoolNotices(): Promise<void> {
 				}
 			}
 			else if (update.Resource?.Type === "Calendars/Substitutions") {
-				const substitutionResponse = await librusClient.librusRequest(update.Resource.Url, {response: "json"}) as librusApiTypes.APICalendarsSubstitution;
+				const substitutionResponse = await librusClient.customLibrusRequest(update.Resource.Url, { response: "json" }) as librusApiTypes.APICalendarsSubstitution;
 				if ("Code" in substitutionResponse) {
 					console.error(`Substitution ${update.Resource.Id} - has Code:`.yellow);
 					console.error(substitutionResponse);
@@ -152,14 +154,14 @@ async function fetchNewSchoolNotices(): Promise<void> {
 				const substitution = substitutionResponse.Substitution;
 				// TODO: Caching
 				// Error handling? If these don't respond something is very wrong anyways.
-				const orgSubject = (await librusClient.librusRequest(substitution.OrgSubject.Url, {response: "json"}) as librusApiTypes.APISubject).Subject;
-				const orgTeacher = (await librusClient.librusRequest(substitution.OrgTeacher.Url, {response: "json"}) as librusApiTypes.APIUser).User;
+				const orgSubject = (await librusClient.customLibrusRequest(substitution.OrgSubject.Url, { response: "json" }) as librusApiTypes.APISubject).Subject;
+				const orgTeacher = await librusClient.users.fetch(substitution.OrgTeacher.Id);
 				let newSubject = null;
 				if ("Subject" in substitution)
-					newSubject = (await librusClient.librusRequest(substitution.Subject.Url, {response: "json"}) as librusApiTypes.APISubject).Subject;
+					newSubject = (await librusClient.customLibrusRequest(substitution.Subject.Url, { response: "json" }) as librusApiTypes.APISubject).Subject;
 				let newTeacher = null;
 				if ("Teacher" in substitution)
-					newTeacher = (await librusClient.librusRequest(substitution.Teacher.Url, {response: "json"}) as librusApiTypes.APIUser).User;
+					newTeacher = await librusClient.users.fetch(substitution.Teacher.Url);
 				let changeType = `changetype: ${update.Type}`;
 				if (substitution.IsShifted)
 					changeType = "Przesunięto zajęcia";
@@ -323,16 +325,10 @@ async function prepareTrackedChannelData(): Promise<void> {
 }
 
 export default async function initLibrusManager() {
-	librusClient = new LibrusClient();
+	librusClient = new LibrusClient({ debug: true });
 	await librusClient.login(config.librusLogin, config.librusPass);
-	if ("pushDevice" in config) {
-		console.log("Using pushDevice from config");
-		librusClient.pushDevice = parseInt(config.pushDevice);
-	}
-	else {
-		console.log("No pushDevice specified in config - getting a new pushDevice");
-		await librusClient.newPushDevice();
-	}
+	librusClient.pushDevice = parseInt(config.pushDevice);
+	// await librusClient.newPushDevice();
 	await prepareTrackedChannelData();
 	setTimeout(fetchNewSchoolNotices, 2000);
 }

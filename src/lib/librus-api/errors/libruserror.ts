@@ -1,11 +1,15 @@
 /**
- * Error type for throwing bullshit Librus errors
+ * Error type for throwing errors regarding Librus' bullshit
  * @class
  * @extends Error
  * @param msg Message
  */
 export class LibrusError extends Error {
-	constructor(msg?: string) {
-		super(msg);
+	status: number;
+	json: unknown;
+	constructor(msg?: string, status?: number, json?: unknown) {
+		super(`${status} ${msg}`);
+		this.status = status;
+		this.json = json;
 	}
 }

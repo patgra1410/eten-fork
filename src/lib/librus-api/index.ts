@@ -3,11 +3,22 @@ import "colors";
 import { LibrusError } from "./errors/libruserror";
 import fetchCookie from "fetch-cookie";
 import * as librusApiTypes from "./librus-api-types";
+import UsersManager from "./managers/usersManager";
+import SchoolNoticesManager from "./managers/schoolNoticesManager";
+
+export interface IBaseFetchOptions {
+	force?: boolean;
+	cache?: boolean;
+}
 
 interface ILibrusRequestOptions {
 	fetchOptions?: RequestInit
+	/** @deprecated use the appropriate manager instead */
 	response?: "text" | "json" | "raw";
-	force?: boolean;
+}
+
+interface ILibrusClientConstructor {
+	debug?: boolean
 }
 
 /**
@@ -22,18 +33,32 @@ export default class LibrusClient {
 	private appUsername: string;
 	private appPassword: string;
 	private cookieFetch;
+	users: UsersManager;
+	schoolNotices: SchoolNoticesManager;
+	debug: boolean;
+	log: (message: unknown) => void;
 	/**
 	 * Create a new Librus API client
-	 * TODO: Getters/setters? Or maybe a better option to initialize them?
 	 * @constructor
 	 */
-	constructor() {
+	constructor(options?: ILibrusClientConstructor) {
 		this.bearerToken = "";
 		this.pushDevice = 0;
 		this.synergiaLogin = "";
 		this.appUsername = "";
 		this.appPassword = "";
 		this.cookieFetch = fetchCookie(nodeFetch, new fetchCookie.toughCookie.CookieJar());
+		this.users = new UsersManager(this);
+		this.schoolNotices = new SchoolNoticesManager(this);
+		if (options?.debug)
+			this.debug = true;
+		else
+			this.debug = false;
+		this.log = function(message: unknown) {
+			if (this.debug) {
+				console.debug(message);
+			}
+		};
 	}
 
 	/**
@@ -87,7 +112,7 @@ export default class LibrusClient {
 		this.synergiaLogin = accountsResult.accounts[0].login;
 		this.appUsername = username;
 		this.appPassword = password;
-		console.debug(" Librus Login OK ".bgGreen.white);
+		this.log(" Librus Login OK ".bgGreen.white);
 		return;
 	}
 
@@ -122,8 +147,8 @@ export default class LibrusClient {
 	 * @param url API endpoit URL
 	 * @param options Additional request options
 	 */
-	async librusRequest(url: string, options?: ILibrusRequestOptions): Promise<string|Response|unknown> {
-		// Merge default request options with user request options - this can be done much better...
+	async customLibrusRequest(url: string, options?: ILibrusRequestOptions): Promise<string|Response|unknown> {
+		// Merge default request options with user request options
 		let requestOptions: RequestInit = {
 			method: "GET",
 			headers: {
@@ -134,56 +159,58 @@ export default class LibrusClient {
 			redirect: "manual"
 		};
 		if (options?.fetchOptions) {
-			if ("headers" in options)
-				requestOptions.headers = { ...requestOptions.headers, ...options.fetchOptions.headers };
 			requestOptions = { ...requestOptions, ...options.fetchOptions };
+			if ("headers" in options.fetchOptions)
+				requestOptions.headers = { ...requestOptions.headers, ...options.fetchOptions.headers };
 		}
 
 		// Execute request
-		console.debug(`${requestOptions.method} ${url}`.bgMagenta.white);
+		this.log(`${requestOptions.method} ${url}`.bgMagenta.white);
 		let result = await this.cookieFetch(url, requestOptions);
+		const rawResult = result.clone();
 		let resultText = await result.text();
 
-		// Check for correctness
 		if (!result.ok) {
-			console.debug("Result not OK".bgYellow.white);
-			console.debug(`${result.status} ${result.statusText}`.bgYellow.white);
-			if (resultText.length) {
+			this.log("Result not OK".bgYellow.white);
+			this.log(`${result.status} ${result.statusText}`.bgYellow.white);
+			if (resultText?.length) {
 				try {
-					console.debug(JSON.parse(resultText));
+					this.log(JSON.parse(resultText));
 				}
 				catch (error) {
-					console.debug(resultText);
+					this.log(resultText);
 				}
 			}
+			// Try to refresh if 401
 			if (result.status === 401) {
-				console.debug("Trying to refresh token".bgYellow.white);
+				this.log("Trying to refresh token".bgYellow.white);
 				try {
 					await this.refreshToken();
 				}
 				catch (error) {
-					console.debug(error);
-					console.debug("Couldn't refresh token, retrying full login".bgRed.white);
+					this.log(error);
+					this.log("Couldn't refresh token, retrying full login".bgRed.white);
 					await this.login(this.appUsername, this.appPassword);
 				}
-				console.debug("Retrying request after reauthentication".bgYellow.white);
+				this.log("Retrying request after reauthentication".bgYellow.white);
 				// This is stupid
 				(requestOptions.headers as {[key: string]: string}).Authorization = `Bearer ${this.bearerToken}`;
-				console.debug(`${requestOptions.method} ${url}`.bgMagenta.white);
+				this.log(`${requestOptions.method} ${url}`.bgMagenta.white);
 				result = await this.cookieFetch(url, requestOptions);
-				if (!result.ok)
-					throw new LibrusError(`${result.status} ${result.statusText} after reauth attempt`);
-				resultText = await result.text();
+				if (!result.ok) {
+					resultText = await result.text();
+					throw new LibrusError(`${result.status} ${result.statusText} after reauth attempt`, result.status, result.text());
+				}
 			}
 		}
 
 		// Return
-		if (options.response === "json")
+		if (options?.response === "json")
 			return JSON.parse(resultText);
-		else if (options.response === "text")
-			return await result.text();
+		else if (options?.response === "text")
+			return resultText;
 		else
-			return result;
+			return rawResult;
 	}
 
 	/**
@@ -192,7 +219,7 @@ export default class LibrusClient {
 	 * @returns Optionally return the new pushDevice ID
 	 */
 	async newPushDevice(): Promise<number> {
-		const jsonResult = await this.librusRequest("https://api.librus.pl/3.0/ChangeRegister", {
+		const response = await this.customLibrusRequest("https://api.librus.pl/3.0/ChangeRegister", {
 			fetchOptions: {
 				method: "POST",
 				body: JSON.stringify({
@@ -200,11 +227,11 @@ export default class LibrusClient {
 					appVersion: "6.0.0"
 				})
 			}
-		}) as librusApiTypes.PostAPIChangeRegister;
-		// this.pushDevice = jsonResult.ChangeRegister.Id;
-		if (jsonResult.ChangeRegister?.Id == null)
-			throw new LibrusError("POST ChangeRegister returned unexpected JSON format");
-		this.pushDevice = jsonResult.ChangeRegister.Id;
+		}) as Response;
+		const jsonResponse = await response.json() as librusApiTypes.PostAPIChangeRegister;
+		if (jsonResponse.ChangeRegister?.Id == null)
+			throw new LibrusError("POST ChangeRegister returned unexpected JSON format", response.status, jsonResponse);
+		this.pushDevice = jsonResponse.ChangeRegister.Id;
 		return this.pushDevice;
 	}
 
@@ -216,8 +243,15 @@ export default class LibrusClient {
 	 * @returns {JSON} Response if OK in member (of type array) "Changes" of returned object.
 	 */
 	async getPushChanges(): Promise<librusApiTypes.APIPushChanges> {
-		const resultJson = await this.librusRequest(`https://api.librus.pl/3.0/PushChanges?pushDevice=${this.pushDevice}`, {response: "json"}) as librusApiTypes.APIPushChanges;
-		if (!("Changes" in resultJson))
+		const response = await this.customLibrusRequest(`https://api.librus.pl/3.0/PushChanges?pushDevice=${this.pushDevice}`) as Response;
+		const responseJson = await response.json() as librusApiTypes.APIPushChanges;
+		if (responseJson?.Code === "UnableToGetPushDevice") {
+			throw new LibrusError("Unable to get pushDevice. You're probably using a pushDevice ID that's invalid or doesn't belong to you.", response.status, responseJson);
+		}
+		else if (responseJson?.Code === "FilterInvalidValue") {
+			throw new LibrusError("Invalid pushDevice ID", response.status, responseJson);
+		}
+		if (!("Changes" in responseJson))
 			throw new LibrusError("No \"Changes\" array in received PushChanges JSON");
 		// const pushChanges: number[] = [];
 		// if (resultJson.Changes.length > 0) {
@@ -226,7 +260,7 @@ export default class LibrusClient {
 		// 			pushChanges.push(element.Id);
 		// 	}
 		// }
-		return resultJson;
+		return responseJson;
 	}
 
 	/**
@@ -238,7 +272,7 @@ export default class LibrusClient {
 			return;
 		while (lastPushChanges.length) {
 			const delChanges = lastPushChanges.splice(0, 30).join(",");
-			await this.librusRequest(`https://api.librus.pl/3.0/PushChanges/${delChanges}?pushDevice=${this.pushDevice}`, {
+			await this.customLibrusRequest(`https://api.librus.pl/3.0/PushChanges/${delChanges}?pushDevice=${this.pushDevice}`, {
 				fetchOptions: {
 					method: "DELETE"
 				}

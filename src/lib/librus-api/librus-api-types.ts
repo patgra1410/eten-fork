@@ -127,15 +127,15 @@ export interface APIGradesCategories extends APIv3BaseResponse {
 	Categories: ICategory[];
 }
 
-interface ISchoolNotice {
-		Id: string;
-		StartDate: string;
-		EndDate: string;
-		Subject: string;
-		Content: string;
-		AddedBy: IStandardResource // Id, Url
-		CreationDate: string;
-		WasRead: boolean;
+export interface ISchoolNotice {
+	Id: string;
+	StartDate: string;
+	EndDate: string;
+	Subject: string;
+	Content: string;
+	AddedBy: IStandardResource // Id, Url
+	CreationDate: string;
+	WasRead: boolean;
 }
 
 // https://api.librus.pl/3.0/SchoolNotices/
@@ -232,22 +232,6 @@ export interface APIGradesComments extends APIv3BaseResponse {
 	Comments: IGradeComment[];
 }
 
-interface IUser {
-	Id: number;
-	AccountId: string;
-	FirstName: string;
-	LastName: string;
-	IsEmployee: boolean;
-}
-
-// https://api.librus.pl/3.0/Users/<Comma separated User IDs>
-export interface APIUser extends APIv3BaseResponse {
-	User: IUser;
-}
-export interface APIUsers extends APIv3BaseResponse {
-	Users: IUser[];
-}
-
 interface ILesson {
 	Id: number;
 	Teacher: IStandardResource; // Id, Url
@@ -304,7 +288,7 @@ export interface APICalendarsSubstitutions extends APIv3BaseResponse {
 	Substitutions: ISubstitution[];
 }
 
-interface IUser {
+export interface IUser {
     Id: number;
     AccountId: string;
     FirstName: string;
