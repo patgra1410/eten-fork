@@ -34,12 +34,12 @@ export const data = new SlashCommandBuilder()
 	)
 	.addSubcommand(subcommand =>
 		subcommand
-			.setName("random")	
+			.setName("random")
 			.setDescription("Puść losowy dźwięk")
 	)
 	.addSubcommand(subcommand =>
 		subcommand
-			.setName("stop")	
+			.setName("stop")
 			.setDescription("Zatrzymaj puszczanie dźwięku")
 	)
 	.addSubcommand(subcommand =>
@@ -67,14 +67,14 @@ export async function execute(interaction: CommandInteraction) {
 	}
 	else if (interaction.options.getSubcommand() == "sound" || interaction.options.getSubcommand() == "random") {
 		const files = fs.readdirSync("./soundeffects");
-		let num, repeat = interaction.options.getInteger("repeat") ? interaction.options.getInteger("repeat") : 1;
+		const repeat = interaction.options.getInteger("repeat") ? interaction.options.getInteger("repeat") : 1;
+		let num;
 
 		if (interaction.options.getSubcommand() == "sound")
 			num = interaction.options.getInteger("numer");
 		else
 			num = Math.floor(Math.random() * files.length) + 1;
 
-			
 		if (num < 1 || num > files.length) {
 			interaction.reply("Niepoprawny numer");
 			return;
@@ -89,7 +89,8 @@ export async function execute(interaction: CommandInteraction) {
 			return;
 		}
 
-		const additionalText = repeat > 1 ? ` ${repeat} razy.` : "";
+		let additionalText = "";
+		additionalText += repeat > 1 ? ` ${repeat} razy.` : "";
 		interaction.reply(`Puszczanie dźwięku ${fileName}${additionalText}`);
 
 		const channel = user.voice.channel;
