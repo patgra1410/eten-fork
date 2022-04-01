@@ -10,7 +10,6 @@ const directions = [[-1, -1], [0, -1], [1, -1], [-1, 0], [1, 0], [-1, 1], [0, 1]
 const SAVE_PATH = "tmp/";
 
 module.exports = class ExtBoard {
-	// class ExtBoard {
 	constructor(board, size_hor, size_ver, evalFunc) {
 		this.ball = [board.ball.x, board.ball.y];
 		this.graph = new Array(size_ver);

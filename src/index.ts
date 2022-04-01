@@ -2,7 +2,7 @@
 import Discord from "discord.js";
 import config from "./config.json";
 import fs from "fs";
-const threadwatcher = require("./lib/threadwatcher");
+import initThreadManager from "./lib/threadManager";
 import createRequiredFiles from "./lib/createRequiredFiles";
 import cronJobs from "./lib/cronJobs";
 import randomSounds from "./lib/randomSoundOnVC";
@@ -68,14 +68,6 @@ async function updateSlashCommands() {
 	await client.application?.commands.set(slashCommands);
 }
 
-threadwatcher.newReply.on("newPost", async (board: string, threadID: string, postID: string, text: string, attachmentUrl: string) => {
-	await client.imageCdnChannel.send({
-		content: `<https://boards.4channel.org/${board}/thread/${threadID}#p${postID}>`,
-		files: [attachmentUrl]
-	});
-	threadwatcher.changePo1stTimeoutEvent.emit("subtractTimeout");
-});
-
 client.once("ready", async () => {
 	if (client.user == null)
 		throw new Error("user does not exist on client");
@@ -89,6 +81,7 @@ client.once("ready", async () => {
 	cronJobs(client);
 	if (config.librus)
 		await initLibrusManager();
+	await initThreadManager();
 	incrementDays();
 	randomSounds();
 	console.log("Ready!");

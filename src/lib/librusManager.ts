@@ -43,7 +43,7 @@ async function fetchNewSchoolNotices(): Promise<void> {
 			if (update.Resource?.Type === "SchoolNotices") {
 				let schoolNoticeResponse: librusApiTypes.ISchoolNotice;
 				try {
-					schoolNoticeResponse = await librusClient.schoolNotices.fetch(update.Resource.Url, { force: true });
+					schoolNoticeResponse = await librusClient.schoolNotices.fetch(update.Resource.Id, { force: true });
 				}
 				catch (error) {
 					console.error(error);
@@ -161,7 +161,7 @@ async function fetchNewSchoolNotices(): Promise<void> {
 					newSubject = (await librusClient.customLibrusRequest(substitution.Subject.Url, { response: "json" }) as librusApiTypes.APISubject).Subject;
 				let newTeacher = null;
 				if ("Teacher" in substitution)
-					newTeacher = await librusClient.users.fetch(substitution.Teacher.Url);
+					newTeacher = await librusClient.users.fetch(substitution.Teacher.Id);
 				let changeType = `changetype: ${update.Type}`;
 				if (substitution.IsShifted)
 					changeType = "Przesunięto zajęcia";
