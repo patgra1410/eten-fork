@@ -39,5 +39,8 @@ Array of dictionaries:
 | imageUrl | image url that will be sent |
 
 
-### sound effects
-put your sound effects in soundeffects/
+### soundeffects
+put your soundeffects in soundeffects/
+
+##### Putting effects on sound with /play
+in order to use this feature you have to install [SoX](http://sox.sourceforge.net/) and put it in your PATH 
