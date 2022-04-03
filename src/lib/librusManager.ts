@@ -38,6 +38,7 @@ async function fetchNewSchoolNotices(): Promise<void> {
 		const pushChanges = await librusClient.getPushChanges();
 		const pushChangesToDelete: number[] = [];
 		for (const update of pushChanges.Changes) {
+			librusClient.log(update);
 			// Get the notice if the element is of type 'SchoolNotices'
 			pushChangesToDelete.push(update.Id);
 			if (update.Resource?.Type === "SchoolNotices") {
@@ -49,6 +50,7 @@ async function fetchNewSchoolNotices(): Promise<void> {
 					console.error(error);
 					continue;
 				}
+				librusClient.log(schoolNoticeResponse);
 				// Handle blocked SchoolNotices
 				let changeType = `changetype: ${update.Type}`;
 				if (update.Type === "Add") {
@@ -113,7 +115,9 @@ async function fetchNewSchoolNotices(): Promise<void> {
 					continue;
 				}
 				const teacherFreeDay = teacherFreeDayResponse.TeacherFreeDay;
+				librusClient.log(teacherFreeDay);
 				const teacher = (await librusClient.customLibrusRequest(teacherFreeDay.Teacher.Url, { response: "json" }) as librusApiTypes.APIUser).User;
+				librusClient.log(teacher);
 				let changeType = `changetype: ${update.Type}`;
 				if (update.Type === "Add")
 					changeType = "Dodano nieobecność nauczyciela";
@@ -124,6 +128,8 @@ async function fetchNewSchoolNotices(): Promise<void> {
 				let description = `${teacher.FirstName} ${teacher.LastName}`;
 				if (update.extraData?.length > 0)
 					description = description.concat("\n" + update.extraData);
+				if (teacherFreeDay.Name?.length > 0)
+					description = description.concat("\n" + teacherFreeDay.Name);
 				let timestampFrom = teacherFreeDay.DateFrom;
 				let timestampTo = teacherFreeDay.DateTo;
 				if ("TimeFrom" in teacherFreeDay)
@@ -152,16 +158,21 @@ async function fetchNewSchoolNotices(): Promise<void> {
 					continue;
 				}
 				const substitution = substitutionResponse.Substitution;
+				librusClient.log(substitution);
 				// TODO: Caching
 				// Error handling? If these don't respond something is very wrong anyways.
 				const orgSubject = (await librusClient.customLibrusRequest(substitution.OrgSubject.Url, { response: "json" }) as librusApiTypes.APISubject).Subject;
+				librusClient.log(orgSubject);
 				const orgTeacher = await librusClient.users.fetch(substitution.OrgTeacher.Id);
+				librusClient.log(orgTeacher);
 				let newSubject = null;
 				if ("Subject" in substitution)
 					newSubject = (await librusClient.customLibrusRequest(substitution.Subject.Url, { response: "json" }) as librusApiTypes.APISubject).Subject;
+				librusClient.log(newSubject);
 				let newTeacher = null;
 				if ("Teacher" in substitution)
 					newTeacher = await librusClient.users.fetch(substitution.Teacher.Id);
+				librusClient.log(newTeacher);
 				let changeType = `changetype: ${update.Type}`;
 				if (substitution.IsShifted)
 					changeType = "Przesunięto zajęcia";

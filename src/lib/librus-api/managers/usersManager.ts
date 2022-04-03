@@ -4,12 +4,12 @@ import { APIUser, APIUsers, IUser } from "../librus-api-types";
 import BaseManager from "./baseManager";
 
 export default class UsersManager extends BaseManager {
-	cache: Map<string, IUser>;
+	cache: Map<number, IUser>;
 	constructor(client: LibrusClient) {
 		super(client);
-		this.cache = new Map<string, IUser>();
+		this.cache = new Map<number, IUser>();
 	}
-	async fetch(id: string, options?: IBaseFetchOptions): Promise<IUser> {
+	async fetch(id: number, options?: IBaseFetchOptions): Promise<IUser> {
 		options = this.defaultizeFetchOptions(options);
 		// Use cache if element is cached and a HTTP request is not forced
 		if (!options.force && this.cache.has(id))
@@ -36,16 +36,18 @@ export default class UsersManager extends BaseManager {
 			}
 		}
 		// Return and cache if set
+		console.log(id);
 		const user = (await userResponse.json() as APIUser).User;
-		if (user.Id.toString() !== id)
+		console.log(user);
+		if (user.Id !== id)
 			throw new LibrusError("Returned user ID mismatches the one passed - How even", userResponse.status, user);
 		if (options.cache)
 			this.cache.set(id, user);
 		return user;
 	}
-	async fetchMany(ids: string[], options?: IBaseFetchOptions): Promise<IUser[]> {
+	async fetchMany(ids: number[], options?: IBaseFetchOptions): Promise<IUser[]> {
 		options = this.defaultizeFetchOptions(options);
-		const idCheckArr: string[] = [];
+		const idCheckArr: number[] = [];
 		const returnArr: IUser[] = [];
 		// Get the ones we already cached (Or not, if force is set to true)
 		if (!options.force) {
@@ -80,7 +82,7 @@ export default class UsersManager extends BaseManager {
 			for (const user of usersJson.Users) {
 				returnArr.push(user);
 				if (options.cache)
-					this.cache.set(user.Id.toString(), user);
+					this.cache.set(user.Id, user);
 			}
 		}
 		return returnArr;
