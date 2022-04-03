@@ -2,12 +2,11 @@ import { Canvas, createCanvas } from "canvas";
 import fs from "fs";
 import Point from "./Point";
 import Edge from "./Edge";
-import { IUserSettings } from "../types";
+import { IRanking, IUserSettings } from "../types";
+import { Message } from "discord.js";
 
 interface ILongestMove {
-	[uid: string]: {
-
-	}
+	[uid: string]: number
 }
 
 export default class Board {
@@ -32,6 +31,8 @@ export default class Board {
 	points: Array<Point> = [];
 	edges: Array<Edge> = [];
 	pos: Array<Array<number>>;
+	directions = [[-1, -1], [0, -1], [1, -1], [-1, 0], [1, 0], [-1, 1], [0, 1], [1, 1]];
+	message: Message;
 
 	constructor(spacing: number, offsetX: number, offsetY: number, uids: Array<string>, usernames: Array<string>, id = 0, withBot = false) {
 		this.spacing = spacing;
@@ -149,7 +150,11 @@ export default class Board {
 		this.points[this.pos[10][6]].edges.push(this.pos[11][5]);
 	}
 
-	draw(filename: string = this.id.toString()) {
+	/**
+	 * Draw current board
+	 * @param id file will be saved to `tmp/boardPilkarzyki${id}.png`
+	 */
+	draw(id: string = this.id.toString()) {
 		this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
 		let grd = this.getGradient(this.offX, this.canvas.height / 2, this.canvas.width / 2, this.canvas.height / 2, this.uids[0]);
@@ -208,6 +213,92 @@ export default class Board {
 		this.ctx.arc(this.offX + this.spacing * (this.ball.x - 1), this.offY + this.spacing * (this.ball.y - 1), 5, 0, 2 * Math.PI, false);
 		this.ctx.fill();
 		this.ctx.stroke();
+
+		const data = this.canvas.toDataURL().replace(/^data:image\/\w+;base64,/, "");
+		const buf = Buffer.from(data, "base64");
+		fs.writeFileSync(`tmp/boardPilkarzyki${id}.png`, buf);
+	}
+
+	/**
+	 * Get indexes of this.directions which are legal moves from given position.
+	 * @param x x coordinate of the position
+	 * @param y y coordinate of the position
+	 * @returns Array of indexes of this.directions. If index exists in the returned array, it is possible to move there
+	 */
+	possibleMovesIndexes(x: number = this.ball.x, y: number = this.ball.y): Array<number> {
+		const moves = [];
+		const directions = [[-1, -1], [0, -1], [1, -1], [-1, 0], [1, 0], [-1, 1], [0, 1], [1, 1]];
+
+		for (let i = 0; i < directions.length; i++) {
+			const dir = directions[i];
+			if (!this.points[this.pos[x][y]].edges.includes(this.pos[x + dir[0]][y + dir[1]]))
+				moves.push(i);
+		}
+
+		return moves;
+	}
+
+	/**
+	 * Get ids of Point which are legal to move on from given position
+	 * @param x x coordinate of the position
+	 * @param y y coordinate of the position
+	 * @returns Array of ids of Points, which are a legal move
+	 */
+	possibleMoves(x: number = this.ball.x, y: number = this.ball.y): Array<number> {
+		const indexes = this.possibleMovesIndexes(x, y);
+		const moves = [];
+		const directions = [[-1, -1], [0, -1], [1, -1], [-1, 0], [1, 0], [-1, 1], [0, 1], [1, 1]];
+
+		for (const index of indexes)
+			moves.push(this.pos[x + directions[index][0]][y + directions[index][1]]);
+
+		return moves;
+	}
+
+	/**
+	 * Try moving in a given direction
+	 * @param index in which direction from this.possibleMoveIndexes to move
+	 * @returns true if move was successful, false otherwise
+	 */
+	move(index: number): boolean {
+		const moves = this.possibleMoves();
+
+		if (index >= moves.length || this.win != -1)
+			return false;
+
+		this.points[this.pos[this.ball.x][this.ball.y]].edges.push(moves[index]);
+		this.points[moves[index]].edges.push(this.pos[this.ball.x][this.ball.y]);
+		this.edges.push(new Edge(this.points[moves[index]], this.points[this.pos[this.ball.x][this.ball.y]], this.spacing, this.offX, this.offY, this.colors[this.turn]));
+		this.totalMoves++;
+
+		if (!this.withBot) {
+			const ranking: IRanking = JSON.parse(fs.readFileSync("./data/ranking.json", "utf8"));
+			if (ranking.sumaruchow[this.uids[this.turn]] === undefined)
+				ranking.sumaruchow[this.uids[this.turn]] = 0;
+			ranking.sumaruchow[this.uids[this.turn]]++;
+			fs.writeFileSync("./data/ranking.json", JSON.stringify(ranking));
+		}
+
+		const point = this.points[moves[index]];
+		this.ball.x = point.x;
+		this.ball.y = point.y;
+
+		if (this.ball.x == 1)
+			this.win = 1;
+		if (this.ball.x == 11)
+			this.win = 0;
+
+		if (this.points[moves[index]].edges.length == 1)
+			this.turn = (this.turn + 1) % 2;
+
+		if (this.points[moves[index]].edges.length == 8)
+			this.win = (this.turn + 1) % 2;
+
+		return true;
+	}
+
+	get turnUID(): string {
+		return this.uids[this.turn];
 	}
 
 	getGradient(begX: number, begY: number, endX: number, endY: number, uid: string) {
@@ -260,5 +351,57 @@ export default class Board {
 		if ((x == 2 || x == 10) && ((y >= 1 && y <= 3) || (y >= 5 && y <= 7)))
 			return true;
 		return false;
+	}
+
+	save(file: string) {
+		const data =
+            JSON.stringify(this.points) + "\n#\n" +
+            JSON.stringify(this.pos) + "\n#\n" +
+            JSON.stringify(this.edges) + "\n#\n" +
+            JSON.stringify(this.ball) + "\n#\n" +
+            JSON.stringify(this.turn) + "\n#\n";
+
+		fs.writeFileSync(file, data);
+	}
+
+	load(file: string) {
+		const data = fs.readFileSync(file, { encoding: "utf8" }).split("#");
+
+		this.points = JSON.parse(data[0]);
+		this.pos = JSON.parse(data[1]);
+		this.edges = JSON.parse(data[2]);
+		this.ball = JSON.parse(data[3]);
+		this.turn = JSON.parse(data[4]);
+	}
+
+	loadFromGraph(graph: Array<Array<Array<boolean>>>) {
+		const directions = [[-1, -1], [0, -1], [1, -1], [-1, 0], [1, 0], [-1, 1], [0, 1], [1, 1]];
+
+		for (let x = 1; x <= 11; x++) {
+			for (let y = 1; y <= 7; y++) {
+				for (const i in directions) {
+					if (graph[x][y][i] === null)
+						break;
+					if (!graph[x][y][i])
+						continue;
+
+					const dir = directions[i];
+					const nX = x + dir[0];
+					const nY = y + dir[1];
+
+					this.points[this.pos[x][y]].edges.push(this.pos[nX][nY]);
+					this.edges.push(new Edge(this.points[this.pos[x][y]], this.points[this.pos[nX][nY]], this.spacing, this.offX, this.offY));
+				}
+			}
+		}
+	}
+
+	removeBoard(id: string) {
+		try {
+			fs.unlinkSync(`./tmp/boardPilkarzyki${id}.png`);
+		}
+		catch (error) {
+			console.log(error);
+		}
 	}
 }
