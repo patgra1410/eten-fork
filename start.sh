@@ -3,9 +3,10 @@
 tsc
 if [ ! $? -eq 0 ] 
 then
-	echo "Typesript didn't compile :("
+	echo "Typescript didn't compile :("
 	exit
 fi
+echo "Typescript compiled~ uwu"
 
 while true
 do

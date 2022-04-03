@@ -43,4 +43,4 @@ Array of dictionaries:
 put your soundeffects in soundeffects/
 
 ##### Putting effects on sound with /play
-in order to use this feature you have to install [SoX](http://sox.sourceforge.net/) and put it in your PATH 
+in order to use this feature you have to install [SoX](http://sox.sourceforge.net/) and put it in your PATH. You can customize your effects in `data/effects.json`.

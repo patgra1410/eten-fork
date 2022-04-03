@@ -6,7 +6,10 @@ import fs from "fs";
 const player = createAudioPlayer();
 
 interface IEffects {
-	[name: string]: string
+	[name: string]: {
+		name: string,
+		args: string
+	}
 }
 
 function sleep(ms: number) {
@@ -21,7 +24,15 @@ export const data = new SlashCommandBuilder()
 	.setName("play")
 	.setDescription("Puść dźwięk na VC");
 try {
-	execSync("sox --version");
+	execSync("sox --version", { stdio: "ignore" });
+
+	const effectsOption = new SlashCommandStringOption()
+		.setName("efekt")
+		.setDescription("dodaj efekt na dźwięk")
+		.setRequired(false);
+
+	for (const [effect, name] of Object.entries(effects))
+		effectsOption.addChoice(name.name, effect);
 
 	data
 		.addSubcommand(subcommand =>
@@ -42,25 +53,7 @@ try {
 						.setMinValue(1)
 						.setRequired(false)
 				)
-				.addStringOption(
-					new SlashCommandStringOption()
-						.setName("efekt")
-						.setDescription("dodaj efekt na dźwięk")
-						.setRequired(false)
-						.addChoice("reverse", "reverse")
-						.addChoice("echo", "echo")
-						.addChoice("flanger", "flanger")
-						.addChoice("overdrive", "overdrive")
-						.addChoice("reverb", "reverb")
-						.addChoice("reverb (troche głośne)", "reverb_loud")
-						.addChoice("tremolo", "tremolo")
-						.addChoice("głośne", "loud")
-						.addChoice("głośniej", "louder")
-						.addChoice("bardzo głośno", "loudest")
-						.addChoice("speed x2", "speed2")
-						.addChoice("wolmo", "speed0.5")
-						.addChoice("super wolmo", "speed0.1")
-				)
+				.addStringOption(effectsOption)
 				.addStringOption(
 					new SlashCommandStringOption()
 						.setName("multiple")
@@ -74,25 +67,47 @@ try {
 				// 		.setDescription("Zaawansowane ustawienia (argumenty przekazywane bezpośrednio SoX")
 				// 		.setRequired(false)
 				// )
-		)
-		.addSubcommand(subcommand =>
-			subcommand
-				.setName("random")
-				.setDescription("Puść losowy dźwięk")
-		)
-		.addSubcommand(subcommand =>
-			subcommand
-				.setName("stop")
-				.setDescription("Zatrzymaj puszczanie dźwięku")
-		)
-		.addSubcommand(subcommand =>
-			subcommand
-				.setName("list")
-				.setDescription("Lista dźwięków")
 		);
 }
-catch {}
+catch {
+	data
+		.addSubcommand(subcommand =>
+			subcommand
+				.setName("sound")
+				.setDescription("Puść dźwięk na VC")
+				.addIntegerOption(
+					new SlashCommandIntegerOption()
+						.setName("numer")
+						.setDescription("Numer dźwięku (/play list)")
+						.setMinValue(1)
+						.setRequired(true)
+				)
+				.addIntegerOption(
+					new SlashCommandIntegerOption()
+						.setName("repeat")
+						.setDescription("Ile razy puścić dźwięk (defaultowo 1)")
+						.setMinValue(1)
+						.setRequired(false)
+				)
+		);
+}
 
+data
+	.addSubcommand(subcommand =>
+		subcommand
+			.setName("random")
+			.setDescription("Puść losowy dźwięk")
+	)
+	.addSubcommand(subcommand =>
+		subcommand
+			.setName("stop")
+			.setDescription("Zatrzymaj puszczanie dźwięku")
+	)
+	.addSubcommand(subcommand =>
+		subcommand
+			.setName("list")
+			.setDescription("Lista dźwięków")
+	);
 
 export async function execute(interaction: CommandInteraction) {
 	if (interaction.options.getSubcommand() == "list") {
@@ -142,7 +157,7 @@ export async function execute(interaction: CommandInteraction) {
 
 		if (interaction.options.getString("multiple") != undefined) {
 			if (interaction.options.getString("multiple") == "?") {
-				let res = "";
+				let res = "Użycie: w polu multiple podaj po spacji nazwy efektów, które chesz dodać. Nazwy efektów:\n";
 				for (const name of Object.keys(effects))
 					res += name + ", ";
 				res = res.slice(0, -2);
@@ -151,17 +166,20 @@ export async function execute(interaction: CommandInteraction) {
 			}
 
 			let args = "";
+			let names = "";
 			const effs = interaction.options.getString("multiple").split(" ");
 			for (const effect of effs) {
 				if (!(effect in effects)) {
 					interaction.reply(`Efekt ${effect} nie istnieje`);
 				}
-				args += effects[effect] + " ";
+				args += effects[effect].args + " ";
+				names += effects[effect].name + " ";
 			}
+			names = names.slice(0, -1);
 
 			await interaction.reply("Przygotowywanie dźwięku...");
 			try {
-				execSync(`sox -t mp3 -V "${path}" tmp/tmp.mp3 ${args}`);
+				execSync(`sox -t mp3 -V "${path}" tmp/tmp.mp3 ${args}`, { stdio: "ignore" });
 			}
 			catch (error) {
 				await interaction.editReply("Wystąpił błąd przy tworzeniu dźwięku.\n```\n" + error.toString() + "```");
@@ -169,26 +187,26 @@ export async function execute(interaction: CommandInteraction) {
 				return;
 			}
 			path = "tmp/tmp.mp3";
-			await interaction.editReply(`Puszczanie dźwięku ${fileName}${additionalText} z efektami ${interaction.options.getString("multiple")}.`);
+			await interaction.editReply(`Puszczanie dźwięku ${fileName}${additionalText} z efektami ${names}.`);
 		}
-		else if (interaction.options.getString("advanced") != undefined) {
-			await interaction.reply("Przygotowywanie dźwięku...");
-			try {
-				execSync(`sox -t mp3 -V "${path}" tmp/tmp.mp3 ${interaction.options.getString("advanced")}`);
-			}
-			catch (error) {
-				await interaction.editReply("Wystąpił błąd przy tworzeniu dźwięku.\n```\n" + error.toString() + "```");
-				console.error(error);
-				return;
-			}
-			path = "tmp/tmp.mp3";
-			interaction.editReply(`Puszczanie dźwięku ${fileName}${additionalText} z argumentami ${interaction.options.getString("advanced")}.`);
-		}
+		// else if (interaction.options.getString("advanced") != undefined) {
+		// 	await interaction.reply("Przygotowywanie dźwięku...");
+		// 	try {
+		// 		execSync(`sox -t mp3 -V "${path}" tmp/tmp.mp3 ${interaction.options.getString("advanced")}`);
+		// 	}
+		// 	catch (error) {
+		// 		await interaction.editReply("Wystąpił błąd przy tworzeniu dźwięku.\n```\n" + error.toString() + "```");
+		// 		console.error(error);
+		// 		return;
+		// 	}
+		// 	path = "tmp/tmp.mp3";
+		// 	interaction.editReply(`Puszczanie dźwięku ${fileName}${additionalText} z argumentami ${interaction.options.getString("advanced")}.`);
+		// }
 		else if (efekt != undefined) {
 			await interaction.reply("Przygotowywanie dźwięku...");
 			try {
-				const args = effects[efekt];
-				execSync(`sox -t mp3 -V "${path}" tmp/tmp.mp3 ${args}`);
+				const args = effects[efekt].args;
+				execSync(`sox -t mp3 -V "${path}" tmp/tmp.mp3 ${args}`, { stdio: "ignore" });
 			}
 			catch (error) {
 				await interaction.editReply("Wystąpił błąd przy tworzeniu dźwięku.\n```\n" + error.toString() + "```");
@@ -197,7 +215,7 @@ export async function execute(interaction: CommandInteraction) {
 			}
 
 			path = "tmp/tmp.mp3";
-			interaction.editReply(`Puszczanie dźwięku ${fileName}${additionalText} z efektem ${efekt}.`);
+			interaction.editReply(`Puszczanie dźwięku ${fileName}${additionalText} z efektem ${effects[efekt].name}.`);
 		}
 		else
 			interaction.reply(`Puszczanie dźwięku ${fileName}${additionalText}.`);
