@@ -11,7 +11,7 @@ interface ILongestMove {
 
 export default class Board {
 	id = 0;
-	remis: number;
+	remis: Array<string>;
 	usernames: Array<string> = [];
 	uids: Array<string> = [];
 	turn = 0;
@@ -393,15 +393,6 @@ export default class Board {
 					this.edges.push(new Edge(this.points[this.pos[x][y]], this.points[this.pos[nX][nY]], this.spacing, this.offX, this.offY));
 				}
 			}
-		}
-	}
-
-	removeBoard(id: string) {
-		try {
-			fs.unlinkSync(`./tmp/boardPilkarzyki${id}.png`);
-		}
-		catch (error) {
-			console.log(error);
 		}
 	}
 }

@@ -3,9 +3,11 @@ import Discord, { ButtonInteraction, Client, CommandInteraction, Message, Messag
 import Elo from "elo-rating";
 import { performance } from "perf_hooks";
 import { SlashCommandBuilder, SlashCommandUserOption } from "@discordjs/builders";
+import fs from "fs";
 import ExtBoard from "./bot";
 import config from "./config.json";
 import { APIMessage } from "discord-api-types";
+import { IRanking } from "./lib/types";
 
 interface Iuids {
 	[uid: string]: number
@@ -20,7 +22,7 @@ interface IBots {
 }
 
 interface IBoards {
-	[id: number]: Board
+	[id: string]: Board
 }
 
 interface IAccept {
@@ -145,13 +147,25 @@ export async function execute(interaction: CommandInteraction) {
 		interaction.customId = interaction.customId.slice(interaction.customId.indexOf("#") + 1);
 
 		if (interaction.customId.startsWith("accept")) {
-			manageAccept(interaction, mainMessage);
+			acceptManager(interaction, mainMessage);
+			return;
+		}
+
+		if (uids[interaction.user.id] == undefined)
+			return;
+
+		if (interaction.customId == "surrender") {
+			surrenderManager(interaction, mainMessage);
+			return;
+		}
+		else if (interaction.customId == "remis") {
+			remisManager(interaction, mainMessage);
 			return;
 		}
 	}
 }
 
-async function manageAccept(interaction: ButtonInteraction, mainMessage: APIMessage | Message<boolean>) {
+async function acceptManager(interaction: ButtonInteraction, mainMessage: APIMessage | Message<boolean>) {
 	const buttonUids = interaction.customId.split("#");
 	const inviter = buttonUids[1];
 	const invited = buttonUids[2];
@@ -189,8 +203,92 @@ async function manageAccept(interaction: ButtonInteraction, mainMessage: APIMess
 		uids[inviter] = id;
 		boards[id] = new Board(50, 50, 50, [inviter, invited], accept.usernames, id);
 
-		sendBoard(id, interaction.client, mainMessage);
+		sendBoard(id, interaction.client, mainMessage, `Tura: <@${boards[id].turnUID}>`);
 	}
+}
+
+async function surrenderManager(interaction: ButtonInteraction, mainMessage: APIMessage | Message<boolean>) {
+	const uid = interaction.user.id;
+	const id = uids[uid];
+
+	if (boards[uid].withBot) {
+		sendBoard(id, interaction.client, mainMessage, `<@${uid}> poddał się`);
+		const bid: number = parseInt(boards[id].uids[1 - boards[id].uids.indexOf(uid)]);
+
+		delete bots[bid];
+		delete boards[id];
+		delete uids[uid];
+		return;
+	}
+	else {
+		const gameuids = boards[id].uids;
+		updateLongestGame(id, gameuids);
+		const ranking: IRanking = JSON.parse(fs.readFileSync("./data/ranking.json", "utf8"));
+
+		const rating1 = ranking.pilkarzyki[gameuids[0]].rating;
+		const rating2 = ranking.pilkarzyki[gameuids[1]].rating;
+
+		let winner, win;
+		if (gameuids[0] == uid) {
+			winner = gameuids[1];
+			win = false;
+		}
+		else {
+			winner = gameuids[0];
+			win = true;
+		}
+
+		const newRating = Elo.calculate(rating1, rating2, win);
+		ranking.pilkarzyki[gameuids[0]].rating = newRating["playerRating"];
+		ranking.pilkarzyki[gameuids[1]].rating = newRating["opponentRating"];
+
+		ranking.pilkarzyki[uid].lost++;
+		ranking.pilkarzyki[winner].won++;
+		fs.writeFileSync("./data/ranking.json", JSON.stringify(ranking));
+
+		sendBoard(id, interaction.client, mainMessage, `<@${winner}> wygrał przez poddanie się przeciwnika.`);
+		delete boards[id];
+		delete uids[winner];
+		delete uids[uid];
+	}
+}
+
+async function remisManager(interaction: ButtonInteraction, mainMessage: APIMessage | Message<boolean>) {
+	const uid = interaction.user.id;
+	const id = uids[uid];
+
+	if (boards[id].withBot)
+		return;
+	if (boards[id].remis.includes(uid))
+		return;
+
+	boards[id].remis.push(uid);
+	if (boards[id].remis.length == 2) {
+		const gameuids = boards[id].uids;
+		sendBoard(id, interaction.client, mainMessage, "Remis");
+		updateLongestGame(id, boards[id].uids);
+
+		delete boards[id];
+		delete uids[gameuids[0]];
+		delete uids[gameuids[1]];
+		return;
+	}
+}
+
+function updateLongestGame(gameid: number, gameuids: Array<string>) {
+	const ranking: IRanking = JSON.parse(fs.readFileSync("./data/ranking.json", "utf8"));
+	const tempuids = [...gameuids];
+	let uidsString = "";
+
+	for (const tuid of tempuids.sort())
+		uidsString += tuid + "#";
+	uidsString = uidsString.substring(0, uidsString.length - 1);
+
+	if (ranking.najdluzszagrapilkarzyki[uidsString] == undefined)
+		ranking.najdluzszagrapilkarzyki[uidsString] = 0;
+	ranking.najdluzszagrapilkarzyki[uidsString] = Math.max(boards[gameid].totalMoves, ranking.najdluzszagrapilkarzyki[uidsString]);
+
+	fs.writeFileSync("./data/ranking.json", JSON.stringify(ranking));
 }
 
 function getAcceptByUids(inviter: string, invited: string): IAccept | undefined {
@@ -210,11 +308,11 @@ function removeAcceptByUids(inviter: string, invited: string): boolean {
 	return false;
 }
 
-async function sendBoard(id: number, client: Client, message: APIMessage | Message<boolean>) {
+async function sendBoard(id: number, client: Client, message: APIMessage | Message<boolean>, content: string) {
 	boards[id].draw();
 	const attachment = new Discord.MessageAttachment(`./tmp/boardPilkarzyki${id}.png`);
 	const img = await (client.guilds.cache.get(config.junkChannel.guild).channels.cache.get(config.junkChannel.channel) as TextChannel).send({ files: [attachment] });
-	const msg = `Tura: <@${boards[id].turnUID}>\n${img.attachments.first().url}`;
-	message = await (message as Message).edit({ content: msg, components: getButtons(id) });
+	content += `\n${img.attachments.first().url}`;
+	message = await (message as Message).edit({ content: content, components: getButtons(id) });
 	boards[id].message = message;
 }

@@ -202,9 +202,9 @@ interface IGrade {
 	Id: number;
 	Lesson: IStringIdResource; // Id, Url
 	Subject: IStringIdResource; // Id, Url
-	Student: IStringIdResource; // Id, Url
+	Student: IUserResource; // Id, Url
 	Category: IStringIdResource; // Id, Url
-	AddedBy: IStringIdResource; // Id, Url
+	AddedBy: IUserResource; // Id, Url
 	Grade: string;
 	Date: string;
 	AddDate: string;
@@ -281,11 +281,11 @@ interface ISubstitution {
 	OrgDate: string;
 	OrgLessonNo: string;
 	OrgSubject: ISubjectResource; // Id, Url
-	OrgTeacher: ISubjectResource; // Id, Url
+	OrgTeacher: IUserResource; // Id, Url
 	Date?: string;
 	LessonNo?: string;
 	Subject?: ISubjectResource; // Id, Url
-	Teacher?: ISubjectResource; // Id, Url
+	Teacher?: IUserResource; // Id, Url
 }
 
 // https://api.librus.pl/3.0/Calendars/Substitutions/<Comma separated IDs>

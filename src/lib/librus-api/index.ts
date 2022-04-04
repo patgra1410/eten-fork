@@ -71,10 +71,11 @@ export default class LibrusClient {
 		if (username.length < 2 || password.length < 2)
 			throw new Error("Invalid username or password");
 		// Get csrf-token from <meta> tag for following requests
-		const result = await (await this.cookieFetch("https://portal.librus.pl/")).text();
-		const csrfTokenRegexResult = /<meta name="csrf-token" content="(.*)">/g.exec(result);
+		const result = await this.cookieFetch("https://portal.librus.pl/");
+		const resultText = await result.text();
+		const csrfTokenRegexResult = /<meta name="csrf-token" content="(.*)">/g.exec(resultText);
 		if (csrfTokenRegexResult == null)
-			throw new LibrusError("No csrf-token meta tag in <head> of main site");
+			throw new LibrusError("No csrf-token meta tag in <head> of main site", result.status, resultText);
 		const csrfToken = csrfTokenRegexResult[1];
 
 		// Login
@@ -92,24 +93,25 @@ export default class LibrusClient {
 			}
 		});
 		if (!loginResult.ok)
-			throw new Error(`https://portal.librus.pl/rodzina/login/action ${loginResult.statusText}`);
+			throw new LibrusError(`https://portal.librus.pl/rodzina/login/action ${loginResult.statusText}`, loginResult.status, await loginResult.text());
 
 		// Get the accessToken
-		const accountsResult = await (await this.cookieFetch("https://portal.librus.pl/api/v3/SynergiaAccounts", {
+		const accountsResult = await this.cookieFetch("https://portal.librus.pl/api/v3/SynergiaAccounts", {
 			method: "GET",
 			headers: {
 				"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.114 Safari/537.36"
 			}
-		})).json() as librusApiTypes.APISynergiaAccounts;
-		if (!loginResult.ok)
-			throw new Error(`https://portal.librus.pl/api/v3/SynergiaAccounts ${loginResult.statusText}`);
+		});
+		const accountsResultJson = await accountsResult.json() as librusApiTypes.APISynergiaAccounts;
+		if (!accountsResult.ok)
+			throw new LibrusError(`https://portal.librus.pl/api/v3/SynergiaAccounts ${loginResult.statusText}`, accountsResult.status, accountsResultJson);
 		// TODO: Fix the existence checking here
-		if (accountsResult.accounts[0]?.accessToken == null)
-			throw new LibrusError("SynergiaAccounts endpoint returned no accessToken for account");
-		this.bearerToken = accountsResult.accounts[0].accessToken;
-		if (accountsResult.accounts[0]?.login == null)
-			throw new LibrusError("SynergiaAccounts endpoint returned no login for account");
-		this.synergiaLogin = accountsResult.accounts[0].login;
+		if (accountsResultJson.accounts[0]?.accessToken == null)
+			throw new LibrusError("SynergiaAccounts endpoint returned no accessToken for account", accountsResult.status, accountsResultJson);
+		this.bearerToken = accountsResultJson.accounts[0].accessToken;
+		if (accountsResultJson.accounts[0]?.login == null)
+			throw new LibrusError("SynergiaAccounts endpoint returned no login for account", accountsResult.status, accountsResultJson);
+		this.synergiaLogin = accountsResultJson.accounts[0].login;
 		this.appUsername = username;
 		this.appPassword = password;
 		this.log(" Librus Login OK ".bgGreen.white);
@@ -123,7 +125,7 @@ export default class LibrusClient {
 	 */
 	async refreshToken(): Promise<void> {
 		// Get the newer accessToken
-		const result = await this.cookieFetch(`https://portal.librus.pl/api/v3/SynergiaAccounts/fresh/${this.synergiaLogin}`,
+		const response = await this.cookieFetch(`https://portal.librus.pl/api/v3/SynergiaAccounts/fresh/${this.synergiaLogin}`,
 			{
 				method: "GET",
 				headers: {
@@ -132,11 +134,18 @@ export default class LibrusClient {
 				redirect: "manual"
 			}
 		);
-		if (!result.ok)
-			throw new LibrusError(`refreshToken: ${result.statusText}`);
-		const resultJson = await result.json() as librusApiTypes.APISynergiaAccountsFresh;
+		let responseText;
+		try {
+			responseText = await response.text();
+		}
+		catch (error) {
+			this.log(error);
+		}
+		if (!response.ok)
+			throw new LibrusError(`refreshToken: ${response.statusText}`, response.status, responseText);
+		const resultJson = await response.json() as librusApiTypes.APISynergiaAccountsFresh;
 		if (resultJson.accessToken == null)
-			throw new LibrusError("GET SynergiaAccounts returned unexpected JSON format");
+			throw new LibrusError("GET SynergiaAccounts returned unexpected JSON format", response.status, responseText);
 		this.bearerToken = resultJson.accessToken;
 		return;
 	}
@@ -245,14 +254,14 @@ export default class LibrusClient {
 	async getPushChanges(): Promise<librusApiTypes.APIPushChanges> {
 		const response = await this.customLibrusRequest(`https://api.librus.pl/3.0/PushChanges?pushDevice=${this.pushDevice}`) as Response;
 		const responseJson = await response.json() as librusApiTypes.APIPushChanges;
-		if (responseJson?.Code === "UnableToGetPushDevice") {
+		if (!response.ok)
+			throw new LibrusError(`${response.status} ${response.statusText}`, response.status, responseJson);
+		if (responseJson?.Code === "UnableToGetPushDevice")
 			throw new LibrusError("Unable to get pushDevice. You're probably using a pushDevice ID that's invalid or doesn't belong to you.", response.status, responseJson);
-		}
-		else if (responseJson?.Code === "FilterInvalidValue") {
+		else if (responseJson?.Code === "FilterInvalidValue")
 			throw new LibrusError("Invalid pushDevice ID", response.status, responseJson);
-		}
 		if (!("Changes" in responseJson))
-			throw new LibrusError("No \"Changes\" array in received PushChanges JSON");
+			throw new LibrusError("No \"Changes\" array in received PushChanges JSON", response.status, responseJson);
 		// const pushChanges: number[] = [];
 		// if (resultJson.Changes.length > 0) {
 		// 	for (const element of resultJson.Changes) {
