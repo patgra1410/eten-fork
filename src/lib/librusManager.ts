@@ -1,4 +1,4 @@
-import { MessageEmbed, Snowflake, TextChannel, MessageOptions } from "discord.js";
+import { MessageEmbed, Snowflake, TextChannel } from "discord.js";
 import config from "../config.json";
 // import util from "util";
 import { client } from "../index";
@@ -13,7 +13,7 @@ interface IRoleRegexes {
 }
 
 interface IChannels {
-	channel: TextChannel;
+	channelId: Snowflake;
 	knownNotices: Map<string, Snowflake>;
 	rolesRegexArr: IRoleRegexes[];
 }
@@ -68,11 +68,11 @@ async function fetchNewSchoolNotices(): Promise<void> {
 
 				for (const listener of noticeListenerChannels) {
 					let messageText = baseMessageText;
-					let taggers = "";
+					let tagText = "";
 					if (isPlanChangeNotice(schoolNoticeResponse.Subject) && listener.rolesRegexArr.length > 0) {
 						for (const roleData of listener.rolesRegexArr) {
 							if (roleData.boldRegex.test(messageText))
-								taggers = taggers.concat(`<@&${roleData.roleId}>`);
+								tagText = tagText.concat(`<@&${roleData.roleId}>`);
 							messageText = messageText.replace(roleData.boldRegex, "**$&**");
 							messageText = messageText.replace(roleData.roleRegex, `<@&${roleData.roleId}> $&`);
 						}
@@ -83,20 +83,26 @@ async function fetchNewSchoolNotices(): Promise<void> {
 							name: `📣 ${changeType} w Librusie`
 						})
 						.setTitle(`**__${schoolNoticeResponse.Subject}__**`)
-						.setDescription(messageText.substring(0, 6000));
+						.setDescription(messageText.substring(0, 6000))
+						.setFooter({ text: `Dodano: ${schoolNoticeResponse.CreationDate}` });
+					const channel = await client.channels.fetch(listener.channelId) as TextChannel; // We're guaranteed it's TextChannel from prepareTrackedChannels()
 					if (listener.knownNotices.has(schoolNoticeResponse.Id)) {
 						const messageId = listener.knownNotices.get(schoolNoticeResponse.Id);
-						await (await listener.channel.messages.fetch(messageId)).edit({ content: taggers, embeds: [embed] });
-						await listener.channel.send({
+						const message = await channel.messages.fetch(messageId);
+						await message.edit({
+							content: ((tagText.length > 0) ? tagText : null),
+							embeds: [embed.setFooter({ text: `Dodano: ${schoolNoticeResponse.CreationDate} | Ostatnia zmiana: ${update.AddDate}` })]
+						});
+						await channel.send({
 							reply: { messageReference: messageId, failIfNotExists: false },
 							content: "Zmieniono ogłoszenie ^"
 						});
 					}
 					else {
-						const messagePayload: MessageOptions = { embeds: [embed] };
-						if (taggers != "")
-							messagePayload.content = taggers;
-						const message = await listener.channel.send(messagePayload);
+						const message = await channel.send({
+							content: ((tagText.length > 0) ? tagText : null),
+							embeds: [embed]
+						});
 						listener.knownNotices.set(schoolNoticeResponse.Id, message.id);
 					}
 				}
@@ -146,7 +152,8 @@ async function fetchNewSchoolNotices(): Promise<void> {
 					])
 					.setFooter({ text: `Dodano: ${update.AddDate}` });
 				for (const listener of noticeListenerChannels) {
-					await listener.channel.send({ embeds: [embed] });
+					const channel = await client.channels.fetch(listener.channelId) as TextChannel; // We're guaranteed it's TextChannel from prepareTrackedChannels()
+					await channel.send({ embeds: [embed] });
 					console.log(`${update.Resource.Url}  --- Sent!`.green);
 				}
 			}
@@ -220,8 +227,9 @@ async function fetchNewSchoolNotices(): Promise<void> {
 					embed.setDescription(update.extraData);
 				for (const listener of noticeListenerChannels) {
 					// Temporary
-					if (listener.channel.id === "884370476128944148") {
-						await listener.channel.send({ content: "<@&885211432025731092>", embeds: [embed] });
+					if (listener.channelId === "884370476128944148") {
+						const channel = await client.channels.fetch(listener.channelId) as TextChannel; // We're guaranteed it's TextChannel from prepareTrackedChannels()
+						await channel.send({ content: "<@&885211432025731092>", embeds: [embed] });
 						console.log(`${update.Resource.Url}  --- Sent!`.green);
 					}
 				}
@@ -259,7 +267,6 @@ async function prepareTrackedChannelData(): Promise<void> {
 			console.log(`${channel.id} is not a valid guild text channel!!!`.white.bgRed);
 			continue;
 		}
-		channel as TextChannel;
 		const rolesRegexArr: IRoleRegexes[] = [];
 		if (channelConfig.roles) {
 			const guildRoles = await (await client.guilds.fetch(channelConfig.guild)).roles.fetch();
@@ -327,9 +334,9 @@ async function prepareTrackedChannelData(): Promise<void> {
 			}
 		}
 		noticeListenerChannels.push({
-			channel: channel,
+			channelId: channel.id,
 			rolesRegexArr: rolesRegexArr,
-			knownNotices: new Map()
+			knownNotices: new Map<string, Snowflake>()
 		});
 	}
 	// console.debug(util.inspect(noticeListenerChannels, false, null, true));

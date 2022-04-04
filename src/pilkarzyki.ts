@@ -30,7 +30,7 @@ interface IAccept {
 	uids: Array<string>,
 	to: string, // uid
 	from: string, // uid
-	message: Message
+	message?: APIMessage | Message<boolean>
 }
 
 const uids: Iuids = {};
@@ -39,6 +39,10 @@ const boards: IBoards = {};
 let gameID = 1;
 let botID = 1;
 let accepts: Array<IAccept> = [];
+
+function sleep(ms: number) {
+	return new Promise(resolve => setTimeout(resolve, ms));
+}
 
 function getButtons(id: number): Array<Discord.MessageActionRow> {
 	const indexes = boards[id].possibleMovesIndexes();
@@ -138,7 +142,10 @@ export const data = new SlashCommandBuilder()
 				option
 					.setName("depth")
 					.setDescription("Głębokość patrzenia (max. " + config.pilkarzykiBot.maxDepth + ")")
-					.setRequired(true))
+					.setRequired(true)
+					.setMinValue(1)
+					.setMaxValue(config.pilkarzykiBot.maxDepth)
+			)
 	);
 
 export async function execute(interaction: CommandInteraction) {
@@ -151,6 +158,9 @@ export async function execute(interaction: CommandInteraction) {
 			return;
 		}
 
+		const uid = interaction.user.id;
+		const id = uids[uid];
+
 		if (uids[interaction.user.id] == undefined)
 			return;
 
@@ -160,6 +170,159 @@ export async function execute(interaction: CommandInteraction) {
 		}
 		else if (interaction.customId == "remis") {
 			remisManager(interaction, mainMessage);
+		}
+		else if (!boards[id].withBot) {
+			buttonWithoutBot(interaction);
+		}
+		else {
+			buttonWithBot(interaction, mainMessage);
+			return;
+		}
+
+		let msg, components = true;
+
+		if (boards[id].win == -1) {
+			msg = `Tura: <@${boards[id].turnUID}>`;
+
+			if (boards[id].remis.length > 0)
+				msg += ` (${boards[id].remis.length}/2 osoby poprosiły o remis)`;
+		}
+		else {
+			msg = `<@${boards[id].uids[boards[id].win]}> wygrał!`;
+			components = false;
+		}
+
+		sendBoard(id, interaction.client, mainMessage, msg, components);
+
+		if (boards[id].win != -1) {
+			const gameuids = boards[id].uids;
+			updateLongestGame(id, gameuids);
+			const ranking: IRanking = JSON.parse(fs.readFileSync("./data/ranking.json", "utf8"));
+
+			const player1 = ranking.pilkarzyki[gameuids[0]].rating;
+			const player2 = ranking.pilkarzyki[gameuids[1]].rating;
+
+			let newRating;
+			if (boards[id].win == 0) {
+				newRating = Elo.calculate(player1, player2, true);
+				ranking.pilkarzyki[gameuids[0]].won++;
+				ranking.pilkarzyki[gameuids[1]].lost++;
+			}
+			else {
+				newRating = Elo.calculate(player1, player2, false);
+				ranking.pilkarzyki[gameuids[0]].lost++;
+				ranking.pilkarzyki[gameuids[1]].won++;
+			}
+
+			ranking.pilkarzyki[gameuids[0]].rating = newRating["playerRating"];
+			ranking.pilkarzyki[gameuids[1]].rating = newRating["opponentRating"];
+
+			fs.writeFileSync("./data/ranking.json", JSON.stringify(ranking));
+
+			delete boards[id];
+			delete uids[gameuids[0]];
+			delete uids[gameuids[1]];
+		}
+		return;
+	}
+	else if (interaction.isCommand()) {
+		const message = await interaction.deferReply({ fetchReply: true });
+		let usernames;
+		const id = gameID;
+		gameID++;
+
+		if (interaction.options.getSubcommand() == "player") {
+			const secondUser = interaction.options.getUser("gracz");
+			const uid2 = secondUser.id;
+			const uid1 = interaction.user.id;
+			usernames = [interaction.user.username, secondUser.username];
+
+			if (uids[uid1] != undefined) {
+				interaction.editReply("Już grasz w grę");
+				return;
+			}
+			if (uids[uid2] != undefined) {
+				interaction.editReply(`<@${uid2}> już gra w grę`);
+				return;
+			}
+			if (uid1 == uid2) {
+				interaction.reply("Nie możesz grać z samym sobą");
+				return;
+			}
+
+			for (const accept of accepts) {
+				if (accept.to == uid2 && accept.from == uid1) {
+					await interaction.editReply("Już wyzwałeś tą osobę");
+					return;
+				}
+			}
+
+			const ranking: IRanking = JSON.parse(fs.readFileSync("./data/ranking.json", "utf8"));
+			if (ranking.pilkarzyki[uid1] == undefined)
+				ranking.pilkarzyki[uid1] = {
+					lost: 0,
+					won: 0,
+					rating: (ranking.pilkarzyki[uid1].rating ? ranking.pilkarzyki[uid1].rating : 1500)
+				};
+			if (ranking.pilkarzyki[uid2] == undefined)
+				ranking.pilkarzyki[uid2] = {
+					lost: 0,
+					won: 0,
+					rating: (ranking.pilkarzyki[uid2].rating ? ranking.pilkarzyki[uid2].rating : 1500)
+				};
+
+			fs.writeFileSync("./data/ranking.json", JSON.stringify(ranking));
+
+			const newAccept: IAccept = {
+				usernames: usernames,
+				uids: [uid1, uid2],
+				to: uid2,
+				from: uid2
+			};
+
+			const row = new Discord.MessageActionRow()
+				.addComponents(
+					new Discord.MessageButton()
+						.setLabel("Tak")
+						.setCustomId("pilkarzyki#acceptYes#" + uid1 + "#" + uid2)
+						.setStyle("PRIMARY"),
+					new Discord.MessageButton()
+						.setLabel("Nie")
+						.setCustomId("pilkarzyki#acceptNo#" + uid1 + "#" + uid2)
+						.setStyle("DANGER")
+				);
+
+			newAccept.message = await interaction.editReply({
+				content: `<@${uid2}>: ${usernames[0]} chce z tobą zagrać`,
+				components: [row]
+			});
+
+			accepts.push(newAccept);
+		}
+		else if (interaction.options.getSubcommand() == "bot") {
+			const uid = interaction.user.id;
+			const bid = botID;
+			botID++;
+			usernames = [interaction.user.username, "Bot"];
+
+			let evalFunctionPath = undefined;
+			for (const func of config.pilkarzykiBot.evaluationFunctionConfig) {
+				if (eval(func.condition)) {
+					evalFunctionPath = func.path;
+				}
+			}
+
+			if (evalFunctionPath === undefined) {
+				interaction.editReply("Nie znaleziono odpowiedniej funkcjievaluacyjnej (być może config jest źle skonfigurowany albo ja nie umiem pisać Etena jak zwykle)");
+				return;
+			}
+			evalFunctionPath = evalFunctionPath[Math.floor(Math.random() * evalFunctionPath.length)];
+			console.log("evalFunctionPath = " + evalFunctionPath);
+
+			uids[uid] = id;
+			boards[id] = new Board(50, 50, 50, [uid, bid.toString()], usernames, id, true);
+
+			sendBoard(id, interaction.client, message, `Tura: <@${boards[id].turnUID}>`);
 			return;
 		}
 	}
@@ -179,7 +342,7 @@ async function acceptManager(interaction: ButtonInteraction, mainMessage: APIMes
 			return;
 
 		const msg = `${accept.usernames[1]} nie zaakceptował gry z ${accept.usernames[0]}`;
-		await accept.message.edit({ content: msg, components: [] });
+		await (accept.message as Message).edit({ content: msg, components: [] });
 		removeAcceptByUids(inviter, invited);
 		return;
 	}
@@ -193,7 +356,7 @@ async function acceptManager(interaction: ButtonInteraction, mainMessage: APIMes
 			if (acc.to != invited && acc.from != inviter)
 				newAccepts.push(acc);
 			else
-				acc.message.edit({ content: acc.message.content, components: [] });
+				(acc.message as Message).edit({ content: acc.message.content, components: [] });
 		}
 		accepts = newAccepts;
 
@@ -275,6 +438,127 @@ async function remisManager(interaction: ButtonInteraction, mainMessage: APIMess
 	}
 }
 
+async function buttonWithoutBot(interaction: ButtonInteraction) {
+	const uid = interaction.user.id;
+	const id = uids[uid];
+
+	if (uid != boards[id].turnUID)
+		return;
+
+	const indexes = boards[id].possibleMovesIndexes();
+	if (!indexes.includes(parseInt(interaction.customId)))
+		return;
+
+	boards[id].currMoveLen++;
+	if (!boards[id].move(indexes.indexOf(parseInt(interaction.customId)))) {
+		console.error("Move wasnt possible");
+		return;
+	}
+
+	if (boards[id].turnUID != uid) {
+		boards[id].longestMove[uid] = Math.max(boards[id].longestMove[uid], boards[id].currMoveLen);
+		boards[id].currMoveLen = 0;
+
+		const ranking: IRanking = JSON.parse(fs.readFileSync("./data/ranking.json", "utf8"));
+		if (ranking.najdluzszyruch[uid] == undefined)
+			ranking.najdluzszyruch[uid] = 0;
+		ranking.najdluzszyruch[uid] = Math.max(ranking.najdluzszyruch[uid], boards[id].longestMove[uid]);
+		fs.writeFileSync("./data/ranking.json", JSON.stringify(ranking));
+	}
+}
+
+async function buttonWithBot(interaction: ButtonInteraction, mainMessage: APIMessage | Message<boolean>) {
+	const uid = interaction.user.id;
+	const id = uids[uid];
+	const bid = parseInt(boards[id].uids[1 - boards[id].uids.indexOf(uid)]);
+	const indexes = boards[id].possibleMovesIndexes();
+
+	if (!indexes.includes(parseInt(interaction.customId)))
+		return;
+	if (!boards[id].move(indexes.indexOf(parseInt(interaction.customId)))) {
+		console.error("Move wasnt possible");
+		return;
+	}
+
+	bots[bid].ext_board.makeMove([interaction.customId]);
+
+	let msg, components = true;
+	if (boards[id].win != -1) {
+		if (boards[id].uids[boards[id].win] == uid)
+			msg = `<@${uid}> wygrał!`;
+		else
+			msg = "Bot wygrał!";
+	}
+	else if (boards[id].turnUID == uid)
+		msg = `Tura: <@${uid}>`;
+	else {
+		components = false;
+		msg = "Bot myśli...";
+	}
+
+	sendBoard(id, interaction.client, mainMessage, msg, components);
+
+	if (boards[id].win != -1) {
+		delete bots[bid];
+		delete boards[id];
+		delete uids[uid];
+		return;
+	}
+	if (boards[id].turnUID == uid)
+		return;
+
+	const start = performance.now();
+	bots[bid].ext_board.nodes = 0;
+	const move = bots[bid].ext_board.search(bots[bid].depth, boards[id].turn, -2000, 2000)[1];
+	const end = performance.now();
+
+	if (move.length == 0) {
+		sendBoard(id, interaction.client, mainMessage, `<@${uid}> wygrał!`);
+		delete bots[bid];
+		delete boards[id];
+		delete uids[uid];
+		return;
+	}
+
+	const nodes = bots[bid].ext_board.nodes;`Bot myślał${Math.round(((end - start) * 100) / 100)}ms i policzył ${nodes} nodów (${Math.round((nodes / ((end - start) / 1000)) * 100) / 100} nodes/s)`;
+	sendBoard(id, interaction.client, mainMessage, msg);
+	console.log((Math.round((end - start) * 100) / 100) + "ms, " + nodes + " nodes, " + Math.round((nodes / ((end - start) / 1000)) * 100) / 100 + " nodes/s", move);
+
+	let num = 0;
+	for (const dir of move) {
+		num++;
+		await sleep(500);
+
+		const ind = boards[id].possibleMovesIndexes();
+		if (!boards[id].move(ind.indexOf(dir))) {
+			console.log("AaAAAAAAAAAAaAAAA A aaA wszystko sie jebie");
+			return;
+		}
+
+		if (num == move.length)
+			continue;
+
+		sendBoard(id, interaction.client, mainMessage, msg);
+	}
+
+	bots[bid].ext_board.makeMove(move);
+
+	if (boards[id].win != -1) {
+		if (boards[id].uids[boards[id].win] == uid)
+			msg = `<@${uid}> wygrał!`;
+		else
+			msg = "Bot wygrał!";
+
+		sendBoard(id, interaction.client, mainMessage, msg, false);
+		delete bots[bid];
+		delete boards[id];
+		delete uids[uid];
+		return;
+	}
+
+	sendBoard(id, interaction.client, mainMessage, `Tura: <@${uid}>`);
+}
+
 function updateLongestGame(gameid: number, gameuids: Array<string>) {
 	const ranking: IRanking = JSON.parse(fs.readFileSync("./data/ranking.json", "utf8"));
 	const tempuids = [...gameuids];
@@ -308,11 +592,11 @@ function removeAcceptByUids(inviter: string, invited: string): boolean {
 	return false;
 }
 
-async function sendBoard(id: number, client: Client, message: APIMessage | Message<boolean>, content: string) {
+async function sendBoard(id: number, client: Client, message: APIMessage | Message<boolean>, content: string, components = true) {
 	boards[id].draw();
 	const attachment = new Discord.MessageAttachment(`./tmp/boardPilkarzyki${id}.png`);
 	const img = await (client.guilds.cache.get(config.junkChannel.guild).channels.cache.get(config.junkChannel.channel) as TextChannel).send({ files: [attachment] });
 	content += `\n${img.attachments.first().url}`;
-	message = await (message as Message).edit({ content: content, components: getButtons(id) });
+	message = await (message as Message).edit({ content: content, components: (components ? getButtons(id) : []) });
 	boards[id].message = message;
 }

@@ -12,16 +12,12 @@ interface IChangeResource {
 	Type: string;
 	Url: string;
 }
+interface INumberIdResource {
+	Id: number;
+	Url: string;
+}
 interface IStringIdResource {
 	Id: string;
-	Url: string;
-}
-interface ISubjectResource {
-	Id: number;
-	Url: string;
-}
-interface IUserResource {
-	Id: number;
 	Url: string;
 }
 
@@ -73,10 +69,7 @@ export interface APISynergiaAccounts {
 // also https://api.librus.pl/3.0/ChangeRegister/<pushdevice id>
 // {"sendPush":"0","appVersion":"6.0.0"}
 export interface PostAPIChangeRegister extends APIv3BaseResponse {
-	ChangeRegister: {
-		Id: number;
-		Url: string;
-	}
+	ChangeRegister: INumberIdResource;
 }
 
 // https://api.librus.pl/3.0/Me
@@ -100,7 +93,7 @@ export interface APIMe extends APIv3BaseResponse {
 			FirstName: string;
 			LastName: string;
 		}
-		Class: IStringIdResource; // Id, Url
+		Class: INumberIdResource; // Id, Url
 	}
 }
 
@@ -113,7 +106,7 @@ export interface APISystemData extends APIv3BaseResponse {
 
 interface ICategory {
 	Id: number;
-	Teacher: IUserResource; // Id, Url
+	Teacher: INumberIdResource; // Id, Url
 	Color: IStringIdResource; // Id, Url
 	Name: string;
 	AdultsExtramural: boolean;
@@ -141,7 +134,7 @@ export interface ISchoolNotice {
 	EndDate: string;
 	Subject: string;
 	Content: string;
-	AddedBy: IUserResource // Id, Url
+	AddedBy: INumberIdResource // Id, Url
 	CreationDate: string;
 	WasRead: boolean;
 }
@@ -158,14 +151,14 @@ export interface APISchoolNotice extends APIv3BaseResponse {
 
 interface IAttendance {
 	Id: number;
-	Lesson: ISubjectResource; // Id, Url
-	Student: IUserResource; // Id, Url
+	Lesson: INumberIdResource; // Id, Url
+	Student: INumberIdResource; // Id, Url
 	Date: string;
 	AddDate: string;
 	LessonNo: number;
 	Semester: number;
 	Type: IStringIdResource; // Id, Url
-	AddedBy: IUserResource; // Id, Url
+	AddedBy: INumberIdResource; // Id, Url
 }
 
 // https://api.librus.pl/3.0/Attendances/<Comma separated Attendance IDs>
@@ -180,14 +173,14 @@ interface IHomework {
 	Id: number;
 	Content: string;
 	Date: string;
-	Category: IStringIdResource; // Id, Url
+	Category: INumberIdResource; // Id, Url
 	LessonNo: string;
 	TimeFrom: string;
 	TimeTo: string;
 	AddDate: string;
-	CreatedBy: IUserResource; // Id, Url
-	Class: IStringIdResource; // Id, Url
-	Subject: ISubjectResource; // Id, Url
+	CreatedBy: INumberIdResource; // Id, Url
+	Class: INumberIdResource; // Id, Url
+	Subject: INumberIdResource; // Id, Url
 }
 
 // https://api.librus.pl/3.0/Homeworks/<Comma separated Homework IDs>
@@ -200,11 +193,11 @@ export interface APIHomeworks extends APIv3BaseResponse {
 
 interface IGrade {
 	Id: number;
-	Lesson: IStringIdResource; // Id, Url
-	Subject: IStringIdResource; // Id, Url
-	Student: IUserResource; // Id, Url
-	Category: IStringIdResource; // Id, Url
-	AddedBy: IUserResource; // Id, Url
+	Lesson: INumberIdResource; // Id, Url
+	Subject: INumberIdResource; // Id, Url
+	Student: INumberIdResource; // Id, Url
+	Category: INumberIdResource; // Id, Url
+	AddedBy: INumberIdResource; // Id, Url
 	Grade: string;
 	Date: string;
 	AddDate: string;
@@ -242,8 +235,8 @@ export interface APIGradesComments extends APIv3BaseResponse {
 
 interface ILesson {
 	Id: number;
-	Teacher: IUserResource; // Id, Url
-	Subject: ISubjectResource; // Id, Url
+	Teacher: INumberIdResource; // Id, Url
+	Subject: INumberIdResource; // Id, Url
 	Class: IStringIdResource; // Id, Url
 }
 
@@ -261,7 +254,7 @@ interface ITeacherFreeDay {
 	DateFrom: string;
 	DateTo: string;
 	AddDate: string;
-	Teacher: IUserResource // Id, Url
+	Teacher: INumberIdResource // Id, Url
 	TimeFrom: string;
 	TimeTo: string;
 }
@@ -280,12 +273,12 @@ interface ISubstitution {
 	IsShifted: boolean;
 	OrgDate: string;
 	OrgLessonNo: string;
-	OrgSubject: ISubjectResource; // Id, Url
-	OrgTeacher: IUserResource; // Id, Url
+	OrgSubject: INumberIdResource; // Id, Url
+	OrgTeacher: INumberIdResource; // Id, Url
 	Date?: string;
 	LessonNo?: string;
-	Subject?: ISubjectResource; // Id, Url
-	Teacher?: IUserResource; // Id, Url
+	Subject?: INumberIdResource; // Id, Url
+	Teacher?: INumberIdResource; // Id, Url
 }
 
 // https://api.librus.pl/3.0/Calendars/Substitutions/<Comma separated IDs>
