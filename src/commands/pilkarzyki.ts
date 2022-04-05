@@ -17,7 +17,8 @@ interface IBots {
 	[bid: number]: {
 		gameID: number,
 		ext_board: ExtBoard,
-		depth: number
+		depth: number,
+		playerTurn: boolean
 	}
 }
 
@@ -45,7 +46,14 @@ function sleep(ms: number) {
 }
 
 function getButtons(id: number): Array<Discord.MessageActionRow> {
-	const indexes = boards[id].possibleMovesIndexes();
+	let indexes;
+	try {
+		indexes = boards[id].possibleMovesIndexes();
+	}
+	catch(error) {
+		console.log(`Couldnt get move indexes for board_id = ${id} (probably doesnt exist)`);
+		return;
+	}
 	let style: MessageButtonStyleResolvable;
 	if (boards[id].turn == 0)
 		style = "PRIMARY";
@@ -173,10 +181,10 @@ export async function execute(interaction: CommandInteraction) {
 				return;
 		}
 		else if (!boards[id].withBot) {
-			buttonWithoutBot(interaction);
+			await buttonWithoutBot(interaction);
 		}
 		else {
-			buttonWithBot(interaction, mainMessage);
+			await buttonWithBot(interaction, mainMessage);
 			return;
 		}
 
@@ -303,6 +311,7 @@ export async function execute(interaction: CommandInteraction) {
 		else if (interaction.options.getSubcommand() == "bot") {
 			const uid = interaction.user.id;
 			const bid = botID;
+			const depth = interaction.options.getInteger("depth"); // required in eval, dont remove
 			botID++;
 			usernames = [interaction.user.username, "Bot"];
 
@@ -322,8 +331,14 @@ export async function execute(interaction: CommandInteraction) {
 
 			uids[uid] = id;
 			boards[id] = new Board(50, 50, 50, 3, [uid, bid.toString()], usernames, id, true);
+			bots[bid] = {
+				gameID: id,
+				ext_board: new ExtBoard(boards[id], 9, 13, require(evalFunctionPath)),
+				depth: depth,
+				playerTurn: true
+			};
 
-			sendBoard(id, interaction.client, message, `Tura: <@${boards[id].turnUID}>`);
+			sendBoard(id, interaction.client, message, `Tura: <@${boards[id].turnUID}>`, true, interaction);
 			return;
 		}
 	}
@@ -376,7 +391,7 @@ async function surrenderManager(interaction: ButtonInteraction, mainMessage: API
 	const id = uids[uid];
 
 	if (boards[id].withBot) {
-		sendBoard(id, interaction.client, mainMessage, `<@${uid}> poddał się`);
+		sendBoard(id, interaction.client, mainMessage, `<@${uid}> poddał się`, false);
 		const bid: number = parseInt(boards[id].uids[1 - boards[id].uids.indexOf(uid)]);
 
 		delete bots[bid];
@@ -473,6 +488,10 @@ async function buttonWithBot(interaction: ButtonInteraction, mainMessage: APIMes
 	const uid = interaction.user.id;
 	const id = uids[uid];
 	const bid = parseInt(boards[id].uids[1 - boards[id].uids.indexOf(uid)]);
+
+	if (bots[bid].playerTurn == false)
+		return;
+
 	const indexes = boards[id].possibleMovesIndexes();
 
 	if (!indexes.includes(parseInt(interaction.customId)))
@@ -509,20 +528,23 @@ async function buttonWithBot(interaction: ButtonInteraction, mainMessage: APIMes
 	if (boards[id].turnUID == uid)
 		return;
 
+	bots[bid].playerTurn = false;
+
 	const start = performance.now();
 	bots[bid].ext_board.nodes = 0;
 	const move = bots[bid].ext_board.search(bots[bid].depth, boards[id].turn, -2000, 2000)[1];
 	const end = performance.now();
 
 	if (move.length == 0) {
-		sendBoard(id, interaction.client, mainMessage, `<@${uid}> wygrał!`);
+		sendBoard(id, interaction.client, mainMessage, `<@${uid}> wygrał!`, false);
 		delete bots[bid];
 		delete boards[id];
 		delete uids[uid];
 		return;
 	}
 
-	const nodes = bots[bid].ext_board.nodes;`Bot myślał${Math.round(((end - start) * 100) / 100)}ms i policzył ${nodes} nodów (${Math.round((nodes / ((end - start) / 1000)) * 100) / 100} nodes/s)`;
+	const nodes = bots[bid].ext_board.nodes;
+	msg = `Bot myślał ${Math.round(((end - start) * 100) / 100)}ms i policzył ${nodes} nodów (${Math.round((nodes / ((end - start) / 1000)) * 100) / 100} nodes/s)`;
 	sendBoard(id, interaction.client, mainMessage, msg);
 	console.log((Math.round((end - start) * 100) / 100) + "ms, " + nodes + " nodes, " + Math.round((nodes / ((end - start) / 1000)) * 100) / 100 + " nodes/s", move);
 
@@ -540,7 +562,7 @@ async function buttonWithBot(interaction: ButtonInteraction, mainMessage: APIMes
 		if (num == move.length)
 			continue;
 
-		sendBoard(id, interaction.client, mainMessage, msg);
+		await sendBoard(id, interaction.client, mainMessage, msg);
 	}
 
 	bots[bid].ext_board.makeMove(move);
@@ -559,6 +581,7 @@ async function buttonWithBot(interaction: ButtonInteraction, mainMessage: APIMes
 	}
 
 	sendBoard(id, interaction.client, mainMessage, `Tura: <@${uid}>`);
+	bots[bid].playerTurn = true;
 }
 
 function updateLongestGame(gameid: number, gameuids: Array<string>) {
@@ -594,14 +617,23 @@ function removeAcceptByUids(inviter: string, invited: string): boolean {
 	return false;
 }
 
-async function sendBoard(id: number, client: Client, message: APIMessage | Message<boolean>, content: string, components = true) {
+async function sendBoard(id: number, client: Client, message: APIMessage | Message<boolean>, content: string, components = true, interaction: CommandInteraction = undefined) {
 	boards[id].draw();
 	const attachment = new Discord.MessageAttachment(`./tmp/boardPilkarzyki${id}.png`);
 	const img = await (client.guilds.cache.get(config.junkChannel.guild).channels.cache.get(config.junkChannel.channel) as TextChannel).send({ files: [attachment] });
 	content += `\n${img.attachments.first().url}`;
-	message = await (message as Message).edit({ content: content, components: (components ? getButtons(id) : []) });
+	const messagePayload = {
+		content: content,
+		components: (components ? getButtons(id) : [])
+	};
+
+	if (interaction)
+		message = await interaction.editReply(messagePayload);
+	else
+		message = await (message as Message).edit(messagePayload);
+
 	try {
-		boards[id].message = message;
+		boards[id].message = (message as Message<boolean>);
 	}
 	catch (error) {
 		console.error("Couldn't set boards[id].message (probably boards[id] doesnt exist)");
