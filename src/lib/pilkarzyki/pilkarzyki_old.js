@@ -1,13 +1,13 @@
 "use strict";
 
-const Board = require("../pilkarzykiRenderer.js");
+const Board = require("./pilkarzykiRenderer.js");
 const Discord = require("discord.js");
 const fs = require("fs");
 const Elo = require("elo-rating");
 const { performance } = require("perf_hooks");
 const { SlashCommandBuilder, SlashCommandUserOption } = require("@discordjs/builders");
-const ExtBoard = require("../bot.js");
-const config = require("../config.json");
+const ExtBoard = require("./bot.js");
+const config = require("./config.json");
 
 const uids = {};
 const bots = {};

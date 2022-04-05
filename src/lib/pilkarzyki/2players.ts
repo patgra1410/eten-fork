@@ -11,7 +11,7 @@ interface ILongestMove {
 
 export default class Board {
 	id = 0;
-	remis: Array<string>;
+	remis: Array<string> = [];
 	usernames: Array<string> = [];
 	uids: Array<string> = [];
 	turn = 0;
@@ -34,10 +34,11 @@ export default class Board {
 	directions = [[-1, -1], [0, -1], [1, -1], [-1, 0], [1, 0], [-1, 1], [0, 1], [1, 1]];
 	message: Message;
 
-	constructor(spacing: number, offsetX: number, offsetY: number, uids: Array<string>, usernames: Array<string>, id = 0, withBot = false) {
+	constructor(spacing: number, offsetX: number, offsetY: number, thickness: number, uids: Array<string>, usernames: Array<string>, id = 0, withBot = false) {
 		this.spacing = spacing;
 		this.offX = offsetX;
 		this.offY = offsetY;
+		this.thickness = thickness;
 		this.uids = uids;
 		this.usernames = usernames;
 		this.id = id;

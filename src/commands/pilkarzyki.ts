@@ -1,13 +1,13 @@
-import Board from "./lib/pilkarzyki/2players";
+import { SlashCommandBuilder, SlashCommandUserOption } from "@discordjs/builders";
+import { APIMessage } from "discord-api-types";
 import Discord, { ButtonInteraction, Client, CommandInteraction, Message, MessageButtonStyleResolvable, TextChannel } from "discord.js";
 import Elo from "elo-rating";
-import { performance } from "perf_hooks";
-import { SlashCommandBuilder, SlashCommandUserOption } from "@discordjs/builders";
 import fs from "fs";
-import ExtBoard from "./bot";
-import config from "./config.json";
-import { APIMessage } from "discord-api-types";
-import { IRanking } from "./lib/types";
+import { performance } from "perf_hooks";
+import ExtBoard from "../bot";
+import config from "../config.json";
+import Board from "../lib/pilkarzyki/2players";
+import { IRanking } from "../lib/types";
 
 interface Iuids {
 	[uid: string]: number
@@ -169,7 +169,8 @@ export async function execute(interaction: CommandInteraction) {
 			return;
 		}
 		else if (interaction.customId == "remis") {
-			remisManager(interaction, mainMessage);
+			if (await remisManager(interaction, mainMessage))
+				return;
 		}
 		else if (!boards[id].withBot) {
 			buttonWithoutBot(interaction);
@@ -246,7 +247,7 @@ export async function execute(interaction: CommandInteraction) {
 				return;
 			}
 			if (uid1 == uid2) {
-				interaction.reply("Nie możesz grać z samym sobą");
+				interaction.editReply("Nie możesz grać z samym sobą");
 				return;
 			}
 
@@ -277,7 +278,7 @@ export async function execute(interaction: CommandInteraction) {
 				usernames: usernames,
 				uids: [uid1, uid2],
 				to: uid2,
-				from: uid2
+				from: uid1
 			};
 
 			const row = new Discord.MessageActionRow()
@@ -320,7 +321,7 @@ export async function execute(interaction: CommandInteraction) {
 			console.log("evalFunctionPath = " + evalFunctionPath);
 
 			uids[uid] = id;
-			boards[id] = new Board(50, 50, 50, [uid, bid.toString()], usernames, id, true);
+			boards[id] = new Board(50, 50, 50, 3, [uid, bid.toString()], usernames, id, true);
 
 			sendBoard(id, interaction.client, message, `Tura: <@${boards[id].turnUID}>`);
 			return;
@@ -364,7 +365,7 @@ async function acceptManager(interaction: ButtonInteraction, mainMessage: APIMes
 		gameID++;
 		uids[invited] = id;
 		uids[inviter] = id;
-		boards[id] = new Board(50, 50, 50, [inviter, invited], accept.usernames, id);
+		boards[id] = new Board(50, 50, 50, 3, [inviter, invited], accept.usernames, id);
 
 		sendBoard(id, interaction.client, mainMessage, `Tura: <@${boards[id].turnUID}>`);
 	}
@@ -374,7 +375,7 @@ async function surrenderManager(interaction: ButtonInteraction, mainMessage: API
 	const uid = interaction.user.id;
 	const id = uids[uid];
 
-	if (boards[uid].withBot) {
+	if (boards[id].withBot) {
 		sendBoard(id, interaction.client, mainMessage, `<@${uid}> poddał się`);
 		const bid: number = parseInt(boards[id].uids[1 - boards[id].uids.indexOf(uid)]);
 
@@ -409,33 +410,34 @@ async function surrenderManager(interaction: ButtonInteraction, mainMessage: API
 		ranking.pilkarzyki[winner].won++;
 		fs.writeFileSync("./data/ranking.json", JSON.stringify(ranking));
 
-		sendBoard(id, interaction.client, mainMessage, `<@${winner}> wygrał przez poddanie się przeciwnika.`);
+		sendBoard(id, interaction.client, mainMessage, `<@${winner}> wygrał przez poddanie się przeciwnika.`, false);
 		delete boards[id];
 		delete uids[winner];
 		delete uids[uid];
 	}
 }
 
-async function remisManager(interaction: ButtonInteraction, mainMessage: APIMessage | Message<boolean>) {
+async function remisManager(interaction: ButtonInteraction, mainMessage: APIMessage | Message<boolean>): Promise<boolean> {
 	const uid = interaction.user.id;
 	const id = uids[uid];
 
 	if (boards[id].withBot)
-		return;
+		return true;
 	if (boards[id].remis.includes(uid))
-		return;
+		return true;
 
 	boards[id].remis.push(uid);
 	if (boards[id].remis.length == 2) {
 		const gameuids = boards[id].uids;
-		sendBoard(id, interaction.client, mainMessage, "Remis");
+		await sendBoard(id, interaction.client, mainMessage, "Remis", false);
 		updateLongestGame(id, boards[id].uids);
 
 		delete boards[id];
 		delete uids[gameuids[0]];
 		delete uids[gameuids[1]];
-		return;
+		return true;
 	}
+	return false;
 }
 
 async function buttonWithoutBot(interaction: ButtonInteraction) {
@@ -598,5 +600,10 @@ async function sendBoard(id: number, client: Client, message: APIMessage | Messa
 	const img = await (client.guilds.cache.get(config.junkChannel.guild).channels.cache.get(config.junkChannel.channel) as TextChannel).send({ files: [attachment] });
 	content += `\n${img.attachments.first().url}`;
 	message = await (message as Message).edit({ content: content, components: (components ? getButtons(id) : []) });
-	boards[id].message = message;
+	try {
+		boards[id].message = message;
+	}
+	catch (error) {
+		console.error("Couldn't set boards[id].message (probably boards[id] doesnt exist)");
+	}
 }
