@@ -1,7 +1,7 @@
 import fs from "fs";
 import Discord, { CommandInteraction, TextChannel } from "discord.js";
 import { SlashCommandBuilder, SlashCommandStringOption } from "@discordjs/builders";
-import Board from "../pilkarzykiRenderer.js";
+import Board from "../lib/pilkarzyki/2players";
 import { IUserSettings } from "../lib/types.js";
 
 export const data = new SlashCommandBuilder()
@@ -97,13 +97,12 @@ export async function execute(interaction: CommandInteraction) {
 		return;
 	}
 
-	const board = new Board(50, 50, 50, [interaction.user.id, ""], [interaction.user.username, ""], -1);
+	const board = new Board(50, 50, 50, 3, [interaction.user.id, ""], [interaction.user.username, ""], -1);
 	board.move(3);
 	board.turn = 0;
 	board.draw();
 	const attachment = new Discord.MessageAttachment("./tmp/boardPilkarzyki-1.png");
 	const img = await (interaction.client.guilds.cache.get("856926964094337044").channels.cache.get("892842178143997982") as TextChannel).send({ files: [attachment] });
-	board.removeBoard();
 
 	interaction.reply("Pls dwa bajgiele (gradienty trudna rzecz).\nPreview: " + img.attachments.first().url);
 }

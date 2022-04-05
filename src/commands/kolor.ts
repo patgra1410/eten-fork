@@ -1,7 +1,7 @@
 import fs from "fs";
 import Discord, { CommandInteraction, TextChannel } from "discord.js";
 import { SlashCommandBuilder, SlashCommandStringOption } from "@discordjs/builders";
-import Board from "../pilkarzykiRenderer.js";
+import Board from "../lib/pilkarzyki/2players";
 import { IUserSettings } from "../lib/types.js";
 
 const possibleColors = ["black", "silver", "gray", "white", "maroon", "red", "purple", "fuchsia", "green", "lime", "olive", "yellow", "navy", "blue", "teal", "aqua", "aliceblue", "antiquewhite", "aqua", "aquamarine", "azure", "beige", "bisque", "black", "blanchedalmond", "blue", "blueviolet", "brown", "burlywood", "cadetblue", "chartreuse", "chocolate", "coral", "cornflowerblue", "cornsilk", "crimson", "cyan", "darkblue", "darkcyan", "darkgoldenrod", "darkgray", "darkgreen", "darkgrey", "darkkhaki", "darkmagenta", "darkolivegreen", "darkorange", "darkorchid", "darkred", "darksalmon", "darkseagreen", "darkslateblue", "darkslategray", "darkslategrey", "darkturquoise", "darkviolet", "deeppink", "deepskyblue", "dimgray", "dimgrey", "dodgerblue", "firebrick", "floralwhite", "forestgreen", "fuchsia", "gainsboro", "ghostwhite", "gold", "goldenrod", "gray", "green", "greenyellow", "grey", "honeydew", "hotpink", "indianred", "indigo", "ivory", "khaki", "lavender", "lavenderblush", "lawngreen", "lemonchiffon", "lightblue", "lightcoral", "lightcyan", "lightgoldenrodyellow", "lightgray", "lightgreen", "lightgrey", "lightpink", "lightsalmon", "lightseagreen", "lightskyblue", "lightslategray", "lightslategrey", "lightsteelblue", "lightyellow", "lime", "limegreen", "linen", "magenta", "maroon", "mediumaquamarine", "mediumblue", "mediumorchid", "mediumpurple", "mediumseagreen", "mediumslateblue", "mediumspringgreen", "mediumturquoise", "mediumvioletred", "midnightblue", "mintcream", "mistyrose", "moccasin", "navajowhite", "navy", "oldlace", "olive", "olivedrab", "orange", "orangered", "orchid", "palegoldenrod", "palegreen", "paleturquoise", "palevioletred", "papayawhip", "peachpuff", "peru", "pink", "plum", "powderblue", "purple", "red", "rosybrown", "royalblue", "saddlebrown", "salmon", "sandybrown", "seagreen", "seashell", "sienna", "silver", "skyblue", "slateblue", "slategray", "slategrey", "snow", "springgreen", "steelblue", "tan", "teal", "thistle", "tomato", "turquoise", "violet", "wheat", "white", "whitesmoke", "yellow", "yellowgreen"];
@@ -52,13 +52,12 @@ export async function execute(interaction: CommandInteraction) {
 		settings[interaction.user.id].dlug += 2;
 		fs.writeFileSync("./data/userSettings.json", JSON.stringify(settings));
 
-		const board = new Board(50, 50, 50, [uid, ""], [username, ""], -1);
+		const board = new Board(50, 50, 50, 3, [uid, ""], [username, ""], -1);
 		board.move(4);
 		board.turn = 0;
 		board.draw();
 		const attachment = new Discord.MessageAttachment("./tmp/boardPilkarzyki-1.png");
 		const img = await (interaction.client.guilds.cache.get("856926964094337044").channels.cache.get("892842178143997982") as TextChannel).send({ files: [attachment] });
-		board.removeBoard();
 
 		interaction.reply("Pls jeden bajgiel.\nPreview: " + img.attachments.first().url);
 	}

@@ -75,4 +75,9 @@ export default async function(message: Message<boolean>) {
 		}
 	} else */ if ((/https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*).(webm|mp4|mov|avi|flv|mkv|wmv|m4v|png|jpg|gif|jpeg|webp|svg|ovg|ogg)\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/g.test(message.content)))
 		await hashFileFromMessageContent(message);
+
+	if (message.content.search("69") != -1) {
+		const msg = await message.reply("Czy chodzi o sex <:mm:847666184722579547>");
+		msg.delete();
+	}
 }
