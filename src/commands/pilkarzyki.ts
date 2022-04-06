@@ -50,7 +50,7 @@ function getButtons(id: number): Array<Discord.MessageActionRow> {
 	try {
 		indexes = boards[id].possibleMovesIndexes();
 	}
-	catch(error) {
+	catch (error) {
 		console.log(`Couldnt get move indexes for board_id = ${id} (probably doesnt exist)`);
 		return;
 	}

@@ -73,7 +73,7 @@ client.once("ready", async () => {
 		throw new Error("user does not exist on client");
 	console.log(`Logged in as ${client.user.tag}`);
 	client.user.setStatus("online");
-	client.user.setActivity("Jak Zapomnieć - Jeden Osiem L", { type: "LISTENING" });
+	client.user.setActivity("Born To Die - Lana Del Rey", { type: "LISTENING" });
 	await updateSlashCommands();
 
 	createRequiredFiles();

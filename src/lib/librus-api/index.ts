@@ -139,14 +139,22 @@ export default class LibrusClient {
 			responseText = await response.text();
 		}
 		catch (error) {
-			this.log(error);
+			console.error(error);
+			throw new LibrusError(`Couldn't get response body for https://portal.librus.pl/api/v3/SynergiaAccounts/fresh/${this.synergiaLogin}`, response.status);
+		}
+		let responseJSON;
+		try {
+			responseJSON = JSON.parse(responseText);
+		}
+		catch (error) {
+			console.error(error);
+			throw new LibrusError(`Body isn't JSON for https://portal.librus.pl/api/v3/SynergiaAccounts/fresh/${this.synergiaLogin}`, response.status, responseText);
 		}
 		if (!response.ok)
-			throw new LibrusError(`refreshToken: ${response.statusText}`, response.status, responseText);
-		const resultJson = await response.json() as librusApiTypes.APISynergiaAccountsFresh;
-		if (resultJson.accessToken == null)
-			throw new LibrusError("GET SynergiaAccounts returned unexpected JSON format", response.status, responseText);
-		this.bearerToken = resultJson.accessToken;
+			throw new LibrusError(`refreshToken: ${response.statusText}`, response.status, responseJSON);
+		if (responseJSON.accessToken == null)
+			throw new LibrusError("GET SynergiaAccounts returned unexpected JSON format", response.status, responseJSON);
+		this.bearerToken = responseJSON.accessToken;
 		return;
 	}
 

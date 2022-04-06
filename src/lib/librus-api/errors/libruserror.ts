@@ -8,7 +8,7 @@ export class LibrusError extends Error {
 	status: number;
 	body: unknown;
 	constructor(msg?: string, status?: number, body?: unknown) {
-		super(`${status} ${msg}`);
+		super(msg);
 		this.status = status;
 		this.body = body;
 	}
