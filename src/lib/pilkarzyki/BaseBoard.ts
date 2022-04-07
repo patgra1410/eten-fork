@@ -76,11 +76,11 @@ export default class BaseBoard {
 		return moves;
 	}
 
-	getGradient(begX: number, begY: number, endX: number, endY: number, uid: string) {
+	getGradient(begX: number, begY: number, endX: number, endY: number, uid: string): CanvasGradient | undefined {
 		const settings: IUserSettings = JSON.parse(fs.readFileSync("./data/userSettings.json", "utf8"));
 
 		if (settings[uid] === undefined || settings[uid].gradient === undefined)
-			return;
+			return undefined;
 
 		const grd = this.ctx.createLinearGradient(begX, begY, endX, endY);
 		if (settings[uid].gradient.special == "rainbow") {
