@@ -74,7 +74,12 @@ export async function hashFile(url: string, message: Message<boolean>) {
 		}
 		else {
 			const link = "https://discord.com/channels/" + splits[0] + "/" + splits[1] + "/" + splits[2];
-			message.reply("repost :grimacing:\n" + link);
+			try {
+				message.reply("repost :grimacing:\n" + link);
+			}
+			catch {
+				console.log("Couldnt reply to message (probably deleted).");
+			}
 		}
 	}
 	else {

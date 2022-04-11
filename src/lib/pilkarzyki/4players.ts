@@ -7,6 +7,8 @@ import Edge from "./Edge";
 import Point from "./Point";
 
 export default class Board extends BaseBoard {
+	surrender: Array<Array<string>> = [[], []];
+
 	constructor(spacing: number, offsetX: number, offsetY: number, thickness: number, uids: Array<string>, usernames: Array<string>, id = 0) {
 		super(spacing, offsetX, offsetY, thickness, uids, usernames, id);
 

@@ -618,7 +618,13 @@ function removeAcceptByUids(inviter: string, invited: string): boolean {
 }
 
 async function sendBoard(id: number, client: Client, message: APIMessage | Message<boolean>, content: string, components = true, interaction: CommandInteraction = undefined) {
-	boards[id].draw();
+	try {
+		boards[id].draw();
+	}
+	catch {
+		console.error("Couldnt draw board (Probably doesnt exist)");
+	}
+
 	const attachment = new Discord.MessageAttachment(`./tmp/boardPilkarzyki${id}.png`);
 	const img = await (client.guilds.cache.get(config.junkChannel.guild).channels.cache.get(config.junkChannel.channel) as TextChannel).send({ files: [attachment] });
 	content += `\n${img.attachments.first().url}`;
