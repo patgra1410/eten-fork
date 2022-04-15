@@ -5,10 +5,13 @@ placeholder.jpg
 tmp
 data/*
 !data/leg60.png
-!data/effects.json
 soundeffects/*
 .vscode
 webhook-link
+
+# effects
+!data/effects.json
+!data/mirror.sh
 
 # TS
 lib-cov

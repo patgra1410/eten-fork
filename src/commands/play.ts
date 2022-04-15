@@ -8,7 +8,9 @@ const player = createAudioPlayer();
 interface IEffects {
 	[name: string]: {
 		name: string,
-		args: string
+		type: "args"|"command",
+		args?: string
+		command?: string
 	}
 }
 
@@ -165,51 +167,45 @@ export async function execute(interaction: CommandInteraction) {
 				return;
 			}
 
-			let args = "";
 			let names = "";
 			const effs = interaction.options.getString("multiple").split(" ");
+			await interaction.reply("Przygotowywanie dźwięku...");
+
 			for (const effect of effs) {
 				if (!(effect in effects)) {
 					interaction.reply(`Efekt ${effect} nie istnieje`);
 				}
-				args += effects[effect].args + " ";
 				names += effects[effect].name + " ";
+
+				try {
+					if (effects[effect].type == "args")
+						execSync(`sox -t mp3 -V "${path}" tmp/tmp.mp3 ${effects[effect].args}`, { stdio: "ignore" });
+					else if (effects[effect].type == "command")
+						execSync(`${effects[effect].command} "${path}"`, { stdio: "ignore" });
+
+					path = "tmp/tmp.mp3";
+				}
+				catch (error) {
+					await interaction.editReply("Wystąpił błąd przy tworzeniu dźwięku.\n```\n" + error.toString() + "```");
+					console.error(error);
+					return;
+				}
 			}
 			names = names.slice(0, -1);
 
-			await interaction.reply("Przygotowywanie dźwięku...");
-			try {
-				execSync(`sox -t mp3 -V "${path}" tmp/tmp.mp3 ${args}`, { stdio: "ignore" });
-			}
-			catch (error) {
-				await interaction.editReply("Wystąpił błąd przy tworzeniu dźwięku.\n```\n" + error.toString() + "```");
-				console.error(error);
-				return;
-			}
-			path = "tmp/tmp.mp3";
 			let msg = `Puszczanie dźwięku ${fileName}${additionalText} z efektami ${names}.`;
 			if (msg.length >= 2000)
 				msg = msg.slice(0, 1900) + "...";
 			await interaction.editReply(msg);
 		}
-		// else if (interaction.options.getString("advanced") != undefined) {
-		// 	await interaction.reply("Przygotowywanie dźwięku...");
-		// 	try {
-		// 		execSync(`sox -t mp3 -V "${path}" tmp/tmp.mp3 ${interaction.options.getString("advanced")}`);
-		// 	}
-		// 	catch (error) {
-		// 		await interaction.editReply("Wystąpił błąd przy tworzeniu dźwięku.\n```\n" + error.toString() + "```");
-		// 		console.error(error);
-		// 		return;
-		// 	}
-		// 	path = "tmp/tmp.mp3";
-		// 	interaction.editReply(`Puszczanie dźwięku ${fileName}${additionalText} z argumentami ${interaction.options.getString("advanced")}.`);
-		// }
 		else if (efekt != undefined) {
 			await interaction.reply("Przygotowywanie dźwięku...");
+
 			try {
-				const args = effects[efekt].args;
-				execSync(`sox -t mp3 -V "${path}" tmp/tmp.mp3 ${args}`, { stdio: "ignore" });
+				if (effects[efekt].type == "args")
+					execSync(`sox -t mp3 -V "${path}" tmp/tmp.mp3 ${effects[efekt].args}`, { stdio: "ignore" });
+				else if (effects[efekt].type == "command")
+					execSync(`${effects[efekt].command} "${path}"`, { stdio: "ignore" });
 			}
 			catch (error) {
 				await interaction.editReply("Wystąpił błąd przy tworzeniu dźwięku.\n```\n" + error.toString() + "```");
