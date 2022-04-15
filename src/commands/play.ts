@@ -187,7 +187,10 @@ export async function execute(interaction: CommandInteraction) {
 				return;
 			}
 			path = "tmp/tmp.mp3";
-			await interaction.editReply(`Puszczanie dźwięku ${fileName}${additionalText} z efektami ${names}.`);
+			let msg = `Puszczanie dźwięku ${fileName}${additionalText} z efektami ${names}.`;
+			if (msg.length >= 2000)
+				msg = msg.slice(0, 1900) + "...";
+			await interaction.editReply(msg);
 		}
 		// else if (interaction.options.getString("advanced") != undefined) {
 		// 	await interaction.reply("Przygotowywanie dźwięku...");
