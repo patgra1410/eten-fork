@@ -179,9 +179,10 @@ export async function execute(interaction: CommandInteraction) {
 
 				try {
 					if (effects[effect].type == "args")
-						execSync(`sox -t mp3 -V "${path}" tmp/tmp.mp3 ${effects[effect].args}`, { stdio: "ignore" });
+						execSync(`sox -t mp3 -V "${path}" tmp/out.mp3 ${effects[effect].args}`, { stdio: "ignore" });
 					else if (effects[effect].type == "command")
 						execSync(`${effects[effect].command} "${path}"`, { stdio: "ignore" });
+					fs.renameSync("./tmp/out.mp3", "./tmp/tmp.mp3");
 
 					path = "tmp/tmp.mp3";
 				}
@@ -213,7 +214,7 @@ export async function execute(interaction: CommandInteraction) {
 				return;
 			}
 
-			path = "tmp/tmp.mp3";
+			path = "tmp/out.mp3";
 			interaction.editReply(`Puszczanie dźwięku ${fileName}${additionalText} z efektem ${effects[efekt].name}.`);
 		}
 		else
