@@ -23,6 +23,8 @@ export default async function(message: Message) {
 		}
 	}
 	const ranking: IRanking = JSON.parse(fs.readFileSync("./data/ranking.json", "utf-8"));
+	if (!(message.author.id in ranking.dubs))
+		ranking.dubs[message.author.id] = {};
 	if (!(repeatingDigits in ranking.dubs[message.author.id])) {
 		ranking.dubs[message.author.id][repeatingDigits] = 0;
 	}
@@ -33,7 +35,7 @@ export default async function(message: Message) {
 			message.react("⚜");
 			message.reply({ content: `@everyone WITNESSED (ID: ${message.id.substring(0, message.id.length - repeatingDigits)}**${message.id.substring(message.id.length - repeatingDigits)}**)`, files: ["https://www.vogue.pl/uploads/repository/nina_p/ap.jpg"] });
 		}
-		else if (repeatingDigits >= 4) {
+		else if (repeatingDigits >= 3) {
 			message.react(repeatingDigitsText[repeatingDigits]);
 		}
 	}

@@ -107,27 +107,67 @@ export async function execute(interaction: CommandInteraction) {
 			}
 		}
 		else {
+			// Generate description for user
 			desc = `Statystyki <@${mentionedUser.id}>\n`;
 			if (!(mentionedUser.id in dubRankinkg)) {
 				desc = desc.concat("Nie doświadczył żadnych powtarzających się numerków");
 			}
-			const userDubsArr: Array<{dubTier: number, count: number}> = [];
-			for (const [dubTier, count] of Object.entries(dubRankinkg[mentionedUser.id])) {
-				userDubsArr.push({ dubTier: Number(dubTier), count: count });
+			else {
+				// Sorted by top dub
+				const userDubsArr: Array<{dubTier: number, count: number}> = [];
+				for (const [dubTier, count] of Object.entries(dubRankinkg[mentionedUser.id])) {
+					userDubsArr.push({ dubTier: Number(dubTier), count: count });
+				}
+				userDubsArr.sort(function(a, b) {
+					return b.dubTier - a.dubTier;
+				});
+				for (const entry of userDubsArr) {
+					if (entry.dubTier == 1)
+						break;
+					desc = desc.concat(`${repeatingDigitsText[entry.dubTier]} x${entry.count}\n`);
+				}
+				desc = desc.concat(`Bez powtarzania: ${dubRankinkg[mentionedUser.id][1]}`);
 			}
-			userDubsArr.sort(function(a, b) {
-				return b.dubTier - a.dubTier;
-			});
-			for (const entry of userDubsArr) {
-				if (entry.dubTier == 1)
-					break;
-				desc = desc.concat(`${repeatingDigitsText[entry.dubTier]} x${entry.count}\n`);
-			}
-			desc = desc.concat(`Bez powtarzania: ${dubRankinkg[mentionedUser.id][1]}`);
 		}
 	}
 	else if (type === "dubspercent") {
-		// TODO
+		const dubRankinkg = (fullRanking as IRanking).dubs;
+		// Create array: {DiscordID, top number of repeating digits}
+		// for easier sorting
+		const userTopDubs: Array<{user: Snowflake, topDub: number}> = [];
+		for (const [userId, dubRecord] of Object.entries(dubRankinkg)) {
+			let topDub = 0;
+			for (const dubTier of Object.keys(dubRecord)) {
+				if (Number(dubTier) > topDub)
+					topDub = Number(dubTier);
+			}
+			userTopDubs.push({ user: userId, topDub: topDub });
+		}
+
+		// Sort based of top dub number first, if equal - quantity of that top dub
+		userTopDubs.sort(function(a, b) {
+			if (a.topDub === b.topDub)
+				return dubRankinkg[b.user][b.topDub] - dubRankinkg[a.user][a.topDub];
+			return b.topDub - a.topDub;
+		});
+		const max = userTopDubs[0].topDub;
+		// Count total occurences of numbers repeating N times
+		const arr = new Array<number>(21).fill(0);
+		for (const dubRecord of Object.values(dubRankinkg)) {
+			for (let i = 1; i <= max; i++) {
+				if (i in dubRecord) {
+					arr[i] += dubRecord[i];
+				}
+			}
+		}
+		// Count up the total of all occurences (for probability)
+		let total = 0;
+		for (let i = 1; i <= max; i++)
+			total += arr[i];
+		// Append desc
+		for (let i = 1; i <= max; i++) {
+			desc = desc.concat(`${repeatingDigitsText[i]}: ${((arr[i] / total) * 100).toFixed(3)}%\n`);
+		}
 	}
 	else {
 		for (const [key, value] of Object.entries(ranking)) {
