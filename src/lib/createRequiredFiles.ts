@@ -50,7 +50,7 @@ export default function() {
 
 	// const ranking = require(`${process.cwd()}/data/ranking.json`)
 	const ranking = JSON.parse(fs.readFileSync("./data/ranking.json", "utf-8"));
-	for (const option of ["pilkarzyki", "kwadraty", "teampilkarzyki", "najdluzszyruch", "najdluzszagrateampilkarzyki", "najdluzszagrapilkarzyki", "sumaruchow", "jajco", "bets"]) {
+	for (const option of ["pilkarzyki", "kwadraty", "teampilkarzyki", "najdluzszyruch", "najdluzszagrateampilkarzyki", "najdluzszagrapilkarzyki", "sumaruchow", "jajco", "bets", "dubs"]) {
 		if (!(option in ranking))
 			ranking[option] = {};
 	}

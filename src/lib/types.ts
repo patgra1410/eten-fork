@@ -10,6 +10,29 @@ export interface IUserSettings {
 	}
 }
 
+export const repeatingDigitsText: Record<number, string> = {
+	1: "1️⃣",
+	2: "2️⃣",
+	3: "3️⃣",
+	4: "4️⃣",
+	5: "5️⃣",
+	6: "6️⃣",
+	7: "7️⃣",
+	8: "8️⃣",
+	9: "9️⃣",
+	10: "🔟",
+	11: "⚜11⚜",
+	12: "⚜12⚜",
+	13: "⚜13⚜",
+	14: "⚜14⚜",
+	15: "⚜15⚜",
+	16: "⚜16⚜",
+	17: "⚜17⚜",
+	18: "⚜18⚜",
+	19: "⚜19⚜",
+	20: "⚜20⚜"
+};
+
 export interface IBets {
 	[user: string]: {
 		time: number, message: string, timeAdded: number
@@ -77,6 +100,9 @@ export interface IRanking {
 	},
 	bets: {
 		[user: string]: number
+	},
+	dubs: {
+		[user: string]: Record<number, number>
 	}
 }
 

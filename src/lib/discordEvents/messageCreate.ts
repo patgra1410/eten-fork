@@ -4,12 +4,42 @@ import * as jajco from "../jajco";
 import { hashFile, hashFileFromMessageContent } from "../hashFile";
 import archiwum from "../archiwum";
 import config from "../../config.json";
+import fs from "fs";
+import { IRanking, repeatingDigitsText } from "../types";
 
-export default async function(message: Message<boolean>) {
+export default async function(message: Message) {
 	const client = message.client;
 
 	if (message.author.bot) return;
 	if (!client.application?.owner) await client.application?.fetch();
+
+	let repeatingDigits = 1;
+	for (let i = message.id.length - 2; i >= 0; i--) {
+		if (message.id[i] === message.id[i + 1]) {
+			repeatingDigits++;
+		}
+		else {
+			break;
+		}
+	}
+	if (repeatingDigits >= 2) {
+		if (repeatingDigits >= 10) {
+			message.react("⚜");
+			message.reply({ content: `@everyone WITNESSED (ID: ${message.id.substring(0, message.id.length - repeatingDigits)}**${message.id.substring(message.id.length - repeatingDigits)}**)`, files: ["https://www.vogue.pl/uploads/repository/nina_p/ap.jpg"] });
+		}
+		else if (repeatingDigits >= 4) {
+			message.react(repeatingDigitsText[repeatingDigits]);
+		}
+		const ranking: IRanking = JSON.parse(fs.readFileSync("./data/ranking.json", "utf-8"));
+		if (!(message.author.id in ranking.dubs)) {
+			ranking.dubs[message.author.id] = {};
+		}
+		if (!(repeatingDigits in ranking.dubs[message.author.id])) {
+			ranking.dubs[message.author.id][repeatingDigits] = 0;
+		}
+		ranking.dubs[message.author.id][repeatingDigits]++;
+		fs.writeFileSync("./data/ranking.json", JSON.stringify(ranking), "utf-8");
+	}
 
 	if (message.channel.id === "813703962838564865") {
 		try {
