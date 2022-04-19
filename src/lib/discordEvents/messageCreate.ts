@@ -22,6 +22,12 @@ export default async function(message: Message) {
 			break;
 		}
 	}
+	const ranking: IRanking = JSON.parse(fs.readFileSync("./data/ranking.json", "utf-8"));
+	if (!(repeatingDigits in ranking.dubs[message.author.id])) {
+		ranking.dubs[message.author.id][repeatingDigits] = 0;
+	}
+	ranking.dubs[message.author.id][repeatingDigits]++;
+	fs.writeFileSync("./data/ranking.json", JSON.stringify(ranking), "utf-8");
 	if (repeatingDigits >= 2) {
 		if (repeatingDigits >= 10) {
 			message.react("⚜");
@@ -30,15 +36,6 @@ export default async function(message: Message) {
 		else if (repeatingDigits >= 4) {
 			message.react(repeatingDigitsText[repeatingDigits]);
 		}
-		const ranking: IRanking = JSON.parse(fs.readFileSync("./data/ranking.json", "utf-8"));
-		if (!(message.author.id in ranking.dubs)) {
-			ranking.dubs[message.author.id] = {};
-		}
-		if (!(repeatingDigits in ranking.dubs[message.author.id])) {
-			ranking.dubs[message.author.id][repeatingDigits] = 0;
-		}
-		ranking.dubs[message.author.id][repeatingDigits]++;
-		fs.writeFileSync("./data/ranking.json", JSON.stringify(ranking), "utf-8");
 	}
 
 	if (message.channel.id === "813703962838564865") {
