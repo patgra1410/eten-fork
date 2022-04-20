@@ -211,6 +211,8 @@ export async function execute(interaction: CommandInteraction) {
 		title = "Ranking wygranych zakładów o godzine postowania ogłoszeń";
 	else if (type === "dubs")
 		title = "Ranking poświadczonych numerków";
+	else if (type === "dubspercent")
+		title = "Prawdopodobieństwo na doświadczenie numerka";
 
 	const embed = new Discord.MessageEmbed()
 		.setColor(("#" + Math.floor(Math.random() * 16777215).toString(16)) as ColorResolvable)

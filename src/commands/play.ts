@@ -193,6 +193,8 @@ export async function execute(interaction: CommandInteraction) {
 				}
 			}
 			names = names.slice(0, -1);
+			fs.renameSync("./tmp/tmp.mp3", "./tmp/out.mp3");
+			path = "tmp/out.mp3";
 
 			let msg = `Puszczanie dźwięku ${fileName}${additionalText} z efektami ${names}.`;
 			if (msg.length >= 2000)
@@ -204,7 +206,7 @@ export async function execute(interaction: CommandInteraction) {
 
 			try {
 				if (effects[efekt].type == "args")
-					execSync(`sox -t mp3 -V "${path}" tmp/tmp.mp3 ${effects[efekt].args}`, { stdio: "ignore" });
+					execSync(`sox -t mp3 -V "${path}" tmp/out.mp3 ${effects[efekt].args}`, { stdio: "ignore" });
 				else if (effects[efekt].type == "command")
 					execSync(`${effects[efekt].command} "${path}"`, { stdio: "ignore" });
 			}
