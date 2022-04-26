@@ -10,9 +10,6 @@ import { IRanking, repeatingDigitsText } from "../types";
 export default async function(message: Message) {
 	const client = message.client;
 
-	if (message.author.bot) return;
-	if (!client.application?.owner) await client.application?.fetch();
-
 	let repeatingDigits = 1;
 	for (let i = message.id.length - 2; i >= 0; i--) {
 		if (message.id[i] === message.id[i + 1]) {
@@ -32,13 +29,25 @@ export default async function(message: Message) {
 	fs.writeFileSync("./data/ranking.json", JSON.stringify(ranking), "utf-8");
 	if (repeatingDigits >= 2) {
 		if (repeatingDigits >= 10) {
-			message.react("⚜");
+			message.react("<:checkem:966379892474249246>");
 			message.reply({ content: `@everyone WITNESSED (ID: ${message.id.substring(0, message.id.length - repeatingDigits)}**${message.id.substring(message.id.length - repeatingDigits)}**)`, files: ["https://www.vogue.pl/uploads/repository/nina_p/ap.jpg"] });
 		}
-		else if (repeatingDigits >= 3) {
-			message.react(repeatingDigitsText[repeatingDigits]);
+		else if (repeatingDigits >= 2) {
+			message.react("<:checkem:966379892474249246>").then(() => {
+				message.react(repeatingDigitsText[repeatingDigits]);
+			});
 		}
 	}
+
+	if (message.content.toLowerCase() == "czym do chuja są te cyferki?" || message.content.toLowerCase() == "czym do chuja są te numerki?") {
+		message.reply(`Każda wiadomość ma ID, i jeśli kilka ostatnich cyfr ID twojej wiadomości jest taka sama to eten reaguje odpowiednią liczbą.
+Na przykład 3️⃣ oznacza że ID twojej wiadomości miało takie same 3 ostatnie cyfry (na przykład 968227852342411**333**).
+Jak jest zbudowane ID wiadomości:
+https://cdn.discordapp.com/attachments/856926964094337047/968536776484487218/unknown.png`);
+	}
+
+	if (message.author.bot) return;
+	if (!client.application?.owner) await client.application?.fetch();
 
 	if (message.channel.id === "813703962838564865") {
 		try {

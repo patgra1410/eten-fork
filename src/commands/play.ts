@@ -111,6 +111,10 @@ data
 			.setDescription("Lista dźwięków")
 	);
 
+function getAudioLength(path: string): string {
+	return execSync(`soxi -d "${path}"`).toString().substring(3).slice(0, -1);
+}
+
 export async function execute(interaction: CommandInteraction) {
 	if (interaction.options.getSubcommand() == "list") {
 		let desc = "";
@@ -173,7 +177,8 @@ export async function execute(interaction: CommandInteraction) {
 
 			for (const effect of effs) {
 				if (!(effect in effects)) {
-					interaction.reply(`Efekt ${effect} nie istnieje`);
+					interaction.editReply(`Efekt ${effect} nie istnieje`);
+					return;
 				}
 				names += effects[effect].name + " ";
 
@@ -196,7 +201,7 @@ export async function execute(interaction: CommandInteraction) {
 			fs.renameSync("./tmp/tmp.mp3", "./tmp/out.mp3");
 			path = "tmp/out.mp3";
 
-			let msg = `Puszczanie dźwięku ${fileName}${additionalText} z efektami ${names}.`;
+			let msg = `Puszczanie dźwięku ${fileName} (${getAudioLength(path)})${additionalText} z efektami ${names}.`;
 			if (msg.length >= 2000)
 				msg = msg.slice(0, 1900) + "...";
 			await interaction.editReply(msg);
@@ -217,10 +222,10 @@ export async function execute(interaction: CommandInteraction) {
 			}
 
 			path = "tmp/out.mp3";
-			interaction.editReply(`Puszczanie dźwięku ${fileName}${additionalText} z efektem ${effects[efekt].name}.`);
+			interaction.editReply(`Puszczanie dźwięku ${fileName} (${getAudioLength(path)})${additionalText} z efektem ${effects[efekt].name}.`);
 		}
 		else
-			interaction.reply(`Puszczanie dźwięku ${fileName}${additionalText}.`);
+			interaction.reply(`Puszczanie dźwięku ${fileName} (${getAudioLength(path)})${additionalText}.`);
 
 		const channel = user.voice.channel;
 		const connection = joinVoiceChannel({
