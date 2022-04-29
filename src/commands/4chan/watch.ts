@@ -1,8 +1,8 @@
 import { CommandInteraction } from "discord.js";
 import nodeFetch from "node-fetch";
 import { SlashCommandBuilder, SlashCommandStringOption, SlashCommandIntegerOption } from "@discordjs/builders";
-import { checkThreads, watchedThreads } from "../lib/threadManager";
-import * as config from "../config.json";
+import { checkThreads, watchedThreads } from "../../lib/threadManager";
+import * as config from "../../config.json";
 
 export const data = new SlashCommandBuilder()
 	.setName("watch")

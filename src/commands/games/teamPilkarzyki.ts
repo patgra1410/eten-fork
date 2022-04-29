@@ -1,9 +1,9 @@
-import Board from "../lib/pilkarzyki/4players";
+import Board from "../../lib/pilkarzyki/4players";
 import Discord, { ButtonInteraction, Client, CommandInteraction, Message, MessageActionRow, MessageButtonStyleResolvable, TextChannel } from "discord.js";
 import { APIMessage } from "discord-api-types";
 import fs from "fs";
 import { SlashCommandBuilder, SlashCommandUserOption } from "@discordjs/builders";
-import config from "../config.json";
+import config from "../../config.json";
 const Elo = require("elo-rating");
 
 interface IUids {

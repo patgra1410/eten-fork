@@ -1,7 +1,7 @@
 import { CommandInteraction } from "discord.js";
 import { SlashCommandBuilder, SlashCommandIntegerOption, SlashCommandStringOption } from "@discordjs/builders";
-import * as config from "../config.json";
-import { watchedThreads } from "../lib/threadManager";
+import * as config from "../../config.json";
+import { watchedThreads } from "../../lib/threadManager";
 
 export const data = new SlashCommandBuilder()
 	.setName("unwatch")

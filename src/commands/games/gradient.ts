@@ -1,8 +1,8 @@
 import fs from "fs";
 import Discord, { CommandInteraction, TextChannel } from "discord.js";
 import { SlashCommandBuilder, SlashCommandStringOption } from "@discordjs/builders";
-import Board from "../lib/pilkarzyki/2players";
-import { IUserSettings } from "../lib/types.js";
+import Board from "../../lib/pilkarzyki/2players";
+import { IUserSettings } from "../../lib/types.js";
 
 export const data = new SlashCommandBuilder()
 	.setName("gradient")

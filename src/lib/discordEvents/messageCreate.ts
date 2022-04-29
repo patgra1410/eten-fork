@@ -39,6 +39,25 @@ export default async function(message: Message) {
 		}
 	}
 
+	if (message.content.toLowerCase() == "h") {
+		message.channel.send(`
+██╗░░██╗
+██║░░██║
+███████║
+██╔══██║
+██║░░██║
+╚═╝░░╚═╝`);
+	}
+	if (message.content.toLowerCase() == "n") {
+		message.channel.send(`
+███╗░░██╗
+████╗░██║
+██╔██╗██║
+██║╚████║
+██║░╚███║
+╚═╝░░╚══╝`);
+	}
+
 	if (message.content.toLowerCase() == "czym do chuja są te cyferki?" || message.content.toLowerCase() == "czym do chuja są te numerki?") {
 		message.reply(`Każda wiadomość ma ID, i jeśli kilka ostatnich cyfr ID twojej wiadomości jest taka sama to eten reaguje odpowiednią liczbą.
 Na przykład 3️⃣ oznacza że ID twojej wiadomości miało takie same 3 ostatnie cyfry (na przykład 968227852342411**333**).

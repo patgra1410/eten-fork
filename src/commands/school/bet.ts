@@ -1,9 +1,9 @@
 import { SlashCommandBuilder, SlashCommandStringOption } from "@discordjs/builders";
 import Discord, { ColorResolvable, CommandInteraction } from "discord.js";
 import fs from "fs";
-import config from "../config.json";
-import * as betsLib from "../lib/bets";
-import { IBets } from "../lib/types";
+import config from "../../config.json";
+import * as betsLib from "../../lib/bets";
+import { IBets } from "../../lib/types";
 
 export const data = new SlashCommandBuilder()
 	.setName("bet")

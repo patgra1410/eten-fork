@@ -1,4 +1,4 @@
-const Board = require("../teamPilkarzykiRenderer.js");
+const Board = require("../../teamPilkarzykiRenderer.js.js");
 const Discord = require("discord.js");
 const fs = require("fs");
 const Elo = require("elo-rating");

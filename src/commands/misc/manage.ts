@@ -1,8 +1,8 @@
 import { SlashCommandBuilder, SlashCommandStringOption, SlashCommandUserOption, SlashCommandBooleanOption } from "@discordjs/builders";
 import { CommandInteraction } from "discord.js";
 import fs from "fs";
-import { ISettings, ISettingsWhere } from "../lib/types";
-import config from "../config.json";
+import { ISettings, ISettingsWhere } from "../../lib/types";
+import config from "../../config.json";
 
 function includesDict(array: ISettingsWhere[], dict: ISettingsWhere) {
 	for (const a of array) {

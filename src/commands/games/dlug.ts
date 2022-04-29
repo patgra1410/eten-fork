@@ -1,7 +1,7 @@
 import fs from "fs";
 import Discord, { ColorResolvable, CommandInteraction } from "discord.js";
 import { SlashCommandBuilder } from "@discordjs/builders";
-import { IUserSettings } from "../lib/types";
+import { IUserSettings } from "../../lib/types";
 
 export const data = new SlashCommandBuilder()
 	.setName("długi")

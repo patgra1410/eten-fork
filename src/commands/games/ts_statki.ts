@@ -1,6 +1,6 @@
 import { CommandInteraction, Message, MessageButton, MessageActionRow } from "discord.js";
 import { SlashCommandBuilder, SlashCommandUserOption, SlashCommandSubcommandBuilder } from "@discordjs/builders";
-import { statkiManager } from "../lib/statkiManager";
+import { statkiManager } from "../../lib/statkiManager";
 
 export const data = new SlashCommandBuilder()
 	.setName("statki")

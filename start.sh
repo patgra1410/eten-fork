@@ -1,5 +1,6 @@
 #!/bin/bash
 
+rm -dr dist/
 tsc
 if [ ! $? -eq 0 ] 
 then

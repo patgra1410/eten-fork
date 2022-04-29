@@ -1,18 +1,20 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
+import { SlashCommandBuilder } from "@discordjs/builders";
 import Discord from "discord.js";
-import config from "./config.json";
 import fs from "fs";
-import initThreadManager from "./lib/threadManager";
+import path from "path";
+import { Player } from "discord-player";
+import config from "./config.json";
 import createRequiredFiles from "./lib/createRequiredFiles";
 import cronJobs from "./lib/cronJobs";
-import randomSounds from "./lib/randomSoundOnVC";
-import initLibrusManager from "./lib/librusManager";
-import incrementDays from "./lib/incrementDays";
 import * as discordEvents from "./lib/discordEvents";
-import { SlashCommandBuilder } from "@discordjs/builders";
+import incrementDays from "./lib/incrementDays";
+import initLibrusManager from "./lib/librusManager";
+import randomSounds from "./lib/randomSoundOnVC";
+import initThreadManager from "./lib/threadManager";
 
 // LOL
-type SlashCommandFunction = ((interaction: Discord.CommandInteraction|Discord.ButtonInteraction|Discord.Message|Discord.ContextMenuInteraction, args?: string) => Promise<unknown>);
+type SlashCommandFunction = ((interaction: Discord.CommandInteraction | Discord.ButtonInteraction | Discord.Message | Discord.ContextMenuInteraction, args?: string) => Promise<unknown>);
 interface SlashCommandFile {
 	__esModule: boolean;
 	data: SlashCommandBuilder;
@@ -30,13 +32,30 @@ declare module "discord.js" {
 
 export const client = new Discord.Client({ intents: [Discord.Intents.FLAGS.GUILDS, Discord.Intents.FLAGS.GUILD_MESSAGES, Discord.Intents.FLAGS.GUILD_MEMBERS, Discord.Intents.FLAGS.GUILD_VOICE_STATES, Discord.Intents.FLAGS.GUILD_MESSAGE_REACTIONS], partials: ["MESSAGE", "CHANNEL", "REACTION"] });
 client.commands = new Discord.Collection();
+export const player = new Player(client);
+
+function getAllFiles(dirPath: string, tsFiles: boolean, arrayOfFiles: Array<string> = []) {
+	const files = fs.readdirSync(dirPath);
+
+	files.forEach(function(file) {
+		if (fs.statSync(dirPath + "/" + file).isDirectory()) {
+			arrayOfFiles = getAllFiles(dirPath + "/" + file, tsFiles, arrayOfFiles);
+		}
+		else if (file.endsWith(".js") && file.startsWith("ts_") == tsFiles) {
+			arrayOfFiles.push(path.join(dirPath, "/", file));
+		}
+	});
+
+	return arrayOfFiles;
+}
 
 async function updateSlashCommands() {
 	const slashCommands = [];
 	// for javascript command files
-	const commandFiles: string[] = fs.readdirSync(`${__dirname}/commands`).filter((file: string) => (file.endsWith(".js") && !file.startsWith("ts_")));
+	// const commandFiles: string[] = fs.readdirSync(`${__dirname}/commands`).filter((file: string) => (file.endsWith(".js") && !file.startsWith("ts_")));
+	const commandFiles = getAllFiles(`${__dirname}/commands`, false);
 	for (const file of commandFiles) {
-		const command: SlashCommandFile = require(`${__dirname}/commands/${file}`);
+		const command: SlashCommandFile = require(file);
 		client.commands.set(command.data.name, command);
 		slashCommands.push(command.data.toJSON());
 		if ("aliases" in command && command.aliases != null) {
@@ -45,9 +64,10 @@ async function updateSlashCommands() {
 		}
 	}
 	// for typescript slash command files
-	const tsCommandFiles: string[] = fs.readdirSync(`${__dirname}/commands`).filter((file: string) => (file.endsWith(".js") && file.startsWith("ts_")));
+	// const tsCommandFiles: string[] = fs.readdirSync(`${__dirname}/commands`).filter((file: string) => (file.endsWith(".js") && file.startsWith("ts_")));
+	const tsCommandFiles = getAllFiles(`${__dirname}/commands`, true);
 	for (const file of tsCommandFiles) {
-		const command: SlashCommandFile = await import(`${__dirname}/commands/${file}`);
+		const command: SlashCommandFile = await import(file);
 		client.commands.set(command.data.name, command);
 		slashCommands.push(command.data.toJSON());
 		// This won't set the aliases in Discord?

@@ -8,7 +8,7 @@ data/*
 soundeffects/*
 .vscode
 webhook-link
-src/commands/kahoot.ts
+src/commands/school/kahoot.ts
 
 # effects
 !data/effects.json

@@ -1,4 +1,4 @@
-const Board = require("../kwadratyRenderer.js");
+const Board = require("../../kwadratyRenderer.js");
 const Discord = require("discord.js");
 const fs = require("fs");
 const Elo = require("elo-rating");

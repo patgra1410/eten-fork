@@ -1,7 +1,7 @@
 import fs from "fs";
 import Discord, { ColorResolvable, CommandInteraction, Snowflake } from "discord.js";
-import { SlashCommandBooleanOption, SlashCommandBuilder, SlashCommandStringOption, SlashCommandUserOption } from "@discordjs/builders";
-import { IRanking, repeatingDigitsText } from "../lib/types";
+import { SlashCommandBuilder, SlashCommandStringOption, SlashCommandUserOption } from "@discordjs/builders";
+import { IRanking, repeatingDigitsText } from "../../lib/types";
 
 export const data = new SlashCommandBuilder()
 	.setName("ranking")

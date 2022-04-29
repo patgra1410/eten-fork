@@ -4,10 +4,10 @@ import Discord, { ButtonInteraction, Client, CommandInteraction, Message, Messag
 import Elo from "elo-rating";
 import fs from "fs";
 import { performance } from "perf_hooks";
-import ExtBoard from "../bot";
-import config from "../config.json";
-import Board from "../lib/pilkarzyki/2players";
-import { IRanking } from "../lib/types";
+import ExtBoard from "../../bot";
+import config from "../../config.json";
+import Board from "../../lib/pilkarzyki/2players";
+import { IRanking } from "../../lib/types";
 
 interface Iuids {
 	[uid: string]: number
