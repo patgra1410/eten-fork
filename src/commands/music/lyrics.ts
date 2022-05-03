@@ -39,12 +39,17 @@ export async function execute(interaction: CommandInteraction) {
 		return;
 	}
 
-	let desc = "Masz 15 sekund na wybór\n\n";
-	let i = 1;
-	for (const song of songs) {
-		desc += `**${i}.** ${song.full_title}\n`;
-		i++;
+	let desc, i;
+	if (songs.length) {
+		desc = "Masz 15 sekund na wybór\n\n";
+		i = 1;
+		for (const song of songs) {
+			desc += `**${i}.** ${song.full_title}\n`;
+			i++;
+		}
 	}
+	else
+		desc = "Nic nie znaleziono:(";
 
 	let embed = new Discord.MessageEmbed()
 		.setColor(("#" + Math.floor(Math.random() * 16777215).toString(16)) as ColorResolvable)
@@ -55,6 +60,9 @@ export async function execute(interaction: CommandInteraction) {
 	const emojis = ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣", "🔟"];
 	const msg = await interaction.editReply({ embeds: [embed] });
 	const message = (interaction.client.channels.cache.get(interaction.channelId) as TextChannel).messages.cache.get(msg.id);
+
+	if (!songs.length)
+		return;
 
 	for (let j = 1; j < i; j++)
 		message.react(repeatingDigitsText[j]);
@@ -74,6 +82,7 @@ export async function execute(interaction: CommandInteraction) {
 		embed = new Discord.MessageEmbed()
 			.setColor(("#" + Math.floor(Math.random() * 16777215).toString(16)) as ColorResolvable)
 			.setTitle(songs[number].full_title)
+			.setURL(songs[number].url)
 			.setDescription(lyrics)
 			.setThumbnail(songs[number].song_art_image_url)
 			.setAuthor({ name: interaction.user.username, iconURL: interaction.user.avatarURL() });
