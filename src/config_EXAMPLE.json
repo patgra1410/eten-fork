@@ -9,6 +9,8 @@
 
 	"adminID": ["admin1 user id", "admin2 user id"],
 
+	"geniusAPIKey": "genius API key (leave empty if you dont want to use /lyrics)",
+
 	"guild": "guild id",
 
 	"playRandomSoundeffects": true,

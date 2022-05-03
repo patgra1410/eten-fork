@@ -115,3 +115,21 @@ export interface IMusicInfo {
 		volume: number
 	}
 }
+
+export interface ILyricsSong {
+    api_path: string,
+    full_title: string,
+    header_image_url: string,
+    id: number,
+    path: string,
+    song_art_image_url: string,
+    title: string,
+    title_with_featured: string,
+    url: string,
+    primary_artist: {
+		api_path: string,
+		id: number,
+		name: string,
+		url: string
+    }
+}
