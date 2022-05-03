@@ -19,6 +19,7 @@ interface SlashCommandFile {
 	__esModule: boolean;
 	data: SlashCommandBuilder;
 	execute: SlashCommandFunction;
+	autocomplete?: ((interaction: Discord.AutocompleteInteraction) => Promise<unknown>);
 	aliases?: string[];
 	// pls delete
 	onMessage?: SlashCommandFunction;
@@ -93,7 +94,7 @@ client.once("ready", async () => {
 		throw new Error("user does not exist on client");
 	console.log(`Logged in as ${client.user.tag}`);
 	client.user.setStatus("online");
-	client.user.setActivity("Born To Die - Lana Del Rey", { type: "LISTENING" });
+	client.user.setActivity("Music DLC", { type: "STREAMING" });
 	await updateSlashCommands();
 
 	createRequiredFiles();

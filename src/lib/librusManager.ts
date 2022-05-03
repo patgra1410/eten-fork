@@ -263,7 +263,7 @@ async function prepareTrackedChannelData(): Promise<void> {
 			console.log(`${channelConfig.channel} - channel fetch() returned null!!!`.white.bgRed);
 			continue;
 		}
-		if (!channel.isText || channel.type !== "GUILD_TEXT") {
+		if (!channel.isText || (channel.type !== "GUILD_TEXT" && channel.type !== "GUILD_NEWS")) {
 			console.log(`${channel.id} is not a valid guild text channel!!!`.white.bgRed);
 			continue;
 		}

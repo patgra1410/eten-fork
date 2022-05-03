@@ -80,4 +80,9 @@ export default function() {
 
 	if (!fs.existsSync("./data/info.json"))
 		fs.writeFileSync("./data/info.json", "{\"uptimeCron\": \"\"}");
+
+	// MUSIC
+
+	if (!fs.existsSync("./data/music.json"))
+		fs.writeFileSync("./data/music.json", "{}");
 }

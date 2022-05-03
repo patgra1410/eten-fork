@@ -109,3 +109,9 @@ export interface IRanking {
 export interface IInfo {
 	uptimeCron: string
 }
+
+export interface IMusicInfo {
+	[guildId: string]: {
+		volume: number
+	}
+}
