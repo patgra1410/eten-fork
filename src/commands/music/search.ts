@@ -32,6 +32,8 @@ export async function execute(interaction: CommandInteraction) {
 		searchEngine: QueryType.AUTO
 	});
 
+	console.log(res);
+
 	if (!res || !res.tracks.length) {
 		interaction.editReply("Nic nie znaleziono");
 		return;

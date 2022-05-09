@@ -18,6 +18,11 @@ export async function execute(interaction: CommandInteraction) {
 	}
 
 	const queue = player.getQueue(interaction.guild.id);
+	if (!queue) {
+		interaction.editReply("Kolejka nie istnieje");
+		return;
+	}
+
 	queue.destroy();
 	interaction.editReply("Usunięto kolejkę");
 }

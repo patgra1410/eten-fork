@@ -85,18 +85,21 @@ async function fetchNewSchoolNotices(): Promise<void> {
 						.setTitle(`**__${schoolNoticeResponse.Subject}__**`)
 						.setDescription(messageText.substring(0, 6000))
 						.setFooter({ text: `Dodano: ${schoolNoticeResponse.CreationDate}` });
-					const channel = await client.channels.fetch(listener.channelId) as TextChannel; // We're guaranteed it's TextChannel from prepareTrackedChannels()
+					const origChannel = await client.channels.fetch(listener.channelId);
+					const channel = origChannel as TextChannel; // We're guaranteed it's TextChannel from prepareTrackedChannels()
 					if (listener.knownNotices.has(schoolNoticeResponse.Id)) {
 						const messageId = listener.knownNotices.get(schoolNoticeResponse.Id);
-						const message = await channel.messages.fetch(messageId);
+						let message = await channel.messages.fetch(messageId);
 						await message.edit({
 							content: ((tagText.length > 0) ? tagText : null),
 							embeds: [embed.setFooter({ text: `Dodano: ${schoolNoticeResponse.CreationDate} | Ostatnia zmiana: ${update.AddDate}` })]
 						});
-						await channel.send({
+						message = await channel.send({
 							reply: { messageReference: messageId, failIfNotExists: false },
 							content: "Zmieniono ogłoszenie ^"
 						});
+						if (origChannel.type == "GUILD_NEWS")
+							message.crosspost();
 					}
 					else {
 						const message = await channel.send({
@@ -104,6 +107,8 @@ async function fetchNewSchoolNotices(): Promise<void> {
 							embeds: [embed]
 						});
 						listener.knownNotices.set(schoolNoticeResponse.Id, message.id);
+						if (origChannel.type == "GUILD_NEWS")
+							await message.crosspost();
 					}
 				}
 				console.log(`${schoolNoticeResponse.Id}  --- Sent!`.green);
