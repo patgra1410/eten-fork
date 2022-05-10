@@ -98,8 +98,6 @@ async function fetchNewSchoolNotices(): Promise<void> {
 							reply: { messageReference: messageId, failIfNotExists: false },
 							content: "Zmieniono ogłoszenie ^"
 						});
-						if (origChannel.type == "GUILD_NEWS")
-							message.crosspost();
 					}
 					else {
 						const message = await channel.send({
@@ -157,8 +155,11 @@ async function fetchNewSchoolNotices(): Promise<void> {
 					])
 					.setFooter({ text: `Dodano: ${update.AddDate}` });
 				for (const listener of noticeListenerChannels) {
-					const channel = await client.channels.fetch(listener.channelId) as TextChannel; // We're guaranteed it's TextChannel from prepareTrackedChannels()
-					await channel.send({ embeds: [embed] });
+					const origChannel = await client.channels.fetch(listener.channelId);
+					const channel = origChannel as TextChannel; // We're guaranteed it's TextChannel from prepareTrackedChannels()
+					const message = await channel.send({ embeds: [embed] });
+					if (origChannel.type == "GUILD_NEWS")
+						await message.crosspost();
 					console.log(`${update.Resource.Url}  --- Sent!`.green);
 				}
 			}
