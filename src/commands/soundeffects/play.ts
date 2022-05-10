@@ -1,7 +1,7 @@
-import { SlashCommandBuilder, SlashCommandIntegerOption, SlashCommandStringOption, SlashCommandSubcommandBuilder } from "@discordjs/builders";
+import { SlashCommandBuilder, SlashCommandIntegerOption, SlashCommandStringOption } from "@discordjs/builders";
 import Discord, { CommandInteraction, ColorResolvable } from "discord.js";
 import { joinVoiceChannel, createAudioPlayer, createAudioResource } from "@discordjs/voice";
-import { exec, execSync } from "child_process";
+import { execSync } from "child_process";
 import fs from "fs";
 const player = createAudioPlayer();
 
@@ -152,6 +152,9 @@ export async function execute(interaction: CommandInteraction) {
 		const guild = interaction.client.guilds.cache.get(interaction.guildId);
 		const user = guild.members.cache.get(interaction.user.id);
 		let path = `./soundeffects/${fileName}`;
+		let isAlreadyOnVC = false;
+		if (guild.me.voice)
+			isAlreadyOnVC = true;
 
 		if (!user.voice.channel) {
 			interaction.reply("Nie jesteś na VC na tym serwerze");
@@ -241,7 +244,8 @@ export async function execute(interaction: CommandInteraction) {
 			while (player.state.status != "idle")
 				await sleep(100);
 		}
-		connection.disconnect();
+		if (!isAlreadyOnVC)
+			connection.disconnect();
 	}
 	else if (interaction.options.getSubcommand() == "stop") {
 		const guild = interaction.client.guilds.cache.get(interaction.guildId);

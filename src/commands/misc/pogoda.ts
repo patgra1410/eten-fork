@@ -1,5 +1,5 @@
 import fetch from "node-fetch";
-import { joinImages } from "join-images";
+import joinImages from "../../lib/joinImages";
 import fs from "fs";
 import util from "util";
 import stream from "stream";
@@ -77,8 +77,7 @@ export async function execute(interaction: CommandInteraction) {
 		title = "Warszawa";
 	}
 	await streamPipeline(imgResult.body, fs.createWriteStream("./tmp/weather.png"));
-	const img = await joinImages(["data/leg60.png", "tmp/weather.png"], { direction: "horizontal" });
-	await img.toFile("tmp/weatherFinal.png");
+	joinImages("data/leg60.png", "tmp/weather.png", "tmp/weatherFinal.png");
 
 	const weatherAttachment = new Discord.MessageAttachment("./tmp/weatherFinal.png");
 	if (interaction.isCommand !== undefined && interaction.isCommand())

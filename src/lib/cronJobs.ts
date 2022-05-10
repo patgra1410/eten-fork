@@ -1,6 +1,6 @@
 import cron from "cron";
 import fetch from "node-fetch";
-import joinImages from "join-images";
+import joinImages from "./joinImages";
 import util from "util";
 import fs from "fs";
 import { Client, MessageAttachment, TextChannel } from "discord.js";
@@ -58,8 +58,7 @@ const dailyJob = new cron.CronJob(
 				});
 				if (!imgResult.ok) throw new Error(`Unexpected response ${result.statusText}`);
 				await streamPipeline(imgResult.body, fs.createWriteStream("./tmp/weather.png"));
-				const img = await joinImages(["data/leg60.png", "tmp/weather.png"], { direction: "horizontal" });
-				await img.toFile("tmp/weatherFinal.png");
+				joinImages("data/leg60.png", "tmp/weather.png", "tmp/weatherFinal.png");
 				const weatherAttachment = new MessageAttachment("./tmp/weatherFinal.png");
 
 				for (const info of settings.pogoda.where) {

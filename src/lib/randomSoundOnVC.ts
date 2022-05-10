@@ -1,4 +1,4 @@
-import { Collection, GuildMember } from "discord.js";
+import { Collection, GuildMember, VoiceChannel } from "discord.js";
 import config from "../config.json";
 import fs from "fs";
 import { joinVoiceChannel, createAudioPlayer, createAudioResource } from "@discordjs/voice";
@@ -12,13 +12,25 @@ function sleep(ms: number) {
 }
 
 async function randomSoundOnVoice() {
-	const channels = client.guilds.cache.get(config.guild)?.channels.cache.filter(c => c.type == "GUILD_VOICE");
+	const channels: Array<VoiceChannel> = [];
+
+	client.guilds.cache.forEach(guild => {
+		for (const channel of guild.channels.cache.filter(c => c.type == "GUILD_VOICE").values())
+			channels.push(channel as VoiceChannel);
+	});
 
 	let isThereAnyone = false;
 	for (const channel of channels.values()) {
 		if ((channel.members as Collection<string, GuildMember>).size == 0 || Math.random() >= config.randomSoundeffectChance)
 			continue;
 		isThereAnyone = true;
+
+		let isAlreadyOnVC = false;
+		if (client.guilds.cache.get(channel.guildId).me.voice)
+			isAlreadyOnVC = true;
+
+		if (isAlreadyOnVC) // TODO lepiej to
+			continue;
 
 		const connection = joinVoiceChannel({
 			channelId: channel.id,
@@ -33,7 +45,9 @@ async function randomSoundOnVoice() {
 		player.play(resource);
 		while (player.state.status != "idle")
 			await sleep(100);
-		connection.disconnect();
+
+		if (!isAlreadyOnVC)
+			connection.disconnect();
 	}
 
 	setTimeout(randomSoundOnVoice, (isThereAnyone ? 1000 * 60 : 1000 * 60 * 15));
