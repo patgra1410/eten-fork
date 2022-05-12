@@ -83,7 +83,7 @@ async function fetchNewSchoolNotices(): Promise<void> {
 							name: `📣 ${changeType} w Librusie`
 						})
 						.setTitle(`**__${schoolNoticeResponse.Subject}__**`)
-						.setDescription(messageText.substring(0, 6000))
+						.setDescription(messageText.substring(0, 4096)) // TODO lepiej
 						.setFooter({ text: `Dodano: ${schoolNoticeResponse.CreationDate}` });
 					const origChannel = await client.channels.fetch(listener.channelId);
 					const channel = origChannel as TextChannel; // We're guaranteed it's TextChannel from prepareTrackedChannels()
