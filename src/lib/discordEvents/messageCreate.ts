@@ -6,6 +6,8 @@ import archiwum from "../archiwum";
 import config from "../../config.json";
 import fs from "fs";
 import { IRanking, repeatingDigitsText } from "../types";
+import url from "url";
+import path from "path";
 
 export default async function(message: Message) {
 	const client = message.client;
@@ -27,15 +29,18 @@ export default async function(message: Message) {
 	}
 	ranking.dubs[message.author.id][repeatingDigits]++;
 	fs.writeFileSync("./data/ranking.json", JSON.stringify(ranking), "utf-8");
-	if (repeatingDigits >= 2) {
-		if (repeatingDigits >= 10) {
-			message.react("<:checkem:966379892474249246>");
-			message.reply({ content: `@everyone WITNESSED (ID: ${message.id.substring(0, message.id.length - repeatingDigits)}**${message.id.substring(message.id.length - repeatingDigits)}**)`, files: ["https://www.vogue.pl/uploads/repository/nina_p/ap.jpg"] });
+	if (repeatingDigits >= 2 && message.guildId != "922800899598974988") {
+		if (repeatingDigits >= 6) {
+			message.react("<:checkem:966379892474249246>")
+				.catch(error => console.log(error));
+			message.reply({ content: `@everyone WITNESSED (ID: ${message.id.substring(0, message.id.length - repeatingDigits)}**${message.id.substring(message.id.length - repeatingDigits)}**)`, files: ["https://www.vogue.pl/uploads/repository/nina_p/ap.jpg"], failIfNotExists: false });
 		}
 		else if (repeatingDigits >= 2) {
-			message.react("<:checkem:966379892474249246>").then(() => {
-				message.react(repeatingDigitsText[repeatingDigits]);
-			});
+			message.react("<:checkem:966379892474249246>")
+				.then(() => {
+					message.react(repeatingDigitsText[repeatingDigits]);
+				})
+				.catch(error => console.log(error));
 		}
 	}
 
@@ -113,6 +118,9 @@ https://cdn.discordapp.com/attachments/856926964094337047/968536776484487218/unk
 			message.reply(`${mediaLink.replace(/media/, "cdn").replace(/net/, "com")}\nFucking goofy ass media link`);
 	}
 
+	let reddit = false;
+	const redditFilenameRegex = /((?![0-9]{13})(?![a-z]{13})[a-z0-9]{13})/g;
+
 	// Nie potrzebny await mam nadzieję
 	archiwum(message);
 
@@ -122,6 +130,8 @@ https://cdn.discordapp.com/attachments/856926964094337047/968536776484487218/unk
 		for (const [id, attachment] of message.attachments) {
 			if (attachment.contentType.startsWith("video") || attachment.contentType.startsWith("image"))
 				await hashFile(attachment.url, message);
+			if (attachment.name.toLowerCase().match("reddit") || redditFilenameRegex.test(attachment.name))
+				reddit = true;
 		}
 	}
 
@@ -130,6 +140,18 @@ https://cdn.discordapp.com/attachments/856926964094337047/968536776484487218/unk
 			if (embed.type == 'video' || embed.type == 'image')
 				await hashFile.hashFile(embed, message)
 		}
-	} else */ if ((/https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*).(webm|mp4|mov|avi|flv|mkv|wmv|m4v|png|jpg|gif|jpeg|webp|svg|ovg|ogg)\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/g.test(message.content)))
+	} else */
+	if (message.content.toLowerCase().match("reddit")) {
+		reddit = true;
+	}
+	if ((/https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*).(webm|mp4|mov|avi|flv|mkv|wmv|m4v|png|jpg|gif|jpeg|webp|svg|ovg|ogg)\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/g.test(message.content))) {
+		const fileName = path.basename(new URL(message.content).pathname);
+		if (redditFilenameRegex.test(fileName)) {
+			reddit = true;
+		}
 		await hashFileFromMessageContent(message);
+	}
+	if (reddit) {
+		message.reply({ content: "https://cdn.discordapp.com/attachments/788126323180044339/980463018800459866/Ew_You_Must_Be_From_Reddit_pl7RIIHK9EE.mp4" });
+	}
 }

@@ -352,7 +352,7 @@ export default async function initLibrusManager() {
 	librusClient = new LibrusClient({ debug: true });
 	await librusClient.login(config.librusLogin, config.librusPass);
 	librusClient.pushDevice = parseInt(config.pushDevice);
-	// await librusClient.newPushDevice();
+	// console.log(await librusClient.newPushDevice());
 	await prepareTrackedChannelData();
 	setTimeout(fetchNewSchoolNotices, 2000);
 }

@@ -5,6 +5,7 @@ placeholder.jpg
 tmp
 data/*
 !data/leg60.png
+!data/reddit.mp4
 soundeffects/*
 .vscode
 webhook-link
