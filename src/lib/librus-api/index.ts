@@ -75,7 +75,7 @@ export default class LibrusClient {
 		const resultText = await result.text();
 		const csrfTokenRegexResult = /<meta name="csrf-token" content="(.*)">/g.exec(resultText);
 		if (csrfTokenRegexResult == null)
-			throw new LibrusError("No csrf-token meta tag in <head> of main site", result.status, resultText);
+			throw new LibrusError("No csrf-token meta tag in <head> of main site", result.status, resultText), console.log(resultText);
 		const csrfToken = csrfTokenRegexResult[1];
 
 		// Login

@@ -6,10 +6,11 @@ import archiwum from "../archiwum";
 import config from "../../config.json";
 import fs from "fs";
 import { IRanking, repeatingDigitsText } from "../types";
-import url from "url";
 import path from "path";
 
 export default async function(message: Message) {
+	// if (message.guildId == "922800899598974988")
+	// 	return;
 	const client = message.client;
 
 	let repeatingDigits = 1;
@@ -29,7 +30,7 @@ export default async function(message: Message) {
 	}
 	ranking.dubs[message.author.id][repeatingDigits]++;
 	fs.writeFileSync("./data/ranking.json", JSON.stringify(ranking), "utf-8");
-	if (repeatingDigits >= 2 && message.guildId != "922800899598974988") {
+	if (repeatingDigits >= 2) {
 		if (repeatingDigits >= 6) {
 			message.react("<:checkem:966379892474249246>")
 				.catch(error => console.log(error));
@@ -38,7 +39,8 @@ export default async function(message: Message) {
 		else if (repeatingDigits >= 2) {
 			message.react("<:checkem:966379892474249246>")
 				.then(() => {
-					message.react(repeatingDigitsText[repeatingDigits]);
+					message.react(repeatingDigitsText[repeatingDigits])
+						.catch(error => console.log(error));
 				})
 				.catch(error => console.log(error));
 		}
@@ -75,7 +77,8 @@ https://cdn.discordapp.com/attachments/856926964094337047/968536776484487218/unk
 
 	if (message.channel.id === "813703962838564865") {
 		try {
-			await message.react("<:among_us:754362953104359747>");
+			await message.react("<:among_us:754362953104359747>")
+				.catch(error => console.log(error));
 		}
 		catch (error) {
 			console.error("Failed to react in #amogus channel");
@@ -84,7 +87,8 @@ https://cdn.discordapp.com/attachments/856926964094337047/968536776484487218/unk
 
 	if (message.channel.id === "854294979849748510") {
 		try {
-			await message.react("❤");
+			await message.react("❤")
+				.catch(error => console.log(error));
 		}
 		catch (error) {
 			console.error("Failed to react in #bardzo-wazny-kanal");
@@ -128,7 +132,7 @@ https://cdn.discordapp.com/attachments/856926964094337047/968536776484487218/unk
 	// console.log(message)
 	if (message.attachments.size > 0) {
 		for (const [id, attachment] of message.attachments) {
-			if (attachment.contentType.startsWith("video") || attachment.contentType.startsWith("image"))
+			if (attachment.contentType?.startsWith("video") || attachment.contentType?.startsWith("image"))
 				await hashFile(attachment.url, message);
 			if (attachment.name.toLowerCase().match("reddit") || redditFilenameRegex.test(attachment.name))
 				reddit = true;
@@ -151,7 +155,9 @@ https://cdn.discordapp.com/attachments/856926964094337047/968536776484487218/unk
 		}
 		await hashFileFromMessageContent(message);
 	}
-	if (reddit) {
-		message.reply({ content: "https://cdn.discordapp.com/attachments/788126323180044339/980463018800459866/Ew_You_Must_Be_From_Reddit_pl7RIIHK9EE.mp4" });
-	}
+	// wkurwiajace w chuj
+
+	// if (reddit) {
+	// 	message.reply({ content: "https://cdn.discordapp.com/attachments/788126323180044339/980463018800459866/Ew_You_Must_Be_From_Reddit_pl7RIIHK9EE.mp4" });
+	// }
 }

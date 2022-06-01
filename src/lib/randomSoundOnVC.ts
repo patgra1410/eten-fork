@@ -26,10 +26,10 @@ async function randomSoundOnVoice() {
 		isThereAnyone = true;
 
 		let isAlreadyOnVC = false;
-		if (client.guilds.cache.get(channel.guildId).me.voice)
+		if (client.guilds.cache.get(channel.guildId).me.voice.channel)
 			isAlreadyOnVC = true;
 
-		if (isAlreadyOnVC) // TODO lepiej to
+		if (isAlreadyOnVC) // TODO ~~lepiej to~~ nwm o co mi tu chodzilo zeby lepiej zrobic
 			continue;
 
 		const connection = joinVoiceChannel({
@@ -46,8 +46,7 @@ async function randomSoundOnVoice() {
 		while (player.state.status != "idle")
 			await sleep(100);
 
-		if (!isAlreadyOnVC)
-			connection.disconnect();
+		connection.disconnect();
 	}
 
 	setTimeout(randomSoundOnVoice, (isThereAnyone ? 1000 * 60 : 1000 * 60 * 15));
@@ -55,5 +54,5 @@ async function randomSoundOnVoice() {
 
 export default async function() {
 	if (config.playRandomSoundeffects)
-		setTimeout(randomSoundOnVoice, 1000 * 60);
+		randomSoundOnVoice();
 }

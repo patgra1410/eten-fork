@@ -255,8 +255,8 @@ async function fetchNewSchoolNotices(): Promise<void> {
 		setTimeout(fetchNewSchoolNotices, (failDelayTimeMs));
 		return;
 	}
-	const maxDelayTime = 5 * 60;
-	const minDelayTime = 4 * 60;
+	const maxDelayTime = 10 * 60;
+	const minDelayTime = 8 * 60;
 	setTimeout(fetchNewSchoolNotices, ((Math.round(Math.random() * (maxDelayTime - minDelayTime) + minDelayTime)) * 1000));
 }
 

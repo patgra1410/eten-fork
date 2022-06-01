@@ -65,7 +65,8 @@ export async function execute(interaction: CommandInteraction) {
 		return;
 
 	for (let j = 1; j < i; j++)
-		message.react(repeatingDigitsText[j]);
+		message.react(repeatingDigitsText[j])
+			.catch(error => console.log(error));
 
 	const collector = message.createReactionCollector({
 		time: 15000,
