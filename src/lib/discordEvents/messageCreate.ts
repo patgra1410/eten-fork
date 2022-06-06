@@ -149,10 +149,10 @@ https://cdn.discordapp.com/attachments/856926964094337047/968536776484487218/unk
 		reddit = true;
 	}
 	if ((/https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*).(webm|mp4|mov|avi|flv|mkv|wmv|m4v|png|jpg|gif|jpeg|webp|svg|ovg|ogg)\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/g.test(message.content))) {
-		const fileName = path.basename(new URL(message.content).pathname);
-		if (redditFilenameRegex.test(fileName)) {
-			reddit = true;
-		}
+		// const fileName = path.basename(new URL(message.content).pathname);
+		// if (redditFilenameRegex.test(fileName)) {
+		// 	reddit = true;
+		// }
 		await hashFileFromMessageContent(message);
 	}
 	// wkurwiajace w chuj
