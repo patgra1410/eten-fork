@@ -85,4 +85,9 @@ export default function() {
 
 	if (!fs.existsSync("./data/music.json"))
 		fs.writeFileSync("./data/music.json", "{}");
+
+	// KNOWN NOTICES FOR RESTARTS
+
+	if (!fs.existsSync("./data/globalKnownNotices.json"))
+		fs.writeFileSync("./data/globalKnownNotices.json", "{}");
 }

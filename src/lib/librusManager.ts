@@ -6,6 +6,7 @@ import * as bets from "./bets";
 import LibrusClient from "./librus-api";
 import * as librusApiTypes from "./librus-api/librus-api-types";
 import { sha256 } from "./util";
+import fs from "fs";
 
 interface IRoleRegexes {
 	boldRegex: RegExp;
@@ -97,7 +98,6 @@ async function tempFunnyKnownNotices() {
 		globalKnownNotices.set(k, v);
 	}
 }
-tempFunnyKnownNotices();
 
 function isPlanChangeNotice(title: string): boolean {
 	let flag = false;
@@ -185,7 +185,7 @@ async function fetchNewSchoolNotices(): Promise<void> {
 							embeds: [embed]
 						});
 						listener.knownNotices.set(schoolNoticeResponse.Id, message.id);
-						globalKnownNotices.set(schoolNoticeResponse.Id, await sha256(schoolNoticeResponse.Content));
+						globalKnownNotices.set(schoolNoticeResponse.Id, sha256(schoolNoticeResponse.Content));
 						if (origChannel.type == "GUILD_NEWS")
 							await message.crosspost();
 					}
@@ -355,7 +355,7 @@ async function fetchNewSchoolNotices(): Promise<void> {
 				let footerText = `❗ Fallback | Dodano: ${notice.CreationDate}`;
 				let changeType = "Nowe ogłoszenie";
 				if (globalKnownNotices.has(notice.Id)) {
-					const contentHash = await sha256(notice.Content);
+					const contentHash = sha256(notice.Content);
 					const knownContentHash = globalKnownNotices.get(notice.Id);
 					if (contentHash !== knownContentHash) {
 						console.log(`Hash mismatch: ${contentHash} ${knownContentHash}`);
@@ -391,7 +391,7 @@ async function fetchNewSchoolNotices(): Promise<void> {
 						embeds: [embed]
 					});
 					listener.knownNotices.set(notice.Id, message.id);
-					globalKnownNotices.set(notice.Id, await sha256(notice.Content));
+					globalKnownNotices.set(notice.Id, sha256(notice.Content));
 					if (channel.type == "GUILD_NEWS")
 						await message.crosspost();
 				}
@@ -405,10 +405,16 @@ async function fetchNewSchoolNotices(): Promise<void> {
 		setTimeout(fetchNewSchoolNotices, failDelayTimeMs);
 		return;
 	}
+	// Tump globalKnownNotices map to a file in ./data/
+	const tempObj: Record<string, string> = {};
+	for (const [k, v] of globalKnownNotices) {
+		tempObj[k] = v;
+	}
+	fs.writeFileSync("./data/globalKnownNotices.json", JSON.stringify(tempObj));
 	const maxDelayTime = 10 * 60;
 	const minDelayTime = 8 * 60;
 	setTimeout(fetchNewSchoolNotices, ((Math.round(Math.random() * (maxDelayTime - minDelayTime) + minDelayTime)) * 1000));
-	console.log("DONE");
+	console.log("DONE".gray);
 }
 
 async function prepareTrackedChannelData(): Promise<void> {
@@ -505,5 +511,10 @@ export default async function initLibrusManager() {
 	librusClient.pushDevice = parseInt(config.pushDevice);
 	// console.log(await librusClient.newPushDevice());
 	await prepareTrackedChannelData();
+	await tempFunnyKnownNotices(); // Delete on next commit along with original function
+	const globalKnownNoticesFile: Record<string, string> = JSON.parse(fs.readFileSync("./data/globalKnownNotices.json", "utf-8"));
+	for (const [k, v] of Object.entries(globalKnownNoticesFile)) {
+		globalKnownNotices.set(k, v);
+	}
 	setTimeout(fetchNewSchoolNotices, 2000);
 }
