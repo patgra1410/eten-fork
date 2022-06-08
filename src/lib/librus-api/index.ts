@@ -1,4 +1,4 @@
-import nodeFetch, { RequestInit } from "node-fetch";
+import nodeFetch, { RequestInit, Response } from "node-fetch";
 import "colors";
 import { LibrusError } from "./errors/libruserror";
 import fetchCookie from "fetch-cookie";
@@ -164,7 +164,7 @@ export default class LibrusClient {
 	 * @param url API endpoit URL
 	 * @param options Additional request options
 	 */
-	async customLibrusRequest(url: string, options?: ILibrusRequestOptions): Promise<string|Response|unknown> {
+	async customLibrusRequest(url: string, options?: ILibrusRequestOptions): Promise<unknown> {
 		// Merge default request options with user request options
 		let requestOptions: RequestInit = {
 			method: "GET",
@@ -173,7 +173,8 @@ export default class LibrusClient {
 				gzip: "true",
 				Authorization: ((this.bearerToken !== "") ? `Bearer ${this.bearerToken}` : "")
 			},
-			redirect: "manual"
+			redirect: "manual",
+			timeout: 10000
 		};
 		if (options?.fetchOptions) {
 			requestOptions = { ...requestOptions, ...options.fetchOptions };
@@ -184,12 +185,11 @@ export default class LibrusClient {
 		// Execute request
 		this.log(`${requestOptions.method} ${url}`.bgMagenta.white);
 		let result = await this.cookieFetch(url, requestOptions);
-		const rawResult = result.clone();
-		let resultText = await result.text();
 
 		if (!result.ok) {
 			this.log("Result not OK".bgYellow.white);
 			this.log(`${result.status} ${result.statusText}`.bgYellow.white);
+			let resultText = await result.text();
 			if (resultText?.length) {
 				try {
 					this.log(JSON.parse(resultText));
@@ -222,12 +222,12 @@ export default class LibrusClient {
 		}
 
 		// Return
-		if (options?.response === "json")
-			return JSON.parse(resultText);
-		else if (options?.response === "text")
-			return resultText;
-		else
-			return rawResult;
+		// if (options?.response === "json")
+		// 	return JSON.parse(resultText);
+		// else if (options?.response === "text")
+		// 	return resultText;
+		// else
+		return result;
 	}
 
 	/**

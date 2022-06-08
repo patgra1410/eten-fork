@@ -141,7 +141,7 @@ export interface ISchoolNotice {
 
 // https://api.librus.pl/3.0/SchoolNotices/
 export interface APISchoolNotices extends APIv3BaseResponse {
-	SchoolNotice: ISchoolNotice[];
+	SchoolNotices: ISchoolNotice[];
 }
 
 // https://api.librus.pl/3.0/SchoolNotices/<SchoolNotice ID>
@@ -321,4 +321,22 @@ export interface APISubject extends APIv3BaseResponse {
 }
 export interface APISubjects extends APIv3BaseResponse {
 	Subjects: ISubject[];
+}
+
+interface IParentTeacherConference {
+	Class: INumberIdResource;
+	Date: string;
+	Name: string;
+	Teacher: INumberIdResource;
+	Topic: string;
+	Room: null; // Probably INumberIdResource otherwise?
+	Time: string;
+}
+
+// https://api.librus.pl/3.0/ParentTeacherConferences/<ID>
+export interface APIParentTeacherConference extends APIv3BaseResponse {
+	ParentTeacherConference: IParentTeacherConference;
+}
+export interface APIParentTeacherConferences extends APIv3BaseResponse {
+	ParentTeacherConferences: IParentTeacherConference[];
 }

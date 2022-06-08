@@ -1,6 +1,6 @@
 import LibrusClient, { IBaseFetchOptions } from "..";
 import { LibrusError } from "../errors/libruserror";
-import { APISchoolNotice, ISchoolNotice } from "../librus-api-types";
+import { APISchoolNotice, APISchoolNotices, ISchoolNotice } from "../librus-api-types";
 import BaseManager from "./baseManager";
 
 export default class SchoolNoticesManager extends BaseManager {
@@ -8,6 +8,30 @@ export default class SchoolNoticesManager extends BaseManager {
 	constructor(client: LibrusClient) {
 		super(client);
 		this.cache = new Map<string, ISchoolNotice>();
+	}
+	async fetchAll(): Promise<ISchoolNotice[]> {
+		const noticeResponse = await this.client.customLibrusRequest("https://api.librus.pl/3.0/SchoolNotices/") as Response;
+		// Check if request is OK
+		if (!noticeResponse.ok) {
+			let errorJson;
+			try {
+				errorJson = await noticeResponse.json();
+			}
+			catch (error) {
+				this.client.log(error);
+			}
+			if (noticeResponse.status === 404) {
+				throw new LibrusError("SchoolNotice not found", noticeResponse.status, errorJson);
+			}
+			if (noticeResponse.status === 403) {
+				throw new LibrusError("SchoolNotice is forbidden from being viewed", noticeResponse.status, errorJson);
+			}
+			else {
+				throw new LibrusError("Unknown error - Could not get SchoolNotice", noticeResponse.status, errorJson);
+			}
+		}
+		const noticeJson = (await noticeResponse.json() as APISchoolNotices).SchoolNotices;
+		return noticeJson;
 	}
 	async fetch(id: string, options?: IBaseFetchOptions): Promise<ISchoolNotice> {
 		options = this.defaultizeFetchOptions(options);
