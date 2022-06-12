@@ -6,7 +6,7 @@ import archiwum from "../archiwum";
 import config from "../../config.json";
 import fs from "fs";
 import { IRanking, repeatingDigitsText } from "../types";
-import path from "path";
+import { onMessage } from "../../commands/games/kwadraty";
 
 export default async function(message: Message) {
 	// if (message.guildId == "922800899598974988")
@@ -95,9 +95,8 @@ https://cdn.discordapp.com/attachments/856926964094337047/968536776484487218/unk
 		}
 	}
 
-	// TODO: ===
 	if (message.content.length == 4)
-		await client.commands.get("kwadraty").onMessage(message);
+		onMessage(message);
 
 
 	if (message.content.startsWith(config.prefix)) {

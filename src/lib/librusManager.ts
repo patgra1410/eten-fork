@@ -111,7 +111,8 @@ async function fetchNewSchoolNotices(): Promise<void> {
 						});
 						listener.knownNotices.set(schoolNoticeResponse.Id, message.id);
 						if (origChannel.type == "GUILD_NEWS")
-							await message.crosspost();
+							message.crosspost()
+								.catch(error => console.error("Error while crossposting:", error));
 					}
 				}
 				globalKnownNotices.set(schoolNoticeResponse.Id, sha256(schoolNoticeResponse.Content));
@@ -165,7 +166,8 @@ async function fetchNewSchoolNotices(): Promise<void> {
 					const channel = origChannel as TextChannel; // We're guaranteed it's TextChannel from prepareTrackedChannels()
 					const message = await channel.send({ embeds: [embed] });
 					if (origChannel.type == "GUILD_NEWS")
-						await message.crosspost();
+						message.crosspost()
+							.catch(error => console.error("Error while crossposting:", error));
 					console.log(`${update.Resource.Url}  --- Sent!`.green);
 				}
 			}
@@ -305,10 +307,16 @@ async function fetchNewSchoolNotices(): Promise<void> {
 						content: ((tagText.length > 0) ? tagText : null),
 						embeds: [embed.setFooter({ text: footerText })]
 					});
-					(await channel.send({
-						reply: { messageReference: messageId, failIfNotExists: false },
-						content: `Zmieniono ogłoszenie "*${notice.Content}*"`
-					})).crosspost();
+					try {
+						await (await channel.send({
+							reply: { messageReference: messageId, failIfNotExists: false },
+							content: `Zmieniono ogłoszenie "*${notice.Subject}*"`
+						})).crosspost();
+					}
+					catch (error) {
+						console.error("Error while crossposting:".bgRed.white);
+						console.error(error);
+					}
 				}
 				else {
 					const message = await channel.send({
@@ -316,8 +324,15 @@ async function fetchNewSchoolNotices(): Promise<void> {
 						embeds: [embed]
 					});
 					listener.knownNotices.set(notice.Id, message.id);
-					if (channel.type == "GUILD_NEWS")
-						await message.crosspost();
+					if (channel.type == "GUILD_NEWS") {
+						try {
+							await message.crosspost();
+						}
+						catch (error) {
+							console.error("Error while crossposting:".bgRed.white);
+							console.error(error);
+						}
+					}
 				}
 			}
 			globalKnownNotices.set(notice.Id, sha256(notice.Content));
@@ -335,7 +350,7 @@ async function fetchNewSchoolNotices(): Promise<void> {
 	for (const [k, v] of globalKnownNotices) {
 		tempObj[k] = v;
 	}
-	// fs.writeFileSync("./data/globalKnownNotices.json", JSON.stringify(tempObj));
+	fs.writeFileSync("./data/globalKnownNotices.json", JSON.stringify(tempObj));
 	const maxDelayTime = 10 * 60;
 	const minDelayTime = 8 * 60;
 	setTimeout(fetchNewSchoolNotices, ((Math.round(Math.random() * (maxDelayTime - minDelayTime) + minDelayTime)) * 1000));
