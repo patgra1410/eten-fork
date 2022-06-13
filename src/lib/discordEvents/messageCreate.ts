@@ -127,7 +127,6 @@ https://cdn.discordapp.com/attachments/856926964094337047/968536776484487218/unk
 	// Nie potrzebny await mam nadzieję
 	archiwum(message);
 
-	await message.fetch();
 	// console.log(message)
 	if (message.attachments.size > 0) {
 		for (const [id, attachment] of message.attachments) {
