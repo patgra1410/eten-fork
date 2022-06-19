@@ -279,7 +279,7 @@ async function fetchNewSchoolNotices(): Promise<void> {
 						messageText = messageText.replace(roleData.roleRegex, `<@&${roleData.roleId}> $&`);
 					}
 				}
-				let footerText = `❗ Fallback | Dodano: ${notice.CreationDate}`;
+				let footerText = `❗ Fallback | Dodano: ${new Date(notice.CreationDate).toLocaleString().replace(",", "")}`;
 				let changeType = "Nowe ogłoszenie";
 				if (globalKnownNotices.has(notice.Id)) {
 					const contentHash = sha256(notice.Content);
@@ -287,7 +287,7 @@ async function fetchNewSchoolNotices(): Promise<void> {
 					if (contentHash !== knownContentHash) {
 						// console.log(`Hash mismatch: ${contentHash} ${knownContentHash}`);
 						changeType = "Najnowsza zmiana ogłoszenia";
-						footerText = footerText.concat(` | Zarejestrowano zmianę: ${new Date().toISOString().replace(/T/, " ").replace(/\..+/, "")}`);
+						footerText = footerText.concat(` | Zarejestrowano zmianę: ${new Date().toLocaleString().replace(",", "")}`);
 					}
 					else {
 						continue;
