@@ -1,5 +1,5 @@
 import { SlashCommandBuilder, SlashCommandStringOption } from "@discordjs/builders";
-import { AutocompleteInteraction, CommandInteraction, CacheType, Interaction, ApplicationCommandOptionChoice } from "discord.js";
+import { AutocompleteInteraction, CommandInteraction, CacheType, Interaction, ApplicationCommandOptionChoiceData } from "discord.js";
 import { player } from "../../index";
 
 export const data = new SlashCommandBuilder()
@@ -117,7 +117,7 @@ export async function autocomplete(interaction: AutocompleteInteraction) {
 	};
 
 	let i = 0;
-	const suggestions: Array<ApplicationCommandOptionChoice> = [];
+	const suggestions: Array<ApplicationCommandOptionChoiceData> = [];
 	for (const effect of effects) {
 		if (effect.startsWith(interaction.options.getString("efekt"))) {
 			suggestions.push({
