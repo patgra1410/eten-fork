@@ -5,7 +5,7 @@
  * @param msg Message
  */
 export class LibrusError extends Error {
-	status: number | unknown;
+	status: number;
 	body: unknown;
 	constructor(msg?: string, status?: number, body?: unknown) {
 		super(msg);

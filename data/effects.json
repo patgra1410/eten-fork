@@ -1,0 +1,77 @@
+{
+	"reverse": {
+		"name": "reverse",
+		"type": "args",
+		"args": "reverse"
+	},
+	"echo": {
+		"name": "echo",
+		"type": "args",
+		"args": "echo 0.8 0.9 200 0.3 400 0.25 600 0.2 800 0.2 1000 0.2"
+	},
+	"flanger": {
+		"name": "flanger",
+		"type": "args",
+		"args": "flanger"
+	},
+	"overdrive": {
+		"name": "overdrive",
+		"type": "args",
+		"args": "overdrive"
+	},
+	"reverb": {
+		"name": "reverb",
+		"type": "args",
+		"args": "reverb 100 90 100 100 0 0"
+	},
+	"reverb_loud": {
+		"name": "reverb (troche głośne)",
+		"type": "args",
+		"args": "reverb 100 90 100 100 0 10"
+	},
+	"tremolo": {
+		"name": "tremolo",
+		"type": "args",
+		"args": "tremolo 3 100" 
+	},
+	"loud": {
+		"name": "głośne",
+		"type": "args",
+		"args": "gain 25"
+	},
+	"louder": {
+		"name": "głośniej",
+		"type": "args",
+		"args": "gain 50"
+	},
+	"loudest": {
+		"name": "bardzo głośno",
+		"type": "args",
+		"args": "gain 100"
+	},
+	"speed2": {
+		"name": "speed x2",
+		"type": "args",
+		"args": "speed 2"
+	},
+	"speed0.5": {
+		"name": "wolmo",
+		"type": "args",
+		"args": "speed 0.5"
+	},
+	"speed0.1": {
+		"name": "bardzo wolmo",
+		"type": "args",
+		"args": "speed 0.1"
+	},
+	"mirror": {
+		"name": "mirror",
+		"type": "command",
+		"command": "./data/mirror.sh 1"
+	},
+	"mirror2nd": {
+		"name": "mirror drugiej połowy",
+		"type": "command",
+		"command": "./data/mirror.sh 2"
+	}
+}

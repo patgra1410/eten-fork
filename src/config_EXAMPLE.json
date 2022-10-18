@@ -1,0 +1,84 @@
+{
+	"prefix": "!",
+	"token": "YourBotTokenGoesHere",
+
+	"librus": true,
+	"librusLogin": "user@domain.tld",
+	"librusPass": "password",
+	"pushDevice": "12345678",
+
+	"adminID": ["admin1 user id", "admin2 user id"],
+
+	"geniusAPIKey": "genius API key (leave empty if you dont want to use /lyrics)",
+
+	"guild": "guild id",
+
+	"playRandomSoundeffects": true,
+	"randomSoundeffectChance": 0.005,
+
+	"bets": {
+		"eneabled": "true",
+		"guild": "guild id",
+		"channel": "channel id"
+	},
+	
+	"autoMemesChannel": "channel id",
+	"allowedBoardsForTracking": {
+		"wsg": "/wsg/ - Worksafe Gif",
+		"g": "/g/ - Technology",
+		"v": "/v/ - Video Games",
+		"int": "/int/ - International"
+	},
+
+	"cronWeather": [
+		{
+			"title": "Warszawa",
+			"link": "https://m.meteo.pl/warszawa/60"
+		}
+	],
+
+	"cronImageSend": {
+		"eneabled": false,
+		"images": "cronImageSend_EXAMPLE.json",
+		"guild": "guild id",
+		"channel": "channel id"
+	},
+
+	"archiwum": {
+		"eneabled": false,
+		"channel": "channel id",
+		"guild": "guild id",
+		"uploadURL": "http://your.website.com/upload",
+		"uploadPassword": "password"
+	},
+	
+	"pilkarzykiBot": {
+		"maxDepth": 5,
+		"evaluationFunctionConfig": [
+			{
+				"condition": "depth==1",
+				"path": [
+					"../evaluationFunctions/evaluationBFS.js",
+					"../evaluationFunctions/evaluationBFSCubic.js",
+					"../evaluationFunctions/evaluationQuad.js"
+				]
+			},
+			{
+				"condition": "depth==2",
+				"path": [
+					"../evaluationFunctions/evaluationBFS.js", "../evaluationFunctions/evaluationBFSReverse.js", 
+					"../evaluationFunctions/evaluationBFSCubic.js", "../evaluationFunctions/evaluationBFSCubicReverse.js",
+					"../evaluationFunctions/evaluationQuad.js"
+				]
+			},
+			{
+				"condition": "depth==3",
+				"path": ["../evaluationFunctions/evaluationQuad.js", "../evaluationFunction/evaluationQuadReverse.js"]
+			},
+			{
+				"condition": "depth>3",
+				"path": ["../evaluationFunctions/evaluationBFSCubic.js"]
+			}
+		]
+	}
+}
