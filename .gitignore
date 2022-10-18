@@ -1,15 +1,6 @@
 # Custom
 src/config.json
-cronImageSend.json
-placeholder.jpg
-tmp
-data/*
-!data/leg60.png
-!data/reddit.mp4
-soundeffects/*
 .vscode
-webhook-link
-src/commands/school/kahoot.ts
 
 # effects
 !data/effects.json

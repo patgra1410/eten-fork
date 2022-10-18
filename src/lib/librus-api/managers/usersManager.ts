@@ -1,88 +1,75 @@
-import LibrusClient, { IBaseFetchOptions } from "..";
+import LibrusClient from "..";
 import { LibrusError } from "../errors/libruserror";
-import { APIUser, APIUsers, IUser } from "../librus-api-types";
+import { APIUser, APIUsers, IUser } from "../types/api-types";
 import BaseManager from "./baseManager";
 
-export default class UsersManager extends BaseManager {
+export class UsersManager extends BaseManager {
 	cache: Map<number, IUser>;
 	constructor(client: LibrusClient) {
 		super(client);
 		this.cache = new Map<number, IUser>();
 	}
-	async fetch(id: number, options?: IBaseFetchOptions): Promise<IUser> {
-		options = this.defaultizeFetchOptions(options);
-		// Use cache if element is cached and a HTTP request is not forced
-		if (!options.force && this.cache.has(id))
-			return this.cache.get(id);
-
+	async fetch(id: number, force = false): Promise<IUser> {
 		const userResponse = await this.client.customLibrusRequest(`https://api.librus.pl/3.0/Users/${id}`) as Response;
+		if (!force && this.cache.has(id)) {
+			const cached = this.cache.get(id);
+			if (cached != null) {
+				return cached;
+			}
+			else {
+				this.client.log("IUser object was null when trying to get from cache map. Key was deleted".bgRed.white);
+				this.cache.delete(id);
+			}
+		}
 		// Check if request is OK
 		if (!userResponse.ok) {
-			let errorJson;
+			let errorResponseData;
 			try {
-				errorJson = await userResponse.json();
+				errorResponseData = await userResponse.text();
 			}
 			catch (error) {
 				this.client.log(error);
 			}
 			if (userResponse.status === 404) {
-				throw new LibrusError("User not found", userResponse.status, errorJson);
+				throw new LibrusError("User not found", userResponse.status, errorResponseData);
 			}
 			else if (userResponse.status === 403) {
-				throw new LibrusError("User is forbidden from being viewed", userResponse.status, errorJson);
+				throw new LibrusError("User is forbidden from being viewed", userResponse.status, errorResponseData);
 			}
 			else {
-				throw new LibrusError("Unknown error - Could not get user", userResponse.status, errorJson);
+				throw new LibrusError("Unhandled error - Could not get user", userResponse.status, errorResponseData);
 			}
 		}
 		// Return and cache if set
-		console.log(id);
 		const user = (await userResponse.json() as APIUser).User;
-		console.log(user);
 		if (user.Id !== id)
-			throw new LibrusError("Returned user ID mismatches the one passed - How even", userResponse.status, user);
-		if (options.cache)
-			this.cache.set(id, user);
+			throw new LibrusError("Returned user ID mismatches the one passed - THIS SHOULDN'T BE POSSIBLE", userResponse.status, user);
 		return user;
 	}
-	async fetchMany(ids: number[], options?: IBaseFetchOptions): Promise<IUser[]> {
-		options = this.defaultizeFetchOptions(options);
+	async fetchMany(ids: number[]): Promise<IUser[]> {
 		const idCheckArr: number[] = [];
-		const returnArr: IUser[] = [];
 		// Get the ones we already cached (Or not, if force is set to true)
-		if (!options.force) {
-			for (const id of ids) {
-				if (this.cache.has(id)) {
-					returnArr.push(this.cache.get(id));
-				}
-				else {
-					idCheckArr.push(id);
-				}
-			}
+		for (const id of ids) {
+			idCheckArr.push(id);
 		}
-		else {
-			for (const id of ids)
-				idCheckArr.push(id);
-		}
-		// Request the ones we don't have cached
+		const returnArr: IUser[] = [];
+		// Request, splitting up into separate requests if they are too large
 		while (idCheckArr.length > 0) {
 			const joinedIds = idCheckArr.splice(0, 29).join(",");
 			const usersResponse = await this.client.customLibrusRequest(`https://api.librus.pl/3.0/Users/${joinedIds},`) as Response;
 			if (!usersResponse.ok) {
-				let errorJson;
+				let errorResponseData;
 				try {
-					errorJson = await usersResponse.json();
+					errorResponseData = await usersResponse.text();
 				}
 				catch (error) {
 					this.client.log(error);
 				}
-				throw new LibrusError("Unknown error - Could not get multiple users at once", usersResponse.status, errorJson);
+				throw new LibrusError("Unhandled error - Could not get multiple users at once", usersResponse.status, errorResponseData);
 			}
 			const usersJson = await usersResponse.json() as APIUsers;
 			for (const user of usersJson.Users) {
 				returnArr.push(user);
-				if (options.cache)
-					this.cache.set(user.Id, user);
 			}
 		}
 		return returnArr;

@@ -1,21 +1,9 @@
 {
+	"extends": "@tsconfig/recommended/tsconfig.json",
 	"compilerOptions": {
-		"module": "CommonJS",
-		"esModuleInterop": true,
+		"target": "es2021",
 		"resolveJsonModule": true,
-		"target": "es6",
-		"noImplicitAny": true,
-		// "strict": true,
-		"allowJs": true,
-		"moduleResolution": "node",
 		"outDir": "dist",
-		"baseUrl": ".",
-		"paths": {
-			"*": [
-				"node_modules/*"
-			]
-		},
-		"skipLibCheck": true
 	},
 	"include": [
 		"src/**/*"

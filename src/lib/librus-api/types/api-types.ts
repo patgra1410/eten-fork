@@ -21,12 +21,12 @@ interface IStringIdResource {
 	Url: string;
 }
 
-interface IChange {
-	Id: number;
+export interface IChange {
+	Id: string;
 	Resource: IChangeResource; // Id, Type, Url
 	Type: string;
 	AddDate: string;
-	extraData: string|null;
+	extraData: string | null;
 }
 
 export interface APIv3BaseResponse {
@@ -34,6 +34,7 @@ export interface APIv3BaseResponse {
 		[path: string]: IResourcesResource; // Url
 	}
 	Url?: string;
+	// If these exist, bad news.
 	Status?: string;
 	Code?: string;
 	Message?: string;
@@ -248,7 +249,7 @@ export interface APILessons extends APIv3BaseResponse {
 	Lessons: ILesson[];
 }
 
-interface ITeacherFreeDay {
+export interface ITeacherFreeDay {
 	Id: number;
 	Name: string;
 	DateFrom: string;
@@ -260,6 +261,7 @@ interface ITeacherFreeDay {
 }
 
 // https://api.librus.pl/3.0/Calendars/TeacherFreeDays/<Comma separated IDs>
+// https://api.librus.pl/2.0/TeacherFreeDays works too, but is not recommended since it doesnt give TimeFrom/TimeTo
 export interface APICalendarsTeacherFreeDay extends APIv3BaseResponse {
 	TeacherFreeDay: ITeacherFreeDay;
 }

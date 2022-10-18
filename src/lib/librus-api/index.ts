@@ -1,20 +1,11 @@
-import nodeFetch, { RequestInit, Response } from "node-fetch";
 import "colors";
 import { LibrusError } from "./errors/libruserror";
-import fetchCookie from "fetch-cookie";
-import * as librusApiTypes from "./librus-api-types";
-import UsersManager from "./managers/usersManager";
-import SchoolNoticesManager from "./managers/schoolNoticesManager";
-
-export interface IBaseFetchOptions {
-	force?: boolean;
-	cache?: boolean;
-}
+import makeFetchCookie from "fetch-cookie";
+import * as librusApiTypes from "./types/api-types";
+import { UsersManager, SchoolNoticesManager, CalendarsManager } from "./managers";
 
 interface ILibrusRequestOptions {
 	fetchOptions?: RequestInit
-	/** @deprecated use the appropriate manager instead */
-	response?: "text" | "json" | "raw";
 }
 
 interface ILibrusClientConstructor {
@@ -35,6 +26,7 @@ export default class LibrusClient {
 	private cookieFetch;
 	users: UsersManager;
 	schoolNotices: SchoolNoticesManager;
+	calendars: CalendarsManager;
 	debug: boolean;
 	log: (message: unknown) => void;
 	/**
@@ -47,9 +39,10 @@ export default class LibrusClient {
 		this.synergiaLogin = "";
 		this.appUsername = "";
 		this.appPassword = "";
-		this.cookieFetch = fetchCookie(nodeFetch, new fetchCookie.toughCookie.CookieJar());
+		this.cookieFetch = makeFetchCookie(fetch);
 		this.users = new UsersManager(this);
 		this.schoolNotices = new SchoolNoticesManager(this);
+		this.calendars = new CalendarsManager(this);
 		if (options?.debug)
 			this.debug = true;
 		else
@@ -80,7 +73,7 @@ export default class LibrusClient {
 
 		// Login
 		// Response gives necessary cookies, saved automatically thanks to fetch-cookie
-		const loginResult = await this.cookieFetch("https://portal.librus.pl/rodzina/login/action", {
+		const loginResult = await this.cookieFetch("https://portal.librus.pl/konto-librus/login/action", {
 			method: "POST",
 			body: JSON.stringify({
 				email: username,
@@ -93,7 +86,7 @@ export default class LibrusClient {
 			}
 		});
 		if (!loginResult.ok)
-			throw new LibrusError(`https://portal.librus.pl/rodzina/login/action ${loginResult.statusText}`, loginResult.status, await loginResult.text());
+			throw new LibrusError(`https://portal.librus.pl/konto-librus/login/action ${loginResult.statusText}`, loginResult.status, await loginResult.text());
 
 		// Get the accessToken
 		const accountsResult = await this.cookieFetch("https://portal.librus.pl/api/v3/SynergiaAccounts", {
@@ -164,7 +157,7 @@ export default class LibrusClient {
 	 * @param url API endpoit URL
 	 * @param options Additional request options
 	 */
-	async customLibrusRequest(url: string, options?: ILibrusRequestOptions): Promise<unknown> {
+	async customLibrusRequest(url: string, options?: ILibrusRequestOptions): Promise<Response> {
 		// Merge default request options with user request options
 		let requestOptions: RequestInit = {
 			method: "GET",
@@ -173,8 +166,7 @@ export default class LibrusClient {
 				gzip: "true",
 				Authorization: ((this.bearerToken !== "") ? `Bearer ${this.bearerToken}` : "")
 			},
-			redirect: "manual",
-			timeout: 10000
+			redirect: "manual"
 		};
 		if (options?.fetchOptions) {
 			requestOptions = { ...requestOptions, ...options.fetchOptions };
@@ -210,8 +202,7 @@ export default class LibrusClient {
 					await this.login(this.appUsername, this.appPassword);
 				}
 				this.log("Retrying request after reauthentication".bgYellow.white);
-				// This is stupid
-				(requestOptions.headers as {[key: string]: string}).Authorization = `Bearer ${this.bearerToken}`;
+				(requestOptions.headers as {[key: string]: string}).Authorization = `Bearer ${this.bearerToken}`; // This is stupid
 				this.log(`${requestOptions.method} ${url}`.bgMagenta.white);
 				result = await this.cookieFetch(url, requestOptions);
 				if (!result.ok) {
@@ -220,13 +211,6 @@ export default class LibrusClient {
 				}
 			}
 		}
-
-		// Return
-		// if (options?.response === "json")
-		// 	return JSON.parse(resultText);
-		// else if (options?.response === "text")
-		// 	return resultText;
-		// else
 		return result;
 	}
 
@@ -284,7 +268,7 @@ export default class LibrusClient {
 	 * Creates one or more DELETE request(s) for all IDs in given array
 	 * @async
 	 */
-	async deletePushChanges(lastPushChanges: number[]): Promise<void> {
+	async deletePushChanges(lastPushChanges: string[]): Promise<void> {
 		if (!lastPushChanges.length)
 			return;
 		while (lastPushChanges.length) {
