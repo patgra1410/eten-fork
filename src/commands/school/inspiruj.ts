@@ -18,5 +18,5 @@ export async function execute(interaction: CommandInteraction) {
 	if (!response.ok) throw new Error(`Unexpected response ${response.statusText}`);
 	await streamPipeline(response.body, fs.createWriteStream("./tmp/placeholder.jpg"));
 	const attachment = new Discord.MessageAttachment("./tmp/placeholder.jpg");
-	interaction.reply({ files: [attachment] });
+	await interaction.reply({ files: [attachment] });
 }

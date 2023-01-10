@@ -133,3 +133,14 @@ export interface ILyricsSong {
 		url: string
     }
 }
+
+export interface IReactionMessages {
+	[messageId: string]: {
+		channelId: string,
+		reactions: {
+			emoji: string,
+			roleName: string,
+			channelId: string
+		}[]
+	}
+}

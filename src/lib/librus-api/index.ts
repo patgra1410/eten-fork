@@ -80,7 +80,8 @@ export default class LibrusClient {
 
 		// Login
 		// Response gives necessary cookies, saved automatically thanks to fetch-cookie
-		const loginResult = await this.cookieFetch("https://portal.librus.pl/rodzina/login/action", {
+		// formerly https://portal.librus.pl/rodzina/login/action
+		const loginResult = await this.cookieFetch("https://portal.librus.pl/konto-librus/login/action", {
 			method: "POST",
 			body: JSON.stringify({
 				email: username,

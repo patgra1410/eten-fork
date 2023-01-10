@@ -271,13 +271,13 @@ export async function execute(interaction: CommandInteraction) {
 				ranking.pilkarzyki[uid1] = {
 					lost: 0,
 					won: 0,
-					rating: (ranking.pilkarzyki[uid1].rating ? ranking.pilkarzyki[uid1].rating : 1500)
+					rating: 1500
 				};
 			if (ranking.pilkarzyki[uid2] == undefined)
 				ranking.pilkarzyki[uid2] = {
 					lost: 0,
 					won: 0,
-					rating: (ranking.pilkarzyki[uid2].rating ? ranking.pilkarzyki[uid2].rating : 1500)
+					rating: 1500
 				};
 
 			fs.writeFileSync("./data/ranking.json", JSON.stringify(ranking));

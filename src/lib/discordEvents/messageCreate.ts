@@ -30,13 +30,13 @@ export default async function(message: Message) {
 	}
 	ranking.dubs[message.author.id][repeatingDigits]++;
 	fs.writeFileSync("./data/ranking.json", JSON.stringify(ranking), "utf-8");
-	if (repeatingDigits >= 2) {
+	if (repeatingDigits >= 3) {
 		if (repeatingDigits >= 6) {
 			message.react("<:checkem:966379892474249246>")
 				.catch(error => console.log(error));
 			message.reply({ content: `@everyone WITNESSED (ID: ${message.id.substring(0, message.id.length - repeatingDigits)}**${message.id.substring(message.id.length - repeatingDigits)}**)`, files: ["https://www.vogue.pl/uploads/repository/nina_p/ap.jpg"], failIfNotExists: false });
 		}
-		else if (repeatingDigits >= 2) {
+		else {
 			message.react("<:checkem:966379892474249246>")
 				.then(() => {
 					message.react(repeatingDigitsText[repeatingDigits])
@@ -115,11 +115,11 @@ https://cdn.discordapp.com/attachments/856926964094337047/968536776484487218/unk
 		client.commands.get("cursedkoteł").execute(message);
 
 
-	if (/https?:\/\/media.discordapp.net\/attachments\/[0-9]+\/[0-9]+\/[^ ^\n\t\r]+\.(webm|mp4|mov|avi|flv|mkv|wmv|m4v)/g.test(message.content)) {
-		const foundMediaLinks = message.content.match(/https?:\/\/media.discordapp.net\/attachments\/[0-9]+\/[0-9]+\/[^ ^\n\t\r]+\.(webm|mp4|mov|avi|flv|mkv|wmv|m4v)/g);
-		for (const mediaLink of foundMediaLinks)
-			message.reply(`${mediaLink.replace(/media/, "cdn").replace(/net/, "com")}\nFucking goofy ass media link`);
-	}
+	// if (/https?:\/\/media.discordapp.net\/attachments\/[0-9]+\/[0-9]+\/[^ ^\n\t\r]+\.(webm|mp4|mov|avi|flv|mkv|wmv|m4v)/g.test(message.content)) {
+	// 	const foundMediaLinks = message.content.match(/https?:\/\/media.discordapp.net\/attachments\/[0-9]+\/[0-9]+\/[^ ^\n\t\r]+\.(webm|mp4|mov|avi|flv|mkv|wmv|m4v)/g);
+	// 	for (const mediaLink of foundMediaLinks)
+	// 		message.reply(`${mediaLink.replace(/media/, "cdn").replace(/net/, "com")}\nFucking goofy ass media link`);
+	// }
 
 	let reddit = false;
 	const redditFilenameRegex = /((?![0-9]{13})(?![a-z]{13})[a-z0-9]{13})/g;

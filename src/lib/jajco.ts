@@ -66,7 +66,7 @@ export async function run(message: Message) {
 
 		coUsers.interval = setInterval(coCountdown.bind(null, message.client), 1000);
 
-		const msg = await message.channel.send("https://cdn.discordapp.com/attachments/455236204477022208/899223760488497242/109.173.177.194-2021.10.05.16.37.49.jpg");
+		const msg = await message.channel.send("https://cdn.discordapp.com/attachments/917846513831534732/1036414875519418388/jajco-szkielet.gif");
 		setTimeout(updateMessage.bind(null, msg), 25000);
 	}
 	else if (message.content == "^" && coChannel !== undefined) {

@@ -62,5 +62,5 @@ export async function execute(interaction: CommandInteraction) {
 	// console.log(response.body);
 	await streamPipeline(response.body, fs.createWriteStream("./tmp/placeholder.jpg"));
 	const attachment = new Discord.MessageAttachment("./tmp/placeholder.jpg");
-	interaction.reply({ files: [attachment] });
+	await interaction.reply({ files: [attachment] });
 }

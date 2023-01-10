@@ -1,29 +1,29 @@
-import { MessageReaction, PartialMessageReaction, PartialUser, User } from "discord.js";
+import { MessageReaction, PartialMessageReaction, PartialUser, TextChannel, User } from "discord.js";
+import { checkReactionAdd } from "../staszic/checkReaction";
+import fs from "fs";
+import { IReactionMessages } from "../types";
+import { client } from "../..";
 
 export default async function(reaction: MessageReaction|PartialMessageReaction, reactedUser: User|PartialUser) {
-	try {
-		const letters = ["🇦", "🇧", "🇨", "🇩", "🇪", "🇫", "🇬", "🇭", "🇮"];
-		const letter = String.fromCharCode(letters.indexOf(reaction.emoji.name) + "a".charCodeAt(0));
-		const user = reaction.message.guild.members.cache.find(member => member.id == reactedUser.id);
-		let role = undefined;
+	await checkReactionAdd(reaction, reactedUser);
 
-		if (reaction.message.id == "932695585465704448") // 1. klasa
-			role = user.guild.roles.cache.find(foundRole => foundRole.name === `1${letter}`);
-		else if (reaction.message.id == "932695586426196060") // 2. klasa
-			role = user.guild.roles.cache.find(foundRole => foundRole.name === `2${letter}`);
-		else if (reaction.message.id == "932695588540141598") // 3. klasa podstawowka
-			role = user.guild.roles.cache.find(foundRole => foundRole.name === `3${letter}4`);
-		else if (reaction.message.id == "932695587424444466") // 3. klasa gimnazjum
-			role = user.guild.roles.cache.find(foundRole => foundRole.name === `3${letter.toUpperCase()}3`);
+	const reactionMessages = JSON.parse(fs.readFileSync("./data/reactionMessages.json", "utf-8")) as IReactionMessages;
+	if (!(reaction.message.id in reactionMessages))
+		return;
 
-		if (role)
-			await user.roles.add(role);
+	const message = await (await client.channels.cache.get(reaction.message.channel.id) as TextChannel).messages.fetch(reaction.message.id);
 
+	let roleName: string = undefined;
+	for (const reactionRole of reactionMessages[message.id].reactions) {
+		if (reaction.emoji.name == reactionRole.emoji)
+			roleName = reactionRole.roleName;
 	}
-	catch (except) {
-		console.log(reaction);
-		console.log(except);
-		const user = reaction.message.guild.members.cache.find(member => member.id == reactedUser.id);
-		user.send("Był problem z dodaniem twojej roli, spróbuj jeszcze raz.");
-	}
+
+	if (!roleName)
+		return;
+	
+	const user = reaction.message.guild.members.cache.find(member => member.id == reactedUser.id);
+	const role = reaction.message.guild.roles.cache.find(role => role.name == roleName);
+
+	await user.roles.add(role);
 }

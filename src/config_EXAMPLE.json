@@ -2,6 +2,20 @@
 	"prefix": "!",
 	"token": "YourBotTokenGoesHere",
 
+	"openAI": {
+		"apiToken": "your openAI api token",
+		"organizationId": "your openAI organization token"
+	},
+	
+	"chatGPT": {
+		"eneabled": true,
+		"email": "your_chat_gpt_email",
+		"password": "your_chat_gpt_password",
+		"session_token": "your_session_token (see: https://github.com/acheong08/ChatGPT/wiki/Setup ) (not required?)"
+	},
+
+	"pythonPort": "2137",
+
 	"librus": true,
 	"librusLogin": "user@domain.tld",
 	"librusPass": "password",
@@ -58,26 +72,26 @@
 			{
 				"condition": "depth==1",
 				"path": [
-					"../evaluationFunctions/evaluationBFS.js",
-					"../evaluationFunctions/evaluationBFSCubic.js",
-					"../evaluationFunctions/evaluationQuad.js"
+					"../../evaluationFunctions/evaluationBFS.js",
+					"../../evaluationFunctions/evaluationBFSCubic.js",
+					"../../evaluationFunctions/evaluationQuad.js"
 				]
 			},
 			{
 				"condition": "depth==2",
 				"path": [
-					"../evaluationFunctions/evaluationBFS.js", "../evaluationFunctions/evaluationBFSReverse.js", 
-					"../evaluationFunctions/evaluationBFSCubic.js", "../evaluationFunctions/evaluationBFSCubicReverse.js",
-					"../evaluationFunctions/evaluationQuad.js"
+					"../../evaluationFunctions/evaluationBFS.js", "../../evaluationFunctions/evaluationBFSReverse.js", 
+					"../../evaluationFunctions/evaluationBFSCubic.js", "../../evaluationFunctions/evaluationBFSCubicReverse.js",
+					"../../evaluationFunctions/evaluationQuad.js"
 				]
 			},
 			{
 				"condition": "depth==3",
-				"path": ["../evaluationFunctions/evaluationQuad.js", "../evaluationFunction/evaluationQuadReverse.js"]
+				"path": ["../../evaluationFunctions/evaluationQuad.js", "../../evaluationFunction/evaluationQuadReverse.js"]
 			},
 			{
 				"condition": "depth>3",
-				"path": ["../evaluationFunctions/evaluationBFSCubic.js"]
+				"path": ["../../evaluationFunctions/evaluationBFSCubic.js"]
 			}
 		]
 	}

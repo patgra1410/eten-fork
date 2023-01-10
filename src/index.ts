@@ -12,6 +12,14 @@ import incrementDays from "./lib/incrementDays";
 import initLibrusManager from "./lib/librusManager";
 import randomSounds from "./lib/randomSoundOnVC";
 import initThreadManager from "./lib/threadManager";
+import { init } from "./openai";
+import initRSS from "./lib/rssFeed";
+
+// staszic stuff
+import { sendMessages, editMessage, addReaction } from "./lib/staszic/createReactionRoleMessages";
+
+// mimuw
+import { create, createReactionMessages } from "./lib/mimuw/create";
 
 // LOL
 type SlashCommandFunction = ((interaction: Discord.CommandInteraction | Discord.ButtonInteraction | Discord.Message | Discord.ContextMenuInteraction, args?: string) => Promise<unknown>);
@@ -94,18 +102,23 @@ client.once("ready", async () => {
 		throw new Error("user does not exist on client");
 	console.log(`Logged in as ${client.user.tag}`);
 	client.user.setStatus("online");
-	client.user.setActivity("Music DLC", { type: "STREAMING", url: "https://www.twitch.tv/meten_" });
+	client.user.setActivity("💀", { type: "PLAYING" });
 	await updateSlashCommands();
 
 	createRequiredFiles();
 	client.imageCdnChannel = await client.channels.fetch(config.autoMemesChannel) as Discord.TextChannel;
 	cronJobs(client);
 	if (config.librus)
-		await initLibrusManager();
+		//await initLibrusManager();
 	await initThreadManager();
+	await initRSS();
+	await init();
 	incrementDays();
 	randomSounds();
 	console.log("Ready!");
+
+	// create();
+	// createReactionMessages("1029111804061818941");
 });
 
 client.on("messageReactionAdd", discordEvents.messageReactionAdd);

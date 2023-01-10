@@ -27,5 +27,5 @@ export async function execute(interaction: CommandInteraction) {
 		.setColor(("#" + Math.floor(Math.random() * 16777215).toString(16)) as ColorResolvable)
 		.setTitle("Pls dajcie mi bajgle")
 		.setDescription(desc);
-	interaction.reply({ embeds: [embed] });
+	await interaction.reply({ embeds: [embed] });
 }

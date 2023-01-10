@@ -27,7 +27,7 @@ export default async function(interaction: Interaction<CacheType>) {
 
 	try {
 		try {
-			client.commands.get(interaction.commandName).execute(interaction);
+			await client.commands.get(interaction.commandName).execute(interaction);
 		}
 		catch (error) {
 			console.error(error);

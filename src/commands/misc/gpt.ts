@@ -1,17 +1,19 @@
 import Discord, { CommandInteraction } from "discord.js";
 import { SlashCommandBuilder, SlashCommandStringOption } from "@discordjs/builders";
+import { askQuestion } from "../../openai";
 
 export const data = new SlashCommandBuilder()
-	.setName("lmgtfy")
-	.setDescription("gdy ktoś nie wie co to internet")
+	.setName("gpt")
+	.setDescription("Eten gpt")
 	.addStringOption(
 		new SlashCommandStringOption()
-			.setName("query")
-			.setDescription("zapytanie")
+			.setName("message")
+			.setDescription("wiadomość")
 			.setRequired(true)
 	);
 
 export async function execute(interaction: CommandInteraction) {
-	const query = encodeURIComponent(interaction.options.getString("query"));
-	await interaction.reply(`https://lmgt.org/?q=${query}&iie=1`);
+	await interaction.deferReply();
+	const response = await askQuestion(interaction.options.getString("message"));
+	interaction.editReply(response);
 }

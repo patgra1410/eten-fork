@@ -273,7 +273,7 @@ async function fetchNewSchoolNotices(): Promise<void> {
 				// If is plan change notice, tag appropriate roles and highlight them in content text
 				if (isPlanChangeNotice(notice.Subject) && listener.rolesRegexArr.length > 0) {
 					for (const roleData of listener.rolesRegexArr) {
-						if (roleData.boldRegex.test(messageText))
+						if (roleData.boldRegex.test(notice.Content))
 							tagText = tagText.concat(`<@&${roleData.roleId}>`);
 						messageText = messageText.replace(roleData.boldRegex, "**$&**");
 						messageText = messageText.replace(roleData.roleRegex, `<@&${roleData.roleId}> $&`);
@@ -358,8 +358,8 @@ async function fetchNewSchoolNotices(): Promise<void> {
 }
 
 async function prepareTrackedChannelData(): Promise<void> {
-	const classRoleRegex = /^([1-3])([A-Ia-i])(3|4)?$/;
-	const classGroupRoleRegex = /^([1-3])([A-Ia-i])( - gr\. p\. .*)$/;
+	const classRoleRegex = /^([1-4])([A-Ia-i])(3|4)?$/;
+	const classGroupRoleRegex = /^([1-4])([A-Ia-i])( - gr\. p\. .*)$/;
 	for (const channelConfig of config.librusNoticeChannels) {
 		const channel = await client.channels.fetch(channelConfig.channel);
 		if (channel == null) {
@@ -396,13 +396,15 @@ async function prepareTrackedChannelData(): Promise<void> {
 					}
 					rolesRegexArr.push({
 						boldRegex: new RegExp(
-							`^((?:${classYear}[A-Ia-i]*[${letterForNoSuffix}][A-Ia-i]*${years}?(?!${badYears}))|(?:${classYear}[A-Ia-i]*[${letterForSuffix}][A-Ia-i]*${years}))${groupText}`, "gm"
+							`^((?:${classYear}[A-Ia-i]*[${letterForNoSuffix}${letterForSuffix}][A-Ia-i]*${years}?(?!${badYears}))|(?:${classYear}[A-Ia-i]*[${letterForSuffix}][A-Ia-i]*${years}))${groupText}`, "gm"
 						),
 						roleRegex: new RegExp(
-							`\\*\\*((?:${classYear}[A-Ia-i]*[${letterForNoSuffix}][A-Ia-i]*${years}?(?!${badYears}))|(?:${classYear}[A-Ia-i]*[${letterForSuffix}][A-Ia-i]*${years}))${groupText}\\*\\*`, "gm"
+							`\\*\\*((?:${classYear}[A-Ia-i]*[${letterForNoSuffix}${letterForSuffix}][A-Ia-i]*${years}?(?!${badYears}))|(?:${classYear}[A-Ia-i]*[${letterForSuffix}][A-Ia-i]*${years}))${groupText}\\*\\*`, "gm"
 						),
 						roleId: role[1].id
 					});
+					if (role[1].id == "932699096320450611")
+						console.log(rolesRegexArr[rolesRegexArr.length - 1]);
 				}
 			}
 			//
@@ -426,16 +428,19 @@ async function prepareTrackedChannelData(): Promise<void> {
 					}
 					rolesRegexArr.push({
 						boldRegex: new RegExp(
-							`^((?:${classYear}[A-Ia-i]*[${letterForNoSuffix}][A-Ia-i]*${years}?(?!${badYears}))|(?:${classYear}[A-Ia-i]*[${letterForSuffix}][A-Ia-i]*${years}))`, "gm"
+							`^((?:${classYear}[A-Ia-i]*[${letterForNoSuffix}${letterForSuffix}][A-Ia-i]*${years}?(?!${badYears}))|(?:${classYear}[A-Ia-i]*[${letterForSuffix}][A-Ia-i]*${years}))`, "gm"
 						),
 						roleRegex: new RegExp(
-							`\\*\\*((?:${classYear}[A-Ia-i]*[${letterForNoSuffix}][A-Ia-i]*${years}?(?!${badYears}))|(?:${classYear}[A-Ia-i]*[${letterForSuffix}][A-Ia-i]*${years}))\\*\\*`, "gm"
+							`\\*\\*((?:${classYear}[A-Ia-i]*[${letterForNoSuffix}${letterForSuffix}][A-Ia-i]*${years}?(?!${badYears}))|(?:${classYear}[A-Ia-i]*[${letterForSuffix}][A-Ia-i]*${years}))\\*\\*`, "gm"
 						),
 						roleId: role[1].id
 					});
+					if (role[1].id == "932699096320450611")
+						console.log(rolesRegexArr[rolesRegexArr.length - 1]);
 				}
 			}
 		}
+		// console.log(rolesRegexArr);
 		noticeListenerChannels.push({
 			channelId: channel.id,
 			rolesRegexArr: rolesRegexArr,
