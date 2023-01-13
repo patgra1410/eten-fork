@@ -10,7 +10,15 @@ const parser: Parser = new Parser();
 const rssFeedCache = new Map<string, { base64Hash: string, content: string }>();
 
 async function checkRSS(init?: boolean) {
-	const feed = await parser.parseURL("https://staszic.waw.pl/rss/");
+	let feed;
+	try {
+		feed = await parser.parseURL("https://staszic.waw.pl/rss/");
+	}
+	catch (err) {
+		console.error("RSS: Error while parsing RSS feed".red);
+		console.error(err);
+		return;
+	}
 
 	for (const item of feed.items) {
 		if (item.guid == null
