@@ -28,15 +28,17 @@ async function checkRSS(init?: boolean) {
 		}
 		if (rssFeedCache.has(item.guid)) {
 			const cachedItem = rssFeedCache.get(item.guid)!;
-			if (cachedItem?.base64Hash != crypto.createHash("SHA256").update(`${item.title}\n${item.content}`).digest("base64")) {
+			const newHash = crypto.createHash("SHA256").update(`${item.title}\n${item.content}`).digest("base64")
+			if (cachedItem?.base64Hash != newHash) {
 				const channel = await client.channels.fetch("1029378257197477939");
 				if (!channel.isText()) {
 					throw new Error("RSS: Debug channel !isText()");
 				}
-				await channel.send(`${item.guid} - Content hash different, post edited. See console`.black.bgYellow);
 				console.log(`GUID: ${item.guid}`)
 				console.log(`OLD: ${cachedItem?.content}`);
 				console.log(`NEW: ${item.title}\n${item.content}`);
+				rssFeedCache.set(item.guid, {base64Hash: newHash, content: `${item.title}\n${item.content}`})
+				await channel.send(`${item.guid} - Content hash different, post edited. See console`);
 			}
 		}
 		else {
@@ -47,24 +49,25 @@ async function checkRSS(init?: boolean) {
 					content: `${item.title}\n${item.content}`
 				}
 			);
-			if (!init) {
-				for (const channelConfig of config.librusNoticeChannels) {
-					const channel = await client.channels.fetch(channelConfig.channel);
-					if (channel == null) {
-						console.log(`${channelConfig.channel} - channel fetch() returned null!`.white.bgRed);
-						continue;
-					}
-					if (!channel.isText || (channel.type !== "GUILD_TEXT" && channel.type !== "GUILD_NEWS")) {
-						console.log(`${channel.id} is not a valid guild text channel!`.white.bgRed);
-						continue;
-					}
-					const embed = new MessageEmbed()
-						.setURL(item.link)
-						.setTitle(`**__${item.title}__**`)
-						.setDescription(item.contentSnippet.substring(0, 4096))
-						.setFooter({ text: item.pubDate });
-					channel.send({ content: "📰 Nowy post na staszic.waw.pl", embeds: [embed] });
+			if (init) {
+				continue
+			}
+			for (const channelConfig of config.librusNoticeChannels) {
+				const channel = await client.channels.fetch(channelConfig.channel);
+				if (channel == null) {
+					console.log(`${channelConfig.channel} - channel fetch() returned null!`.white.bgRed);
+					continue;
 				}
+				if (!channel.isText || (channel.type !== "GUILD_TEXT" && channel.type !== "GUILD_NEWS")) {
+					console.log(`${channel.id} is not a valid guild text channel!`.white.bgRed);
+					continue;
+				}
+				const embed = new MessageEmbed()
+					.setURL(item.link)
+					.setTitle(`**__${item.title}__**`)
+					.setDescription(item.contentSnippet.substring(0, 4096))
+					.setFooter({ text: item.pubDate });
+				channel.send({ content: "📰 Nowy post na staszic.waw.pl", embeds: [embed] });
 			}
 		}
 	}
