@@ -2,6 +2,40 @@ import Discord, { ColorResolvable, TextChannel } from "discord.js";
 import { client } from "../../index";
 
 // TODO: add reaction collector
+
+export async function createSzczesliwyNumerekRoles() {
+	const guild = await client.guilds.fetch("930512190220435516");
+
+	for (let i = 1; i <= 40; i++) {
+		await guild.roles.create({
+			name: `Numerek ${i}`,
+		});
+	}
+}
+
+export async function sendSzczesliwyNumerekMessages(channelID: string) {
+	const channel = client.channels.cache.get(channelID) as TextChannel;
+	const reactions: string[] = [ "1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣", "0️⃣" ];
+	const colors = ["#E09F7D", "#EF5D60", "#EC4067", "#A01A7D"];
+
+	for (let i = 0; i < 4; i++) {
+		let desc = "Kliknij odpowiednią reakcję, żeby wybrać swój numerek w dzienniku\n\n";
+		for (let j = 1; j <= 10; j++) {
+			desc += `${reactions[j - 1]} - numerek ${i * 10 + j}\n`;
+		}
+
+		const embed = new Discord.MessageEmbed()
+			.setTitle(`Numerki od ${i * 10 + 1} do ${i * 10 + 10}`)
+			.setColor(colors[i] as ColorResolvable)
+			.setDescription(desc);
+
+		const message = await channel.send({ embeds: [embed] });
+		for (let j = 1; j <= 10; j++) {
+			await message.react(reactions[j - 1]);
+		}
+	}
+}
+
 export async function sendMessages(channelID: string) {
 	const letters: { [letter: string]: string } = {
 		"A": "🇦",
@@ -15,7 +49,7 @@ export async function sendMessages(channelID: string) {
 		"I": "🇮"
 	};
 	const klasy = ["H", "H", "G", "I"];
-	const klasyName = ["Pierwsze", "Drugie", "Trzecie", "Czwarte"]
+	const klasyName = ["Pierwsze", "Drugie", "Trzecie", "Czwarte"];
 	const colors = ["#E09F7D", "#EF5D60", "#EC4067", "#A01A7D"];
 
 	const channel = client.channels.cache.get(channelID) as TextChannel;

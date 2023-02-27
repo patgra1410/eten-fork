@@ -16,7 +16,7 @@ import { init } from "./openai";
 import initRSS from "./lib/rssFeed";
 
 // staszic stuff
-import { sendMessages, editMessage, addReaction } from "./lib/staszic/createReactionRoleMessages";
+import { sendMessages, editMessage, addReaction, sendSzczesliwyNumerekMessages, createSzczesliwyNumerekRoles } from "./lib/staszic/createReactionRoleMessages";
 
 // mimuw
 import { create, createReactionMessages } from "./lib/mimuw/create";
@@ -119,6 +119,8 @@ client.once("ready", async () => {
 
 	// create();
 	// createReactionMessages("1029111804061818941");
+	// sendSzczesliwyNumerekMessages("1079803173717430332");
+	// createSzczesliwyNumerekRoles();
 });
 
 client.on("messageReactionAdd", discordEvents.messageReactionAdd);
