@@ -309,6 +309,8 @@ export async function execute(interaction: CommandInteraction) {
 			accepts.push(newAccept);
 		}
 		else if (interaction.options.getSubcommand() == "bot") {
+			interaction.editReply("<@257119850026106880>");
+			return;
 			const uid = interaction.user.id;
 			const bid = botID;
 			const depth = interaction.options.getInteger("depth"); // required in eval, dont remove
