@@ -15,7 +15,7 @@ do
 	touch data/crashed
 	curl -X POST `cat webhook-link` -H "Content-Type: application/json" --data-binary @- <<DATA
 	{
-	"content": "@everyone (<@257119850026106880>)\n\nETEN HAS WORKED\n`cat ./data/uptime`\nDAYS WITHOUT AN ACCIDENT"
+	"content": "<@416162471368327178> (<@257119850026106880>) (@everyone)\n\nETEN HAS WORKED\n`cat ./data/uptime`\nDAYS WITHOUT AN ACCIDENT"
 	}
 DATA
 done

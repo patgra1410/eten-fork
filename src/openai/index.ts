@@ -15,6 +15,7 @@ export async function askQuestion(prompt: string) {
 	const response = await openai.createCompletion({
 		model: "text-davinci-003",
 		prompt: prompt,
+		max_tokens: 256
 	});
 	console.log(response.data.choices[0]);
 	return response.data.choices[0].text;
