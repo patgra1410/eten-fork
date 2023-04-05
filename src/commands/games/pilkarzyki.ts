@@ -87,7 +87,7 @@ function getButtons(id: number): Array<Discord.MessageActionRow> {
 				.setDisabled(!indexes.includes(3)),
 			new Discord.MessageButton()
 				.setCustomId("pilkarzyki#disabled")
-				.setLabel(" ")
+				.setLabel("xd")
 				.setStyle(style)
 				.setDisabled(true),
 			new Discord.MessageButton()
@@ -309,8 +309,6 @@ export async function execute(interaction: CommandInteraction) {
 			accepts.push(newAccept);
 		}
 		else if (interaction.options.getSubcommand() == "bot") {
-			interaction.editReply("<@257119850026106880>");
-			return;
 			const uid = interaction.user.id;
 			const bid = botID;
 			const depth = interaction.options.getInteger("depth"); // required in eval, dont remove

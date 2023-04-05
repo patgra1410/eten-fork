@@ -74,7 +74,7 @@ function getButtons(id: number): Array<MessageActionRow> {
 				.setDisabled(!indexes.includes(3)),
 			new Discord.MessageButton()
 				.setCustomId("teampilkarzyki#disabled")
-				.setLabel(" ")
+				.setLabel("xd")
 				.setStyle(style)
 				.setDisabled(true),
 			new Discord.MessageButton()
