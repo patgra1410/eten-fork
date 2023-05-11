@@ -84,15 +84,26 @@ async function fetchNewSchoolNotices(): Promise<void> {
 					}
 					let embeds = [];
 					while(messageText.length > 0) {
+						let description :string = messageText.substring(0, 4096);
+						let index :number = description.length - 1;
+						while(description[index] !== '\n') {
+							index--;
+							if(index === 0)
+								break;
+						}
+						if(index === 0) {
+							index = 4096;
+						}
+						description = messageText.substring(0, index);
+						messageText = messageText.substring(index);
 						const embed = new MessageEmbed()
 							.setColor("#D3A5FF")
 							.setAuthor({
 								name: `📣 ${changeType} w Librusie`
 							})
 							.setTitle(`**__${schoolNoticeResponse.Subject}__**`)
-							.setDescription(messageText.substring(0, 4096)) // TODO lepiej
+							.setDescription(description)
 						embeds.push(embed);
-						messageText = messageText.substring(4096);
 					}
 					embeds[embeds.length - 1].setFooter({text: `Dodano: ${schoolNoticeResponse.CreationDate}`});
 					const origChannel = await client.channels.fetch(listener.channelId);
