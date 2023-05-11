@@ -309,19 +309,38 @@ async function fetchNewSchoolNotices(): Promise<void> {
 						continue;
 					}
 				}
-				const embed = new MessageEmbed()
-					.setColor("#D3A5FF")
-					.setAuthor({ name: `📣 ${changeType} Ogłoszenie w Librusie` })
-					.setTitle(`**__${notice.Subject}__**`)
-					.setDescription(messageText.substring(0, 4096)) // TODO lepiej
-					.setFooter({ text: footerText });
+				let embeds = [];
+				while(messageText.length > 0) {
+					let description :string = messageText.substring(0, 4096);
+					let index :number = description.length - 1;
+					while(description[index] !== '\n') {
+						index--;
+						if(index === 0)
+							break;
+					}
+					if(index === 0) {
+						index = 4096;
+					}
+					description = messageText.substring(0, index);
+					messageText = messageText.substring(index);
+					const embed = new MessageEmbed()
+						.setColor("#D3A5FF")
+						.setAuthor({
+							name: `📣 Ogłoszenie w Librusie`
+						})
+						.setTitle(`**__${notice.Subject}__**`)
+						.setDescription(description)
+					embeds.push(embed);
+				}
+				embeds[embeds.length - 1].setFooter({text: footerText});
 				const channel = await client.channels.fetch(listener.channelId) as TextBasedChannel;
 				if (listener.knownNotices.has(notice.Id)) {
 					const messageId = listener.knownNotices.get(notice.Id);
 					const message = await channel.messages.fetch(messageId);
+					embeds[embeds.length - 1].setFooter({text: footerText});
 					await message.edit({
 						content: ((tagText.length > 0) ? tagText : null),
-						embeds: [embed.setFooter({ text: footerText })]
+						embeds: embeds
 					});
 					try {
 						await (await channel.send({
@@ -337,7 +356,7 @@ async function fetchNewSchoolNotices(): Promise<void> {
 				else {
 					const message = await channel.send({
 						content: ((tagText.length > 0) ? tagText : null),
-						embeds: [embed]
+						embeds: embeds
 					});
 					listener.knownNotices.set(notice.Id, message.id);
 					if (channel.type == "GUILD_NEWS") {
