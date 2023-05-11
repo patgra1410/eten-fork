@@ -82,32 +82,37 @@ async function fetchNewSchoolNotices(): Promise<void> {
 							messageText = messageText.replace(roleData.roleRegex, `<@&${roleData.roleId}> $&`);
 						}
 					}
-					const embed = new MessageEmbed()
-						.setColor("#D3A5FF")
-						.setAuthor({
-							name: `📣 ${changeType} w Librusie`
-						})
-						.setTitle(`**__${schoolNoticeResponse.Subject}__**`)
-						.setDescription(messageText.substring(0, 4096)) // TODO lepiej
-						.setFooter({ text: `Dodano: ${schoolNoticeResponse.CreationDate}` });
+					let embeds = [];
+					while(messageText.length > 0) {
+						const embed = new MessageEmbed()
+							.setColor("#D3A5FF")
+							.setAuthor({
+								name: `📣 ${changeType} w Librusie`
+							})
+							.setTitle(`**__${schoolNoticeResponse.Subject}__**`)
+							.setDescription(messageText.substring(0, 4096)) // TODO lepiej
+						embeds.push(embed);
+						messageText = messageText.substring(4096);
+					}
+					embeds[embeds.length - 1].setFooter({text: `Dodano: ${schoolNoticeResponse.CreationDate}`});
 					const origChannel = await client.channels.fetch(listener.channelId);
 					const channel = origChannel as TextChannel; // We're guaranteed it's TextChannel from prepareTrackedChannels()
 					if (listener.knownNotices.has(schoolNoticeResponse.Id)) {
 						const messageId = listener.knownNotices.get(schoolNoticeResponse.Id);
 						const message = await channel.messages.fetch(messageId);
+						embeds[embeds.length - 1].setFooter({text: `Dodano: ${schoolNoticeResponse.CreationDate} | Ostatnia zmiana: ${update.AddDate}`});
 						await message.edit({
 							content: ((tagText.length > 0) ? tagText : null),
-							embeds: [embed.setFooter({ text: `Dodano: ${schoolNoticeResponse.CreationDate} | Ostatnia zmiana: ${update.AddDate}` })]
+							embeds: embeds
 						});
 						await channel.send({
-							reply: { messageReference: messageId, failIfNotExists: false },
+							reply: {messageReference: messageId, failIfNotExists: false},
 							content: "Zmieniono ogłoszenie ^"
 						});
-					}
-					else {
+					} else {
 						const message = await channel.send({
 							content: ((tagText.length > 0) ? tagText : null),
-							embeds: [embed]
+							embeds: embeds
 						});
 						listener.knownNotices.set(schoolNoticeResponse.Id, message.id);
 						if (origChannel.type == "GUILD_NEWS")
